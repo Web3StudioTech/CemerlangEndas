@@ -351,7 +351,7 @@ select.fInp{cursor:pointer}
     </div>
     <!-- New Order -->
     <div id="cOrder" class="cScr">
-      <div class="stepBar"><div class="sStep on" id="sp1">1·Bin</div><div class="sStep" id="sp2">2·Duration</div><div class="sStep" id="sp3">3·Dates</div><div class="sStep" id="sp4">4·Location</div><div class="sStep" id="sp5">5·Confirm</div></div>
+      <div class="stepBar"><div class="sStep on" id="sp1">1·Service</div><div class="sStep" id="sp2">2·Item</div><div class="sStep" id="sp3">3·Dates</div><div class="sStep" id="sp4">4·Location</div><div class="sStep" id="sp5">5·Confirm</div></div>
       <div id="oS1">
         <div class="sLbl">Select Service Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
@@ -388,20 +388,57 @@ select.fInp{cursor:pointer}
         </div>
       </div>
       <div id="oS2" style="display:none">
-        <div id="s2BinSection">
-          <div class="sLbl" id="s2Lbl">Select Size</div>
-          <div id="binList"></div>
-          <div id="durSection" style="display:none">
-            <div class="sLbl">Rental Duration</div>
-            <div class="durGrid" id="durGrid"></div>
+        <!-- RoRo rate card picker -->
+        <div id="s2Roro" style="display:none">
+          <div class="sLbl">Select Your Area</div>
+          <div style="margin-bottom:10px">
+            <select class="fInp" id="townSelect" onchange="onTownChange(this.value)" style="margin-bottom:8px">
+              <option value="">Select town / area…</option>
+            </select>
+            <div id="subAreaWrap" style="display:none">
+              <select class="fInp" id="subSelect" onchange="onSubChange(this.value)">
+                <option value="">Select sub-area…</option>
+              </select>
+            </div>
+          </div>
+          <div id="rateTable" style="display:none">
+            <div class="sLbl">Select Bin Size</div>
+            <div style="background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--rads);overflow:hidden;margin-bottom:12px">
+              <div style="display:grid;grid-template-columns:1.5fr repeat(6,1fr);background:var(--g1);padding:8px 10px;gap:4px">
+                <div style="font-size:.65rem;font-weight:800;color:rgba(255,255,255,.7)">SIZE</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">8½"<br>No Cover</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">8½"<br>Cover</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">10"<br>Batu</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">12"<br>Kayu</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">16"<br>Batu</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">16"<br>Kayu</div>
+              </div>
+              <div id="ratePriceRow" style="display:grid;grid-template-columns:1.5fr repeat(6,1fr);padding:0;gap:0"></div>
+            </div>
+            <div class="sLbl">Selected Bin Size</div>
+            <div id="selectedBinDisplay" style="display:none;background:var(--g3);border:1.5px solid var(--g4);border-radius:var(--rads);padding:13px;margin-bottom:12px">
+              <div style="font-size:.95rem;font-weight:900;color:var(--g5)" id="selectedBinName">—</div>
+              <div style="font-size:.8rem;color:var(--tx2);font-weight:700;margin-top:4px" id="selectedBinPrice">—</div>
+            </div>
+          </div>
+          <div id="s2RoroEmpty" style="display:none;text-align:center;padding:24px;color:var(--tx3)">
+            <div style="font-size:2rem;margin-bottom:8px">📍</div>
+            <div style="font-size:.85rem;font-weight:700">Select your town and sub-area above to see pricing</div>
           </div>
         </div>
-        <div id="s2EquipSection" style="display:none">
+        <!-- Leach / Garbage placeholder -->
+        <div id="s2Placeholder" style="display:none;text-align:center;padding:40px 20px">
+          <div style="font-size:3rem;margin-bottom:12px">🔜</div>
+          <div style="font-size:1rem;font-weight:900;color:var(--tx);margin-bottom:6px" id="s2PlaceholderTitle">Coming Soon</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--tx2)">Pricing details for this service will be updated shortly. Please contact us directly for a quote.</div>
+          <div style="margin-top:16px"><a href="https://wa.me/60362513977?text=Hi, I would like a quote for bin rental." target="_blank"><button class="btn btn-wa btn-sm">📱 WhatsApp for Quote</button></a></div>
+        </div>
+        <!-- Equipment (skylift / crane) -->
+        <div id="s2Equip" style="display:none">
           <div class="sLbl" id="s2EquipLbl">Select Duration</div>
-          <div class="infoBox"><p id="s2EquipInfo">Equipment rental — operated by certified crew.</p></div>
+          <div class="infoBox"><p id="s2EquipInfo">Equipment rental — certified operator included.</p></div>
           <div class="durGrid" id="equipDurGrid"></div>
         </div>
-        <div class="infoBox"><p>📋 Min. 2 working days advance booking. Price includes operator/driver.</p></div>
       </div>
       <div id="oS3" style="display:none">
         <div class="sLbl">Delivery Start Date</div>
@@ -417,18 +454,38 @@ select.fInp{cursor:pointer}
       </div>
       <div id="oS4" style="display:none">
         <div class="sLbl">Site Contact</div>
-        <div class="fLbl">Contact Person on Site</div><input class="fInp" type="text" id="oContact" placeholder="Name">
-        <div class="fLbl">Phone</div><input class="fInp" type="tel" id="oPhone" placeholder="01x-xxxx xxxx">
-        <div class="sLbl" style="margin-top:2px">Delivery Address</div>
-        <div class="fLbl">Street Address</div><input class="fInp" type="text" id="oStreet" placeholder="No., Jalan, Taman…">
+        <div class="fLbl">Contact Person on Site *</div><input class="fInp" type="text" id="oContact" placeholder="Full name">
+        <div class="fLbl">Contact Phone *</div><input class="fInp" type="tel" id="oPhone" placeholder="01x-xxxx xxxx">
+        <div class="fLbl">Emergency Contact Name</div><input class="fInp" type="text" id="oEmergName" placeholder="Alternative contact person">
+        <div class="fLbl">Emergency Contact Mobile *</div><input class="fInp" type="tel" id="oEmergPhone" placeholder="01x-xxxx xxxx">
+        <div class="sLbl" style="margin-top:4px">Delivery Address</div>
+        <div class="fLbl">Unit / Block / Level</div><input class="fInp" type="text" id="oUnit" placeholder="e.g. Unit 3A, Block B, Level 2">
+        <div class="fLbl">Street Address *</div><input class="fInp" type="text" id="oStreet" placeholder="No., Jalan, Taman…">
+        <div class="fLbl">Area / Neighbourhood</div><input class="fInp" type="text" id="oArea" placeholder="e.g. Taman Kepong, Sri Damansara">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><div class="fLbl">Postcode</div><input class="fInp" type="text" id="oPost" maxlength="5" placeholder="52100"></div>
-          <div><div class="fLbl">City</div><input class="fInp" type="text" id="oCity" placeholder="Kepong"></div>
+          <div><div class="fLbl">Postcode *</div><input class="fInp" type="text" id="oPost" maxlength="5" placeholder="52100"></div>
+          <div><div class="fLbl">City *</div><input class="fInp" type="text" id="oCity" placeholder="Kepong"></div>
         </div>
-        <div class="fLbl">Placement Type</div>
-        <select class="fInp" id="oPlacement"><option value="">Select…</option><option>Private compound / yard</option><option>Loading bay / basement</option><option>Ground floor — driveway</option><option>Public road (permit needed)</option><option>Public walkway (permit needed)</option></select>
-        <div class="fLbl">Special Notes (optional)</div>
-        <textarea class="fInp" id="oNotes" rows="3" placeholder="Gate code, access instructions, landmark…"></textarea>
+        <div class="fLbl">State</div>
+        <select class="fInp" id="oState">
+          <option value="">Select state…</option>
+          <option>Kuala Lumpur</option><option>Selangor</option><option>Putrajaya</option>
+          <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+          <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+          <option>Perak</option><option>Perlis</option><option>Pulau Pinang</option>
+          <option>Sabah</option><option>Sarawak</option><option>Terengganu</option>
+        </select>
+        <div class="fLbl">Bin Placement Type</div>
+        <select class="fInp" id="oPlacement">
+          <option value="">Select…</option>
+          <option>Private compound / yard</option>
+          <option>Loading bay / basement</option>
+          <option>Ground floor — driveway</option>
+          <option>Public road (permit needed)</option>
+          <option>Public walkway (permit needed)</option>
+        </select>
+        <div class="fLbl">Special Instructions (optional)</div>
+        <textarea class="fInp" id="oNotes" rows="3" placeholder="Gate code, access code, landmark, slope warning…"></textarea>
       </div>
       <div id="oS5" style="display:none">
         <div class="sLbl">Review Your Order</div>
@@ -621,6 +678,102 @@ function init(){
   };
   saveStore(s);return s;
 }
+
+const RATE_COLS = ['8½" (No Cover)','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
+const RATE_COLS_SHORT = ['8½"\nNo Cover','8½"\nCover','10"\nBatu','12"\nKayu','16"\nBatu','16"\nKayu'];
+const RATE_DATA = {
+  "Kepong": [
+    {name:"Sri Sinar / Sri Damansara", p:[270,200,280,330,380,400]},
+    {name:"Bkt Maluri / Megalara",     p:[270,200,280,320,380,400]},
+    {name:"Tmn Ehsan / Desa Jaya / Tmn Diva", p:[270,200,280,320,380,400]},
+  ],
+  "Selayang": [
+    {name:"Batu / Selayang Baru / Jaya", p:[270,200,280,290,380,400]},
+    {name:"Utara / Selatan",             p:[270,200,280,320,380,400]},
+  ],
+  "Injong": [
+    {name:"Utara / Selatan", p:[270,200,280,330,380,400]},
+  ],
+  "Segambut": [
+    {name:"Jln Ipoh", p:[280,300,290,410,380,550]},
+  ],
+  "Sungai Buloh": [
+    {name:"Banramas / Valencia / Kg Baru", p:[280,300,290,440,380,null]},
+    {name:"Bdr Rahman Putra",              p:[280,300,290,null,380,null]},
+  ],
+  "Batu Caves": [
+    {name:"Batu Caves", p:[280,300,290,null,null,null]},
+  ],
+  "Sentul": [
+    {name:"Tmn Dato Senu", p:[280,300,290,370,400,420]},
+  ],
+  "Kota Damansara": [
+    {name:"Kota Damansara", p:[290,300,300,370,400,420]},
+  ],
+  "Wangsa Maju": [
+    {name:"Setawangsa / Melawati", p:[290,300,300,370,450,420]},
+  ],
+  "Setiapak": [
+    {name:"Jln Kerang / Sri Ukay",    p:[290,300,300,370,400,420]},
+    {name:"Sri Gombak / Desa Keramat",p:[290,300,300,370,450,420]},
+  ],
+  "Petaling Jaya / Damansara": [
+    {name:"Bdr Utama / Tmn Tun",           p:[290,300,300,370,450,420]},
+    {name:"Kelana Jaya / Seapark",         p:[290,300,300,370,450,420]},
+    {name:"Tropicana / Lembah Klara",      p:[290,300,300,370,450,420]},
+    {name:"Damansara Perdana",             p:[290,300,300,370,450,420]},
+    {name:"Bkt Kiara / Mutiara Damansara", p:[290,300,300,370,400,420]},
+    {name:"Bkt Tunku / Bangsar / Jln Duta",p:[290,300,300,370,400,420]},
+    {name:"Sri Hartamas / Mont Kiara / D'sara Heights",p:[290,300,300,370,400,420]},
+  ],
+  "Kuala Lumpur (City)": [
+    {name:"Lake Yew / Semarak / Chow Kit / PUDU",p:[300,320,310,380,420,440]},
+    {name:"Tmn Desa / Desa Makmur / USJ",        p:[300,320,310,380,420,440]},
+    {name:"Klang Lama / OUG / Desa Petaling",    p:[300,320,310,380,420,440]},
+    {name:"Pandah Indah / Perdana (Cheras)",      p:[300,320,310,380,380,440]},
+    {name:"Taman Midah / Sg Long / Bdr Mahkota",  p:[300,320,310,380,380,440]},
+    {name:"Rawang — Buaya / Country Home",        p:[300,320,310,400,430,450]},
+    {name:"Desa Tun Razak",                       p:[300,320,320,400,430,450]},
+  ],
+  "Ampang": [
+    {name:"Kg Pandan / Tasik Permei / Ampang Jaya",p:[320,330,330,380,430,450]},
+  ],
+  "Puchong": [
+    {name:"Puchong", p:[320,330,330,400,430,450]},
+  ],
+  "Serdang / Bdr Jati": [
+    {name:"Bdr Jati", p:[330,340,340,400,430,450]},
+    {name:"Serdang",  p:[330,340,340,400,430,450]},
+  ],
+  "Sri Kembangan": [
+    {name:"Balakong / Taming Jaya", p:[330,340,340,400,430,450]},
+  ],
+  "Shah Alam": [
+    {name:"Kampung Jawa / Bt Tiga", p:[340,350,350,400,450,470]},
+  ],
+  "Bukit Limau": [
+    {name:"Bukit Limau", p:[350,360,370,430,450,470]},
+  ],
+  "Kota Kemuning / Setia Alam": [
+    {name:"Setia Alam", p:[360,370,370,430,450,470]},
+  ],
+  "Klang": [
+    {name:"Klang", p:[380,400,400,470,500,520]},
+  ],
+  "Kajang / Semenyih": [
+    {name:"Semenyih", p:[380,400,400,470,500,520]},
+  ],
+  "Bangi": [
+    {name:"Bangi", p:[400,410,410,470,500,520]},
+  ],
+  "Cyberjaya": [
+    {name:"Cyberjaya", p:[400,410,410,470,500,520]},
+  ],
+  "Putrajaya": [
+    {name:"Putrajaya", p:[400,410,410,470,500,520]},
+  ],
+};
+
 const BINS=[
   {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³ · 7.6 m³',dims:"14'×7'×4'H",best:'Light construction, furniture, renovation debris',w:380,f:620,m:950},
   {id:'roro-m',ico:'🏗',name:'RoRo Bin — Medium',size:'20 yd³ · 15 m³',dims:"20'×8'×5'H",best:'Commercial, factories, canteen waste',w:520,f:850,m:1350,pop:true},
@@ -748,7 +901,7 @@ function backFromDash(){if(curUser)loadOrders(curUser);document.querySelectorAll
 
 // ═══ ORDER FLOW ═══
 function pickSvc(svc){
-  oSt.svc=svc;oSt.bin=null;oSt.dur=null;
+  oSt.svc=svc;oSt.bin=null;oSt.dur=null;oSt.selectedTown=null;oSt.selectedSub=null;oSt.selectedSize=null;oSt.price=0;
   // Update visual selection
   ['roro','leach','garbage','skylift','crane'].forEach(s=>{
     const el=document.getElementById('svc-'+s);
@@ -756,28 +909,146 @@ function pickSvc(svc){
   });
 }
 function buildStep2(){
-  const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
-  document.getElementById('s2BinSection').style.display=isSvc?'none':'block';
-  document.getElementById('s2EquipSection').style.display=isSvc?'block':'none';
-  if(isSvc){
-    const name=oSt.svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)';
-    const fd=oSt.svc==='skylift'?'RM 450':'RM 800';
-    const hd=oSt.svc==='skylift'?'RM 380':'RM 480';
-    document.getElementById('s2EquipLbl').textContent='Select Duration — '+name;
-    document.getElementById('s2EquipInfo').textContent=name+' — certified operator included. Price excludes fuel surcharge.';
-    document.getElementById('equipDurGrid').innerHTML=`
-      <div class="durCard ${oSt.dur==='full'?'sel':''}" onclick="pickDur('full')">
-        <div class="dLbl">Full Day</div><div class="dDays">8 hours</div>
-        <div class="dPrice">${fd}</div><div class="dDesc">Operator included</div>
+  const svc = oSt.svc;
+  // Hide all sections
+  ['s2Roro','s2Placeholder','s2Equip'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  
+  if(svc==='roro'){
+    const el=document.getElementById('s2Roro');
+    if(el) el.style.display='block';
+    // Populate town dropdown
+    const ts=document.getElementById('townSelect');
+    if(ts&&ts.options.length<=1){
+      Object.keys(RATE_DATA).forEach(town=>{
+        const opt=document.createElement('option');opt.value=town;opt.textContent=town;ts.appendChild(opt);
+      });
+    }
+    // Show empty state
+    const re=document.getElementById('s2RoroEmpty');if(re)re.style.display='block';
+    const rt=document.getElementById('rateTable');if(rt)rt.style.display='none';
+    const sw=document.getElementById('subAreaWrap');if(sw)sw.style.display='none';
+  } else if(svc==='leach'||svc==='garbage'){
+    const el=document.getElementById('s2Placeholder');
+    if(el){
+      el.style.display='block';
+      const t=document.getElementById('s2PlaceholderTitle');
+      if(t)t.textContent=(svc==='leach'?'Leach Bin':'Garbage Bin')+' — Pricing Coming Soon';
+    }
+    // Allow next without bin selection for these
+    oSt.bin={name:svc==='leach'?'Leach Bin':'Garbage Bin',ico:svc==='leach'?'🗂':'🗑',w:0,f:0,m:0};
+    oSt.selectedSize=null;oSt.price=0;
+  } else if(svc==='skylift'||svc==='crane'){
+    const el=document.getElementById('s2Equip');
+    if(el) el.style.display='block';
+    const name=svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)';
+    const fd=svc==='skylift'?450:800;
+    const hd=svc==='skylift'?380:480;
+    const lbl=document.getElementById('s2EquipLbl');
+    if(lbl)lbl.textContent='Select Duration — '+name;
+    const info=document.getElementById('s2EquipInfo');
+    if(info)info.textContent=name+' with certified operator. Min. 2 days advance booking.';
+    const grid=document.getElementById('equipDurGrid');
+    if(grid)grid.innerHTML=`
+      <div class="durCard ${oSt.dur==='full'?'sel':''}" onclick="pickEquipDur('full',${fd},'${name}','${svc==='skylift'?'🏗':'🚜'}')">
+        <div class="dLbl">Full Day</div>
+        <div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">8 hours</div>
+        <div class="dPrice">RM ${fd}</div>
+        <div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
       </div>
-      <div class="durCard ${oSt.dur==='half'?'sel':''}" onclick="pickDur('half')">
-        <div class="dLbl">Half Day</div><div class="dDays">4 hours</div>
-        <div class="dPrice">${hd}</div><div class="dDesc">Operator included</div>
+      <div class="durCard ${oSt.dur==='half'?'sel':''}" onclick="pickEquipDur('half',${hd},'${name}','${svc==='skylift'?'🏗':'🚜'}')">
+        <div class="dLbl">Half Day</div>
+        <div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">4 hours</div>
+        <div class="dPrice">RM ${hd}</div>
+        <div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
       </div>`;
-  } else {
-    renderBins();
   }
 }
+
+function onTownChange(town){
+  oSt.selectedTown=town;oSt.selectedSub=null;oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
+  const sw=document.getElementById('subAreaWrap');
+  const rt=document.getElementById('rateTable');
+  const re=document.getElementById('s2RoroEmpty');
+  const bd=document.getElementById('selectedBinDisplay');
+  if(bd)bd.style.display='none';
+  if(!town){if(sw)sw.style.display='none';if(rt)rt.style.display='none';if(re)re.style.display='block';return;}
+  const subs=RATE_DATA[town];
+  if(!subs){return;}
+  const ss=document.getElementById('subSelect');
+  if(ss){
+    ss.innerHTML='<option value="">Select sub-area…</option>';
+    subs.forEach((s,i)=>{const opt=document.createElement('option');opt.value=i;opt.textContent=s.name;ss.appendChild(opt);});
+  }
+  if(sw)sw.style.display='block';
+  if(rt)rt.style.display='none';
+  if(re)re.style.display='block';
+  // If only one sub-area, auto-select it
+  if(subs.length===1){
+    if(ss)ss.value='0';
+    onSubChange('0');
+  }
+}
+
+function onSubChange(idx){
+  if(idx===''){return;}
+  oSt.selectedSub=parseInt(idx);oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
+  const town=oSt.selectedTown;
+  const subs=RATE_DATA[town];if(!subs)return;
+  const sub=subs[parseInt(idx)];if(!sub)return;
+  const rt=document.getElementById('rateTable');
+  const re=document.getElementById('s2RoroEmpty');
+  const bd=document.getElementById('selectedBinDisplay');
+  if(rt)rt.style.display='block';
+  if(re)re.style.display='none';
+  if(bd)bd.style.display='none';
+  // Build price row
+  const pr=document.getElementById('ratePriceRow');
+  if(pr){
+    const sizes=['8½" No Cover','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
+    pr.innerHTML=`<div style="padding:10px;display:flex;align-items:center"><span style="font-size:.78rem;font-weight:700;color:var(--tx2)">${sub.name}</span></div>`+
+    sub.p.map((price,i)=>{
+      if(price===null) return `<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3);cursor:default">—</div>`;
+      const isSelected=oSt.selectedSize===i;
+      return `<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSelected?'var(--g1)':'transparent'};color:${isSelected?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s">RM ${price}</div>`;
+    }).join('');
+  }
+}
+
+function pickRoroSize(sizeIdx, price, sizeName){
+  oSt.selectedSize=sizeIdx;oSt.price=price;
+  const town=oSt.selectedTown;
+  const subIdx=oSt.selectedSub;
+  const subs=RATE_DATA[town];
+  const sub=subs?subs[subIdx]:null;
+  const subName=sub?sub.name:'';
+  oSt.bin={
+    name:'RoRo Bin — '+sizeName,
+    ico:'🏗',
+    location:town+' › '+subName,
+    sizeName,price,
+    w:price,f:price,m:price
+  };
+  oSt.dur='unit'; // price is per delivery for RoRo
+  // Re-render price row to show selection
+  onSubChange(String(subIdx));
+  // Show selected bin
+  const bd=document.getElementById('selectedBinDisplay');
+  const bn=document.getElementById('selectedBinName');
+  const bp=document.getElementById('selectedBinPrice');
+  if(bd)bd.style.display='block';
+  if(bn)bn.textContent='🏗 RoRo Bin — '+sizeName+' ('+town+' › '+subName+')';
+  if(bp)bp.textContent='RM '+price+' per delivery';
+}
+
+function pickEquipDur(dur, price, name, ico){
+  oSt.dur=dur;oSt.price=price;
+  oSt.bin={name,ico,price,w:price,f:price,m:price};
+  buildStep2(); // re-render to show selection
+}
+
+
 function renderBins(){document.getElementById('binList').innerHTML=BINS.map(b=>`<div class="binCard ${oSt.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')"><div class="bIco">${b.ico}</div><div style="flex:1">${b.pop?'<span class="badge b-green" style="margin-bottom:5px;display:inline-flex">Popular</span><br>':''}<div class="bName">${b.name}</div><div class="bSub">${b.size} · ${b.dims}</div><div class="bSub">${b.best}</div><div class="bPrices"><span class="pPill">Weekly RM${b.w}</span><span class="pPill hl">14-Day RM${b.f}</span><span class="pPill">Monthly RM${b.m}</span></div></div><div class="selChk">✓</div></div>`).join('');}
 function pickBin(id){oSt.bin=BINS.find(b=>b.id===id);renderBins();renderDur();}
 function renderDur(){if(!oSt.bin)return;const b=oSt.bin;document.getElementById('durGrid').innerHTML=[{k:'w',l:'Weekly',d:'7 days',p:b.w},{k:'f',l:'14 Days',d:'2 weeks',p:b.f,sv:'Best value 💚'},{k:'m',l:'Monthly',d:'30 days',p:b.m}].map(x=>`<div class="durCard ${oSt.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${parseInt(x.d)})"><div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div><div class="dPrice">RM${x.p}</div>${x.sv?`<div class="dSave">${x.sv}</div>`:''}</div>`).join('');}
@@ -794,15 +1065,17 @@ function updateDates(){
 }
 function getPrice(){
   if(!oSt.svc) return '—';
+  if(oSt.price) return 'RM '+oSt.price;
   if(oSt.svc==='skylift') return oSt.dur==='full'?'RM 450':'RM 380';
   if(oSt.svc==='crane') return oSt.dur==='full'?'RM 800':'RM 480';
-  if(!oSt.bin||!oSt.dur) return '—';
-  const pMap={w:oSt.bin.w,f:oSt.bin.f,m:oSt.bin.m};
-  return 'RM '+(pMap[oSt.dur]||'—');
+  if(oSt.svc==='leach'||oSt.svc==='garbage') return 'Quote on request';
+  return '—';
 }
 function getDurLabel(){
   if(oSt.svc==='skylift'||oSt.svc==='crane') return oSt.dur==='full'?'Full Day (8 hours)':'Half Day (4 hours)';
-  return {w:'Weekly (7 days)',f:'14-Day (Fortnight)',m:'Monthly (30 days)'}[oSt.dur]||'—';
+  if(oSt.svc==='roro'&&oSt.selectedTown) return 'Location: '+(oSt.selectedTown||'—');
+  if(oSt.svc==='leach'||oSt.svc==='garbage') return 'Quote on request';
+  return '—';
 }
 function buildSumm(){
   const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
@@ -814,11 +1087,22 @@ function buildSumm(){
   const ddEl=document.getElementById('oDD');
   const delDate=ddEl?ddEl.textContent:'—';
   const street=document.getElementById('oStreet')?document.getElementById('oStreet').value:'—';
+  const unit=document.getElementById('oUnit')?document.getElementById('oUnit').value:'';
+  const area=document.getElementById('oArea')?document.getElementById('oArea').value:'';
+  const emergPhone=document.getElementById('oEmergPhone')?document.getElementById('oEmergPhone').value:'';
   const city=document.getElementById('oCity')?document.getElementById('oCity').value:'—';
   const contact=document.getElementById('oContact')?document.getElementById('oContact').value:'—';
   const phone=document.getElementById('oPhone')?document.getElementById('oPhone').value:'—';
   const summEl=document.getElementById('oSumm');
-  if(summEl)summEl.innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${ico} ${binName}</div><div class="oCardRef">${svcLbl} · ${durLbl}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">${price}</div></div><div class="oCardMeta"><div class="mChip">📅 Deliver ${delDate}</div><div class="mChip">🕙 ${oSt.delTime||'TBC'}</div><div class="mChip">📍 ${street}, ${city}</div><div class="mChip">👤 ${contact} · ${phone}</div>${!isSvc?'<div class="mChip" style="color:var(--g1);font-weight:800">📦 Collection: on-demand request</div>':''}</div>`;
+  if(summEl)summEl.innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${ico} ${binName}</div><div class="oCardRef">${svcLbl} · ${durLbl}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">${price}</div></div><div class="oCardMeta">
+    <div class="mChip">📅 Deliver ${delDate}</div>
+    <div class="mChip">🕙 ${oSt.delTime||'TBC'}</div>
+    <div class="mChip">📍 ${unit?unit+', ':''}${street}${area?', '+area:''}, ${city}</div>
+    <div class="mChip">👤 ${contact} · ${phone}</div>
+    ${emergPhone?`<div class="mChip">🆘 Emergency: ${emergPhone}</div>`:''}
+    ${!isSvc?'<div class="mChip" style="color:var(--g1);font-weight:800">📦 Collection: on-demand request</div>':''}
+    ${oSt.selectedTown?`<div class="mChip">📍 Area: ${oSt.selectedTown||''}</div>`:''}
+  </div>`;
 }
 
 function orderNext(){
@@ -826,11 +1110,23 @@ function orderNext(){
   if(s===1&&!oSt.svc){toast('⚠️ Select a service type');return;}
   if(s===2){
     const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
-    if(!isSvc&&!oSt.bin){toast('⚠️ Select a bin size');return;}
-    if(!oSt.dur){toast('⚠️ Choose a duration');return;}
+    const isPlaceholder=oSt.svc==='leach'||oSt.svc==='garbage';
+    if(!isPlaceholder&&!isSvc&&!oSt.bin){toast('⚠️ Select your area and bin size');return;}
+    if(isSvc&&!oSt.dur){toast('⚠️ Choose Full Day or Half Day');return;}
+    if(isSvc&&!oSt.bin){toast('⚠️ Choose Full Day or Half Day');return;}
   }
   if(s===3){if(!oSt.startDate){toast('⚠️ Pick a delivery date');return;}if(!oSt.delTime){toast('⚠️ Choose delivery time window');return;}}
-  if(s===4){if(!document.getElementById('oContact').value||!document.getElementById('oStreet').value){toast('⚠️ Fill in contact & address');return;}buildSumm();}
+  if(s===4){
+    const c=document.getElementById('oContact');
+    const ph=document.getElementById('oPhone');
+    const ep=document.getElementById('oEmergPhone');
+    const st=document.getElementById('oStreet');
+    if(!c||!c.value.trim()){toast('⚠️ Enter contact person name');return;}
+    if(!ph||!ph.value.trim()){toast('⚠️ Enter contact phone number');return;}
+    if(!ep||!ep.value.trim()){toast('⚠️ Enter emergency contact mobile number');return;}
+    if(!st||!st.value.trim()){toast('⚠️ Enter delivery street address');return;}
+    buildSumm();
+  }
   if(s===5)return;oSt.step++;updateStep();
 }
 function orderBack(){if(oSt.step>1){oSt.step--;updateStep();}}
@@ -847,7 +1143,15 @@ function submitOrder(){
   const btn=document.getElementById('submitBtn');btn.textContent='Placing order…';btn.disabled=true;
   const s=getStore(),b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
   const dL={w:'Weekly',f:'14-Day',m:'Monthly'}[oSt.dur];
-  const no={id:'o'+Date.now(),ref:'CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000),custId:curUser.id,ico:b.ico,bin:b.name,plan:dL,delDate:document.getElementById('oDD').textContent,delTime:oSt.delTime,colDate:document.getElementById('oCD').textContent,colTime:oSt.colTime,price:'RM '+price,status:'pending',driver:null,stage:1,addr:document.getElementById('oStreet').value+', '+document.getElementById('oPost').value+' '+document.getElementById('oCity').value,contact:document.getElementById('oContact').value+' · '+document.getElementById('oPhone').value,notes:document.getElementById('oNotes').value};
+  const no={id:'o'+Date.now(),ref:'CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000),custId:curUser.id,ico:b.ico,bin:b.name,plan:dL,delDate:document.getElementById('oDD').textContent,delTime:oSt.delTime,colDate:document.getElementById('oCD').textContent,colTime:oSt.colTime,price:'RM '+price,status:'pending',driver:null,stage:1,addr:[
+      document.getElementById('oUnit')?.value,
+      document.getElementById('oStreet')?.value,
+      document.getElementById('oArea')?.value,
+      document.getElementById('oPost')?.value,
+      document.getElementById('oCity')?.value,
+      document.getElementById('oState')?.value,
+    ].filter(Boolean).join(', '),
+    emergContact:(document.getElementById('oEmergName')?.value||'')+(document.getElementById('oEmergPhone')?.value?' · '+document.getElementById('oEmergPhone').value:''),contact:document.getElementById('oContact').value+' · '+document.getElementById('oPhone').value,notes:document.getElementById('oNotes').value};
   s.orders.push(no);const ci=s.customers.findIndex(c=>c.id===curUser.id);if(ci>=0)s.customers[ci].orders.push(no.id);saveStore(s);
   setTimeout(()=>{btn.textContent='✓ Confirm & Place Order';btn.disabled=false;toast('🎉 Order placed! We\'ll WhatsApp you shortly.');loadOrders(curUser);cNav('cOrders',document.querySelectorAll('.cNavItem')[2]);document.getElementById('oActBar').classList.remove('show');document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;},1200);
 }
@@ -858,7 +1162,14 @@ function showODash(id){
   document.getElementById('dashRef').textContent=o.ref;document.getElementById('dashBin').textContent=o.ico+' '+o.bin;
   const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
   document.getElementById('dashBadge').innerHTML=`<span class="badge ${bc}">${o.status}</span>`;
-  document.getElementById('dashMeta').innerHTML=`<span>📅 ${o.delDate} – ${o.colDate}</span><span>🚚 ${o.delTime}</span><span>📦 ${o.colTime}</span><span>💰 ${o.price}</span><span>🚛 ${o.driver||'Arranging…'}</span>`;
+  document.getElementById('dashMeta').innerHTML=[
+    '📅 Deliver '+o.delDate+' · '+o.delTime,
+    '💰 '+o.price,
+    '🚛 '+(drv?drv.name:'Arranging…'),
+    '📦 On-demand collection',
+    o.emergContact?'🆘 '+o.emergContact:'',
+    o.addr?'📍 '+o.addr.substring(0,40):'',
+  ].filter(Boolean).map(t=>'<span>'+t+'</span>').join('');
   const cur=o.stage||1;
   document.getElementById('dashStages').innerHTML=STAGES.map(st=>{
     const done=st.n<cur,active=st.n===cur;
@@ -879,7 +1190,7 @@ function showODash(id){
   document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');
   document.getElementById('oActBar').classList.remove('show');
 }
-function custAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=5;saveStore(s);toast('✅ Delivery accepted! Company notified.');showODash(id);}
+function custAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=5;saveStore(s);toast('✅ Delivery accepted! Company has been notified. Thank you.');showODash(id);}
 function custClose(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=7;s.orders[i].status='completed';saveStore(s);toast('🔒 Case closed. Thank you!');showODash(id);}
 function sendChat(){const inp=document.getElementById('chatInp'),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('dashChat');const el=document.createElement('div');el.className='chatMsg me';el.innerHTML=msg+'<div class="cmTime">Now</div>';w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='chatMsg sys';r.textContent='Message delivered to driver';w.appendChild(r);w.scrollTop=w.scrollHeight;},700);}
 
@@ -931,7 +1242,7 @@ function adminORow(o,s){
   const c=s.customers.find(x=>x.id===o.custId)||{name:'—'};
   const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
   const waMsg=encodeURIComponent(`*Order Confirmed — Cemerlang Endas*\nRef: ${o.ref}\nBin: ${o.bin}\nDeliver: ${o.delDate} · ${o.delTime}\nCollect: ${o.colDate} · ${o.colTime}\nAddress: ${o.addr}\nTotal: ${o.price}\n\nPlease ensure your site is accessible on delivery day. Driver will call 30 min before arrival. TQ`);
-  return `<div class="aRow"><div class="arTop"><div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan} · ${c.name}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="arMeta"><div class="arMI">👤 ${o.contact}</div><div class="arMI">📍 ${o.addr}</div><div class="arMI">🚚 ${o.delDate} · ${o.delTime}</div><div class="arMI">📦 Collect ${o.colDate} · ${o.colTime}</div><div class="arMI">💰 ${o.price}</div>${o.driver?`<div class="arMI">🚛 ${o.driver}</div>`:''}</div><div class="arActs">${o.status==='pending'?`<button class="abtn abtn-g" onclick="adminAccept('${o.id}')">✓ Accept</button><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button><a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`:`<button class="abtn abtn-b" onclick="openAssign('${o.id}')">Change Driver</button><a href="https://wa.me/?text=${encodeURIComponent('Reminder: Order '+o.ref)}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`}<button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','inv')">🧾 Invoice</button><button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','do')">📄 D/O</button></div></div>`;
+  return `<div class="aRow"><div class="arTop"><div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan} · ${c.name}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="arMeta"><div class="arMI">👤 ${o.contact}</div><div class="arMI">📍 ${o.addr}</div>${o.emergContact?`<div class="arMI">🆘 ${o.emergContact}</div>`:''}<div class="arMI">🚚 ${o.delDate} · ${o.delTime}</div><div class="arMI">📦 Collect ${o.colDate} · ${o.colTime}</div><div class="arMI">💰 ${o.price}</div>${o.driver?`<div class="arMI">🚛 ${o.driver}</div>`:''}</div><div class="arActs">${o.status==='pending'?`<button class="abtn abtn-g" onclick="adminAccept('${o.id}')">✓ Accept</button><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button><a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`:`<button class="abtn abtn-b" onclick="openAssign('${o.id}')">Change Driver</button><a href="https://wa.me/?text=${encodeURIComponent('Reminder: Order '+o.ref)}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`}<button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','inv')">🧾 Invoice</button><button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','do')">📄 D/O</button></div></div>`;
 }
 function adminODash(o,s){
   const cur=o.stage||1,nm=s.notifMode,uid=o.id;
@@ -952,8 +1263,8 @@ function custRegCard(c,s){
   return `<div class="cRegCard"><div class="cRegTop"><div class="cAva">${ini}</div><div style="flex:1"><div class="cRegName">${c.name}</div><div class="cRegComp">${c.company||'Individual'}</div></div><span class="badge ${c.active?'b-green':'b-gray'}">${c.active?'Active':'Inactive'}</span></div><div class="cRegMeta"><div class="cRegMI">📧 ${c.email}</div><div class="cRegMI">📱 ${c.phone||'—'}</div><div class="cRegMI">📍 ${c.addr||'—'}</div><div class="cRegMI">📦 ${orders.length} orders</div><div class="cRegMI">🔧 ${c.createdBy==='admin'?'Admin registered':'Self registered'}</div></div><div class="cRegActs"><button class="abtn abtn-g" onclick="showCreds('${c.id}')">🔑 View Login Details</button><button class="abtn abtn-ghost" onclick="resetPass('${c.id}')">Reset Password</button><button class="abtn abtn-ghost" onclick="toggleActive('${c.id}')">${c.active?'Deactivate':'Activate'}</button></div></div>`;
 }
 function toggleNotif(on){const s=getStore();s.notifMode=on?'B':'A';saveStore(s);document.getElementById('notifLbl').textContent=on?'Mode B':'Mode A';toast(on?'Mode B: Auto simultaneous notify ON':'Mode A: Manual confirmation ON');}
-function adminAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].status='confirmed';s.orders[i].stage=2;saveStore(s);toast('✅ Order accepted!');renderAdmin('aOrders');}
-function adminSendConf(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=3;saveStore(s);toast('📱 Confirmation sent to customer!');renderAdmin('aODash');}
+function adminAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].status='confirmed';s.orders[i].stage=2;saveStore(s);toast('✅ Order accepted! Customer notified — arranging driver.');renderAdmin('aOrders');}
+function adminSendConf(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=3;saveStore(s);toast('📱 Confirmation sent to customer! They will be notified in the app.');renderAdmin('aODash');}
 function adminShowDoc(id,type){const s=getStore();curODash=s.orders.find(o=>o.id===id);if(!curODash)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(curODash):buildInv(curODash);document.getElementById('docModal').classList.add('show');}
 function adminToggleChat(uid,btn){const bar=document.getElementById('acb_'+uid),show=bar.style.display==='none';bar.style.display=show?'block':'none';btn.textContent=show?'Leave Chat':'Join Chat';if(show)toast('💬 Joined chat as Admin');}
 function adminChatSend(uid){const inp=document.getElementById('aci_'+uid),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('acm_'+uid);const el=document.createElement('div');el.className='acMsg adm';el.textContent='Admin: '+msg;w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;}
@@ -1007,7 +1318,7 @@ function drvNavFn(id,tab){
   document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
   if(tab)tab.classList.add('on');
 }
-function drvAccept(btn){const card=btn.closest('.dJob');card.querySelector('.djActs').innerHTML=`<button class="djBtn djDone" onclick="openPhotoModal('delivery')">📸 Mark as Delivered</button>`;card.style.borderColor='#4caf50';card.querySelector('.badge').textContent='Accepted';card.querySelector('.badge').className='badge b-green';toast('✅ Job accepted! Admin & customer notified.');}
+function drvAccept(btn){const card=btn.closest('.dJob');card.querySelector('.djActs').innerHTML=`<button class="djBtn djDone" onclick="openPhotoModal('delivery')">📸 Mark as Delivered</button>`;card.style.borderColor='#4caf50';card.querySelector('.badge').textContent='Accepted';card.querySelector('.badge').className='badge b-green';toast('✅ Job accepted! Admin & customer have been notified.');}
 function drvDecline(btn){btn.closest('.dJob').remove();toast('Job declined. Admin notified.');}
 function openPhotoModal(ctx){photoCtx=ctx;photoCnt=0;['ps1','ps2'].forEach(id=>{const el=document.getElementById(id);el.className='photoSlot';el.innerHTML='<span style="font-size:1.4rem">📷</span>'+(id==='ps1'?'Photo 1':'Photo 2')+'<br><span style="font-size:.68rem">Tap to upload</span>';});document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';document.getElementById('photoModal').classList.add('show');}
 function fakePhoto(id){const el=document.getElementById(id);el.className='photoSlot filled';el.innerHTML='<span style="font-size:1.4rem">✅</span>Photo uploaded<br><span style="font-size:.68rem">Tap to replace</span>';photoCnt=document.querySelectorAll('.photoSlot.filled').length;}
