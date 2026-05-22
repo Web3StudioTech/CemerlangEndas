@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1B6B3A">
+<title>Cemerlang Endas — Bin Rental</title>
+<link rel="manifest" href="data:application/json,{}">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#1B6B3A;--g2:#27924f;--g3:#e8f5ee;--g4:#c8e6d4;
+  --y1:#F5A623;--y2:#fff3e0;--y3:#c47a00;
+  --r1:#D32F2F;--r2:#fdeaea;
+  --b1:#1565C0;--b2:#e8f0fe;--b3:#0D47A1;
+  --bg:#F4F6F2;--sur:#fff;--sur2:#F9FAF7;
+  --bdr:#E2E5DF;--bdr2:#C5CCC0;
+  --tx:#14180F;--tx2:#4A5544;--tx3:#8A9485;
+  --rad:14px;--rads:9px;--radx:6px;
+  --sh:0 2px 12px rgba(0,0,0,.08);--shl:0 6px 28px rgba(0,0,0,.13);
+  --fn:'Nunito',sans-serif;
+}
+html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
+
+/* ── PORTAL BAR ── */
+#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g1);display:flex;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
+.pTab.on{color:#fff;border-bottom-color:var(--y1)}
+.pTab .ptIco{font-size:1rem}
+
+/* ── PANELS ── */
+.panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
+.panel.on{display:flex}
+
+/* ══════════ SHARED COMPONENTS ══════════ */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.b-green{background:var(--g3);color:#0f5a28}
+.b-yellow{background:var(--y2);color:var(--y3)}
+.b-red{background:var(--r2);color:var(--r1)}
+.b-blue{background:var(--b2);color:var(--b3)}
+.b-gray{background:#eee;color:#555}
+.b-orange{background:#fff0e0;color:#c05000}
+.b-purple{background:#f0eaff;color:#5a00c8}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--g1);color:#fff}.btn-green:hover{background:var(--g2)}
+.btn-yellow{background:var(--y1);color:#fff}.btn-yellow:hover{background:#e09010}
+.btn-blue{background:var(--b1);color:#fff}.btn-blue:hover{background:#1976D2}
+.btn-red{background:var(--r2);color:var(--r1);border:1.5px solid var(--r1)}
+.btn-ghost{background:var(--sur2);color:var(--tx2);border:1.5px solid var(--bdr2)}
+.btn-full{width:100%}
+.btn-sm{padding:8px 14px;font-size:.78rem}
+
+.fLabel{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);margin-bottom:5px}
+.fInput{width:100%;padding:12px 14px;border:2px solid var(--bdr);border-radius:var(--rads);font-family:var(--fn);font-size:.92rem;font-weight:600;color:var(--tx);background:var(--sur);outline:none;transition:border-color .15s;margin-bottom:12px}
+.fInput:focus{border-color:var(--g1);background:#fff}
+textarea.fInput{resize:vertical;min-height:72px}
+select.fInput{cursor:pointer}
+
+.card{background:var(--sur);border-radius:var(--rad);border:1.5px solid var(--bdr);padding:16px;box-shadow:var(--sh)}
+.divider{height:1px;background:var(--bdr);margin:14px 0}
+.sLabel{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:8px}
+
+/* ══════════ TOAST ══════════ */
+#toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--tx);color:#fff;border-radius:99px;padding:10px 22px;font-size:.84rem;font-weight:700;z-index:9999;transition:transform .28s;white-space:nowrap;box-shadow:var(--shl);max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ══════════ MODAL ══════════ */
+.modal{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;padding-bottom:0}
+.modal.show{display:flex}
+.mBox{background:var(--sur);border-radius:var(--rad) var(--rad) 0 0;padding:22px 20px 32px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:var(--shl)}
+.mBox h3{font-size:1.05rem;font-weight:900;margin-bottom:16px;color:var(--tx)}
+.mClose{float:right;font-size:1.3rem;cursor:pointer;color:var(--tx3);line-height:1;margin-top:-2px}
+
+/* ══════════════════════════════════════
+   CUSTOMER APP
+══════════════════════════════════════ */
+#custPanel{background:var(--bg)}
+
+.authWrap{flex:1;overflow-y:auto;padding:24px 18px 80px;display:flex;flex-direction:column}
+.authLogo{text-align:center;padding:20px 0 24px}
+.authLogo .lMark{width:62px;height:62px;border-radius:18px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:1.9rem;margin-bottom:10px}
+.authLogo h1{font-size:1.5rem;font-weight:900;color:var(--tx)}
+.authLogo p{font-size:.83rem;color:var(--tx2);font-weight:600;margin-top:3px}
+.authCard{background:var(--sur);border-radius:var(--rad);padding:20px;box-shadow:var(--sh);border:1.5px solid var(--bdr)}
+.authCard h2{font-size:1.1rem;font-weight:900;margin-bottom:16px}
+.authSwitch{text-align:center;margin-top:14px;font-size:.86rem;color:var(--tx2);font-weight:600}
+.authSwitch a{color:var(--g1);font-weight:800;cursor:pointer}
+
+/* Bottom nav */
+.cNav{position:absolute;bottom:0;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);display:flex;height:62px;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.cNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);transition:color .15s;position:relative}
+.cNavItem.on{color:var(--g1)}
+.cNavItem .nIco{font-size:1.3rem}
+.cNavDot{position:absolute;top:8px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--r1);border:2px solid var(--sur)}
+
+/* Screens */
+.cScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px 14px 20px;display:none}
+.cScr.on{display:block}
+.cHdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-top:2px}
+.cHdr h2{font-size:1.25rem;font-weight:900}
+.cHdr .greet{font-size:.8rem;color:var(--tx2);font-weight:600}
+
+/* Order cards */
+.oCard{background:var(--sur);border-radius:var(--rad);border:1.5px solid var(--bdr);padding:14px;margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;transition:border-color .15s}
+.oCard:hover{border-color:var(--g2)}
+.oCard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.oCard-bin{font-size:.95rem;font-weight:900}
+.oCard-ref{font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px}
+.oCard-meta{display:flex;flex-wrap:wrap;gap:6px;padding-top:9px;border-top:1px solid var(--bdr)}
+.mChip{display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:700;color:var(--tx2)}
+
+/* Step progress */
+.stepBar{display:flex;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;background:var(--sur);border-radius:var(--rads);border:1.5px solid var(--bdr);padding:4px}
+.stepBar::-webkit-scrollbar{display:none}
+.sStep{flex-shrink:0;padding:7px 10px;border-radius:7px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);white-space:nowrap;transition:all .15s}
+.sStep.on{background:var(--g1);color:#fff}
+.sStep.done{color:var(--g2)}
+
+/* Bin cards */
+.binCard{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--rad);padding:13px;margin-bottom:9px;cursor:pointer;display:flex;gap:11px;align-items:flex-start;transition:all .15s}
+.binCard.sel{border-color:var(--g1);background:var(--g3)}
+.binCard .bIco{font-size:1.9rem;flex-shrink:0;margin-top:1px}
+.binCard .bName{font-size:.92rem;font-weight:900}
+.binCard .bSub{font-size:.75rem;color:var(--tx2);font-weight:600;margin:2px 0 7px}
+.binCard .bPrices{display:flex;gap:5px;flex-wrap:wrap}
+.pPill{padding:3px 8px;border-radius:99px;font-size:.68rem;font-weight:800;color:var(--tx2);background:var(--bg);border:1px solid var(--bdr)}
+.pPill.hl{background:var(--y2);color:var(--y3);border-color:#f5d090}
+.selCheck{width:20px;height:20px;border-radius:50%;background:var(--g1);color:#fff;display:none;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;margin-top:2px}
+.binCard.sel .selCheck{display:flex}
+
+/* Duration */
+.durGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.durCard{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--rads);padding:12px 6px;text-align:center;cursor:pointer;transition:all .15s}
+.durCard.sel{border-color:var(--g1);background:var(--g3)}
+.durCard .dLbl{font-size:.85rem;font-weight:900}
+.durCard .dDays{font-size:.7rem;color:var(--tx2);font-weight:700;margin:2px 0 7px}
+.durCard .dPrice{font-size:1rem;font-weight:900;color:var(--g1)}
+.durCard .dSave{font-size:.64rem;color:var(--y3);font-weight:800;margin-top:2px}
+
+/* Time slots */
+.timeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.tSlot{padding:9px 4px;text-align:center;border:2px solid var(--bdr);border-radius:var(--radx);font-size:.73rem;font-weight:800;color:var(--tx2);cursor:pointer;background:var(--sur);transition:all .15s}
+.tSlot.sel{background:var(--g1);border-color:var(--g1);color:#fff}
+
+/* Bottom action bar */
+#oActBar{position:fixed;bottom:62px;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);padding:10px 14px;display:none;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+#oActBar.show{display:flex;gap:9px}
+
+/* Chat */
+.chatWrap{display:flex;flex-direction:column;height:100%}
+.chatMsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.chatMsg{max-width:78%;padding:9px 13px;border-radius:14px;font-size:.85rem;font-weight:600;line-height:1.45}
+.chatMsg.me{background:var(--g1);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chatMsg.them{background:var(--sur);border:1.5px solid var(--bdr);color:var(--tx);align-self:flex-start;border-bottom-left-radius:4px}
+.chatMsg.sys{background:var(--y2);color:var(--y3);align-self:center;border-radius:99px;font-size:.73rem;text-align:center;padding:5px 14px;max-width:90%}
+.chatMsg .cmSender{font-size:.65rem;font-weight:800;opacity:.7;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.chatMsg .cmTime{font-size:.63rem;opacity:.65;margin-top:3px;text-align:right}
+.chatInput{display:flex;gap:8px;padding:10px 12px;background:var(--sur);border-top:1.5px solid var(--bdr)}
+.chatInput input{flex:1;padding:10px 14px;border:2px solid var(--bdr);border-radius:99px;font-family:var(--fn);font-size:.88rem;font-weight:600;color:var(--tx);outline:none}
+.chatInput input:focus{border-color:var(--g1)}
+.chatSend{width:38px;height:38px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Order Dashboard */
+.odWrap{padding:0}
+.odHdr{background:var(--g1);color:#fff;padding:16px 14px 14px;margin:-14px -14px 14px}
+.odHdr .odRef{font-size:.72rem;font-weight:700;opacity:.7;margin-bottom:3px}
+.odHdr .odBin{font-size:1.1rem;font-weight:900;margin-bottom:6px}
+.odHdr .odMeta{display:flex;flex-wrap:wrap;gap:8px}
+.odHdr .odMetaItem{font-size:.75rem;font-weight:700;opacity:.85;display:flex;align-items:center;gap:4px}
+
+/* Stage timeline */
+.stageList{display:flex;flex-direction:column;gap:0;margin-bottom:14px}
+.stageRow{display:flex;gap:12px;align-items:flex-start;padding:11px 0}
+.stageRow:not(:last-child){border-bottom:1px solid var(--bdr)}
+.stageDot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0;margin-top:1px}
+.stageDot.done{background:var(--g1);color:#fff}
+.stageDot.active{background:var(--y1);color:#fff}
+.stageDot.pending{background:var(--bdr);color:var(--tx3)}
+.stageContent{flex:1}
+.stageTitle{font-size:.88rem;font-weight:800;color:var(--tx);margin-bottom:2px}
+.stageSub{font-size:.75rem;color:var(--tx2);font-weight:600;line-height:1.4}
+.stageTime{font-size:.68rem;color:var(--tx3);font-weight:700;margin-top:3px}
+.stageActions{margin-top:8px;display:flex;gap:7px;flex-wrap:wrap}
+
+/* Photo upload */
+.photoGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.photoSlot{aspect-ratio:4/3;border:2px dashed var(--bdr2);border-radius:var(--rads);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--sur2);transition:all .15s;font-size:.78rem;color:var(--tx3);font-weight:700;gap:6px}
+.photoSlot:hover{border-color:var(--g2);background:var(--g3)}
+.photoSlot.filled{border-style:solid;border-color:var(--g1);background:var(--g3);color:var(--g1)}
+
+/* Reminder banner */
+.reminderBanner{background:var(--y2);border:1.5px solid var(--y1);border-radius:var(--rads);padding:10px 13px;margin-bottom:12px;display:flex;gap:9px;align-items:flex-start}
+.reminderBanner p{font-size:.8rem;font-weight:700;color:var(--y3);line-height:1.5}
+
+/* ══════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════ */
+#adminPanel{flex-direction:row;background:#0e1410}
+.aSide{width:210px;background:#131d14;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #233023;overflow-y:auto}
+.aSide .aLogo{padding:18px 16px 14px;border-bottom:1px solid #233023}
+.aLogo h3{color:#fff;font-size:.92rem;font-weight:900;line-height:1.3}
+.aLogo p{color:#4a7a4a;font-size:.7rem;font-weight:700;margin-top:2px}
+.aMenu{flex:1;padding:8px 0}
+.aMenuItem{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:.8rem;font-weight:800;color:#5a8a5a;transition:all .15s;border-left:3px solid transparent}
+.aMenuItem:hover{color:#aaddaa;background:rgba(255,255,255,.03)}
+.aMenuItem.on{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--y1)}
+.aMenuItem .ami{font-size:1.05rem;width:20px;text-align:center}
+.aBadge{margin-left:auto;background:var(--r1);color:#fff;font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:99px}
+.aMain{flex:1;overflow-y:auto;padding:20px;background:#0e1410}
+.aMain h2{color:#fff;font-size:1.15rem;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+
+/* Admin stats */
+.aStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.aStat{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:13px}
+.aStat .asNum{font-size:1.5rem;font-weight:900;color:#fff;line-height:1}
+.aStat .asLbl{font-size:.68rem;font-weight:700;color:#4a7a4a;margin-top:4px;text-transform:uppercase;letter-spacing:.07em}
+.aStat .asSub{font-size:.7rem;color:var(--y1);font-weight:700;margin-top:2px}
+
+/* Admin order rows */
+.aRow{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:14px;margin-bottom:9px;transition:border-color .15s}
+.aRow:hover{border-color:#3a5a3a}
+.aRow .arTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;gap:8px}
+.aRow .arBin{font-size:.92rem;font-weight:900;color:#fff}
+.aRow .arRef{font-size:.7rem;color:#4a7a4a;font-weight:700;margin-top:2px}
+.aRow .arMeta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.arMetaItem{display:flex;align-items:center;gap:4px;font-size:.77rem;font-weight:700;color:#7aaa7a}
+.arMetaItem .ic{font-size:.85rem;opacity:.8}
+.aRow .arActions{display:flex;gap:7px;flex-wrap:wrap}
+.abtn{padding:7px 13px;border-radius:var(--radx);border:none;font-family:var(--fn);font-size:.75rem;font-weight:800;cursor:pointer;transition:all .15s}
+.abtn:active{transform:scale(.97)}
+.abtn-green{background:var(--g1);color:#fff}.abtn-green:hover{background:var(--g2)}
+.abtn-blue{background:var(--b1);color:#fff}.abtn-blue:hover{background:#1976D2}
+.abtn-yellow{background:var(--y1);color:#fff}.abtn-yellow:hover{background:#e09010}
+.abtn-red{background:var(--r1);color:#fff}
+.abtn-ghost{background:#1e2e1e;color:#aaa;border:1px solid #2e3e2e}
+
+/* Toggle switch */
+.toggle{position:relative;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:700;color:#8aaa8a}
+.toggle input{position:absolute;opacity:0;width:0;height:0}
+.toggleTrack{width:38px;height:20px;background:#2a3a2a;border-radius:99px;transition:background .2s;flex-shrink:0;position:relative}
+.toggle input:checked ~ .toggleTrack{background:var(--y1)}
+.toggleThumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none}
+.toggle input:checked ~ .toggleTrack .toggleThumb{transform:translateX(18px)}
+
+/* Admin order dashboard */
+.aOrdDash{background:#131d14;border:1px solid #233023;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.aOrdDash .aodHdr{background:#1a2a1a;padding:14px 16px;border-bottom:1px solid #233023;display:flex;align-items:center;justify-content:space-between}
+.aOrdDash .aodHdr h4{color:#fff;font-size:.9rem;font-weight:900}
+.aStageRow{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid #152015}
+.aStageRow:last-child{border-bottom:none}
+.asDot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;flex-shrink:0;margin-top:1px}
+.asDot.done{background:var(--g1);color:#fff}
+.asDot.active{background:var(--y1);color:#fff}
+.asDot.pending{background:#233023;color:#4a7a4a}
+.asContent{flex:1}
+.asTitle{font-size:.82rem;font-weight:800;color:#ccc;margin-bottom:2px}
+.asSub2{font-size:.72rem;color:#5a7a5a;font-weight:600;line-height:1.4}
+.asActions{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+
+/* Driver assign modal */
+.drvRow{background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s}
+.drvRow:hover{border-color:var(--y1)}
+.drvRow.sel{border-color:var(--y1);background:var(--y2)}
+.drvAva{width:40px;height:40px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;color:#fff;flex-shrink:0}
+.drvName{font-size:.88rem;font-weight:800;color:var(--tx)}
+.drvSub{font-size:.73rem;color:var(--tx2);font-weight:600;margin-top:2px}
+
+/* Admin chat (admin view) */
+.adminChat{background:#0a140a;border-radius:var(--rads);overflow:hidden;margin-top:10px}
+.adminChat .acHdr{background:#131d14;padding:10px 14px;font-size:.78rem;font-weight:800;color:#8aaa8a;display:flex;align-items:center;justify-content:space-between}
+.adminChat .acMsgs{padding:12px;display:flex;flex-direction:column;gap:7px;max-height:180px;overflow-y:auto}
+.adminChat .acMsg{font-size:.78rem;font-weight:600;color:#aaa;padding:7px 11px;border-radius:10px;background:#131d14;max-width:85%}
+.adminChat .acMsg.cust{align-self:flex-start}
+.adminChat .acMsg.drv{align-self:flex-end;background:#1a2a1a;color:#8aaa8a}
+.adminChat .acMsg.admin{align-self:center;background:#2a2a10;color:var(--y1);border-radius:99px;font-size:.68rem;text-align:center;padding:4px 12px}
+.adminChat .acSender{font-size:.62rem;font-weight:800;opacity:.6;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.adminChatInput{display:flex;gap:8px;padding:10px 12px;background:#131d14;border-top:1px solid #233023}
+.adminChatInput input{flex:1;padding:8px 12px;background:#0a140a;border:1px solid #233023;border-radius:99px;font-family:var(--fn);font-size:.82rem;color:#ccc;outline:none}
+.adminChatInput button{padding:8px 14px;background:var(--y1);border:none;border-radius:99px;font-family:var(--fn);font-size:.78rem;font-weight:800;cursor:pointer;color:#fff}
+
+/* D/O Invoice toggle in admin */
+.notifToggleBox{background:#1a2a1a;border:1px solid #2a3a2a;border-radius:var(--rads);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.notifToggleBox p{font-size:.8rem;font-weight:700;color:#8aaa8a}
+
+/* Customer table */
+.custTbl{width:100%;border-collapse:collapse}
+.custTbl th{background:#1a2a1a;color:#4a7a4a;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;text-align:left}
+.custTbl td{padding:11px 12px;border-bottom:1px solid #1a2a1a;font-size:.8rem;color:#aaa;font-weight:600;vertical-align:top}
+.custTbl tr:hover td{background:#131d14}
+.custTbl .tdName{color:#fff;font-weight:800;font-size:.85rem}
+
+/* ══════════════════════════════════════
+   DRIVER APP
+══════════════════════════════════════ */
+#drvPanel{background:#0d0d0d}
+.drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none}
+.drvScr.on{display:block}
+.drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50}
+.dNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#444;transition:color .15s}
+.dNavItem.on{color:var(--y1)}
+.dNavItem .nIco{font-size:1.3rem}
+
+.dJobCard{background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:var(--rad);padding:14px;margin-bottom:11px;transition:border-color .15s}
+.dJobCard.urgent{border-color:var(--y1)}
+.dJobCard.done{border-color:#1a3a1a;opacity:.75}
+.djTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;gap:8px}
+.djBin{font-size:.95rem;font-weight:900;color:#fff}
+.djRef{font-size:.7rem;color:#555;font-weight:700;margin-top:2px}
+.djMeta{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.djMetaRow{display:flex;align-items:flex-start;gap:8px;font-size:.8rem;color:#888;font-weight:700}
+.djMetaRow .ic{font-size:.85rem;width:18px;text-align:center;flex-shrink:0;margin-top:1px}
+.djMetaRow .val{color:#ccc;flex:1}
+.djActions{display:flex;gap:8px;flex-wrap:wrap}
+.djBtn{flex:1;padding:12px;border:none;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:900;cursor:pointer;transition:all .15s}
+.djBtn:active{transform:scale(.97)}
+.djBtnAccept{background:var(--y1);color:#111}
+.djBtnDone{background:var(--g1);color:#fff}
+.djBtnDecline{padding:12px 16px;background:#2a2a2a;color:#777;border:none;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer}
+
+/* Driver stage dashboard */
+.dStageLine{display:flex;flex-direction:column;gap:0;margin-bottom:12px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:var(--rad);overflow:hidden}
+.dStageRow{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid #1a2a1a}
+.dStageRow:last-child{border-bottom:none}
+.dsDot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0;margin-top:2px}
+.dsDot.done{background:var(--g1);color:#fff}
+.dsDot.active{background:var(--y1);color:#111}
+.dsDot.pending{background:#2a2a2a;color:#555}
+.dsContent{flex:1}
+.dsTitle{font-size:.82rem;font-weight:800;color:#ccc;margin-bottom:2px}
+.dsSub{font-size:.72rem;color:#666;font-weight:600;line-height:1.4}
+.dsActions{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+
+/* Photo proof */
+.photoProofGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0}
+.photoProofSlot{aspect-ratio:4/3;background:#111;border:2px dashed #333;border-radius:var(--rads);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:5px;font-size:.75rem;color:#555;font-weight:700;transition:all .15s}
+.photoProofSlot:hover{border-color:var(--y1);color:var(--y1)}
+.photoProofSlot.filled{border-style:solid;border-color:var(--g1);color:var(--g1);background:#0a1a0a}
+
+/* Driver chat */
+.drvChatWrap{background:#111;border:1px solid #2a2a2a;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.drvChatHdr{background:#1a1a1a;padding:10px 14px;font-size:.78rem;font-weight:800;color:#888;display:flex;align-items:center;justify-content:space-between}
+.drvChatMsgs{padding:11px;display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto}
+.drvCMsg{font-size:.8rem;font-weight:600;padding:8px 12px;border-radius:12px;max-width:80%}
+.drvCMsg.me{background:var(--y1);color:#111;align-self:flex-end;border-bottom-right-radius:4px}
+.drvCMsg.them{background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;align-self:flex-start;border-bottom-left-radius:4px}
+.drvCMsg.sys{background:#1a1a0a;color:#a08000;align-self:center;border-radius:99px;font-size:.7rem;padding:4px 12px}
+.drvCMsg .cSender{font-size:.62rem;font-weight:800;opacity:.6;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.drvChatInput{display:flex;gap:7px;padding:9px 11px;background:#1a1a1a;border-top:1px solid #2a2a2a}
+.drvChatInput input{flex:1;padding:8px 12px;background:#111;border:1px solid #2a2a2a;border-radius:99px;font-family:var(--fn);font-size:.82rem;color:#ccc;outline:none}
+.drvChatInput button{width:34px;height:34px;border-radius:50%;background:var(--y1);border:none;color:#111;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ══ RESPONSIVE ADMIN ══ */
+@media(max-width:640px){
+  #adminPanel{flex-direction:column}
+  .aSide{width:100%;height:46px;flex-direction:row;border-right:none;border-bottom:1px solid #233023;overflow-x:auto;overflow-y:hidden;flex-shrink:0}
+  .aSide .aLogo{display:none}
+  .aMenu{display:flex;flex-direction:row;padding:0;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+  .aMenu::-webkit-scrollbar{display:none}
+  .aMenuItem{flex-direction:column;gap:1px;padding:6px 12px;font-size:.58rem;border-left:none;border-bottom:3px solid transparent;flex-shrink:0}
+  .aMenuItem.on{border-left:none;border-bottom-color:var(--y1)}
+  .aMenuItem .ami{font-size:1.1rem}
+  .aStats{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:600px){
+  .panel,.modal{max-width:480px;left:50%;transform:translateX(-50%)}
+  #adminPanel{max-width:900px;left:50%;transform:translateX(-50%)}
+  #pBar{max-width:900px;left:50%;transform:translateX(-50%)}
+  #toast{max-width:420px}
+}
+</style>
+</head>
+<body>
+
+<!-- PORTAL BAR -->
+<div id="pBar">
+  <div class="pTab on" onclick="switchPortal('cust',this)"><span class="ptIco">👤</span>Customer</div>
+  <div class="pTab" onclick="switchPortal('admin',this)"><span class="ptIco">🏢</span>Admin</div>
+  <div class="pTab" onclick="switchPortal('driver',this)"><span class="ptIco">🚛</span>Driver</div>
+</div>
+
+<!-- ══════════════════════════════════════ CUSTOMER PANEL ══════════════════════════════════════ -->
+<div id="custPanel" class="panel on">
+  <!-- LOGIN -->
+  <div id="authLogin" class="authWrap">
+    <div class="authLogo"><div class="lMark">🗑</div><h1>Cemerlang Endas</h1><p>Bin Rental — Customer App</p></div>
+    <div class="authCard">
+      <h2>Welcome Back 👋</h2>
+      <div class="fLabel">Phone Number</div><input class="fInput" type="tel" placeholder="01x-xxxx xxxx" id="lPhone">
+      <div class="fLabel">Password</div><input class="fInput" type="password" placeholder="••••••••" id="lPass">
+      <button class="btn btn-green btn-full" onclick="doLogin()">Login</button>
+      <div class="authSwitch">New customer? <a onclick="showAuth('reg')">Register here</a></div>
+    </div>
+  </div>
+  <!-- REGISTER -->
+  <div id="authReg" class="authWrap" style="display:none">
+    <div class="authLogo"><div class="lMark">✍️</div><h1>Create Account</h1><p>Register as a new customer</p></div>
+    <div class="authCard">
+      <h2>New Customer</h2>
+      <div class="fLabel">Full Name</div><input class="fInput" type="text" placeholder="Your full name" id="rName">
+      <div class="fLabel">Company (optional)</div><input class="fInput" type="text" placeholder="ABC Sdn. Bhd." id="rComp">
+      <div class="fLabel">Phone</div><input class="fInput" type="tel" placeholder="01x-xxxx xxxx" id="rPhone">
+      <div class="fLabel">Email</div><input class="fInput" type="email" placeholder="you@email.com" id="rEmail">
+      <div class="fLabel">Password</div><input class="fInput" type="password" placeholder="Create password" id="rPass">
+      <div class="fLabel">Default Delivery Address</div><input class="fInput" type="text" placeholder="No., Jalan, Postcode, City" id="rAddr">
+      <button class="btn btn-green btn-full" onclick="doReg()">Create Account</button>
+      <div class="authSwitch">Already registered? <a onclick="showAuth('login')">Login</a></div>
+    </div>
+  </div>
+  <!-- MAIN APP -->
+  <div id="custApp" style="display:none;position:relative;flex:1;overflow:hidden">
+    <!-- HOME -->
+    <div id="cHome" class="cScr on">
+      <div class="cHdr">
+        <div><div class="greet">Good morning 👋</div><h2 id="custName">Ahmad Hairul</h2></div>
+        <div style="font-size:1.7rem">🗑</div>
+      </div>
+      <div class="reminderBanner"><span style="font-size:1.1rem;flex-shrink:0">🔔</span><p><b>Reminder:</b> Your RoRo Bin delivery is tomorrow, Fri 23 May · 10:00–11:00am. Ensure site is accessible.</p></div>
+      <div class="sLabel">Active Rentals</div>
+      <div class="oCard" onclick="showOrderDash('CE-2026-10234')">
+        <div class="oCard-top"><div><div class="oCard-bin">🏗 RoRo Bin — Medium</div><div class="oCard-ref">CE-2026-10234 · 14-Day</div></div><span class="badge b-yellow">Confirmed</span></div>
+        <div class="oCard-meta"><div class="mChip">📅 23 May – 5 Jun</div><div class="mChip">🚚 Deliver tomorrow 10–11am</div><div class="mChip">💰 RM850</div></div>
+      </div>
+      <div class="sLabel" style="margin-top:4px">New Order</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px">
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🏗</div><div style="font-size:.7rem;font-weight:900">RORO BIN</div></div>
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🗂</div><div style="font-size:.7rem;font-weight:900">LEACH BIN</div></div>
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🗑</div><div style="font-size:.7rem;font-weight:900">GARBAGE BIN</div></div>
+      </div>
+      <div class="sLabel">Past Orders</div>
+      <div class="oCard" onclick="showOrderDash('CE-2026-10198')">
+        <div class="oCard-top"><div><div class="oCard-bin">🗑 Garbage Bin — 240L</div><div class="oCard-ref">CE-2026-10198 · Weekly</div></div><span class="badge b-gray">Completed</span></div>
+        <div class="oCard-meta"><div class="mChip">📅 1–7 May</div><div class="mChip">💰 RM65</div></div>
+      </div>
+    </div>
+    <!-- NEW ORDER SCREEN -->
+    <div id="cOrder" class="cScr">
+      <div class="stepBar" id="stepBar">
+        <div class="sStep on" id="sp1">1 · Bin</div>
+        <div class="sStep" id="sp2">2 · Duration</div>
+        <div class="sStep" id="sp3">3 · Date & Time</div>
+        <div class="sStep" id="sp4">4 · Location</div>
+        <div class="sStep" id="sp5">5 · Confirm</div>
+      </div>
+      <div id="oStep1"><div class="sLabel">Select Bin</div><div id="binList"></div></div>
+      <div id="oStep2" style="display:none">
+        <div class="sLabel">Rental Duration</div>
+        <div class="durGrid" id="durGrid"></div>
+        <div class="reminderBanner"><span style="font-size:1rem;flex-shrink:0">📋</span><p>Minimum 2 working days advance booking. End date is fixed per plan selected.</p></div>
+      </div>
+      <div id="oStep3" style="display:none">
+        <div class="sLabel">Start Date</div>
+        <input type="date" class="fInput" id="oStartDate" onchange="updateDates()">
+        <div id="oDateResult" style="display:none">
+          <div style="display:flex;gap:9px;margin-bottom:13px">
+            <div class="card" style="flex:1;padding:12px"><div style="font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">📦 Delivery</div><div style="font-size:.9rem;font-weight:800" id="oDelDate">—</div></div>
+            <div class="card" style="flex:1;padding:12px"><div style="font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">🔄 Collection</div><div style="font-size:.9rem;font-weight:800" id="oColDate">—</div></div>
+          </div>
+          <div class="sLabel">🚚 Preferred Delivery Time Window</div>
+          <div class="timeGrid" id="delTimeGrid"></div>
+          <div class="sLabel">📦 Preferred Collection Time Window</div>
+          <div class="timeGrid" id="colTimeGrid"></div>
+        </div>
+      </div>
+      <div id="oStep4" style="display:none">
+        <div class="sLabel">Site Contact</div>
+        <div class="fLabel">Contact Person</div><input class="fInput" type="text" id="oContact" placeholder="Name on site">
+        <div class="fLabel">Contact Phone</div><input class="fInput" type="tel" id="oPhone" placeholder="01x-xxxx xxxx">
+        <div class="sLabel" style="margin-top:4px">Delivery Address</div>
+        <div class="fLabel">Street Address</div><input class="fInput" type="text" id="oStreet" placeholder="No., Jalan…">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><div class="fLabel">Postcode</div><input class="fInput" type="text" id="oPost" maxlength="5" placeholder="52100"></div>
+          <div><div class="fLabel">City</div><input class="fInput" type="text" id="oCity" placeholder="Kepong"></div>
+        </div>
+        <div class="fLabel">Placement Type</div>
+        <select class="fInput" id="oPlacement">
+          <option value="">Select…</option>
+          <option>Private compound / yard</option>
+          <option>Loading bay / basement</option>
+          <option>Public road (permit needed)</option>
+          <option>Public walkway (permit needed)</option>
+        </select>
+        <div class="fLabel">Special Notes</div>
+        <textarea class="fInput" id="oNotes" rows="3" placeholder="Gate code, access instructions, landmark…"></textarea>
+      </div>
+      <div id="oStep5" style="display:none">
+        <div class="sLabel">Order Summary</div>
+        <div class="oCard" id="oSummCard" style="cursor:default"></div>
+        <div class="reminderBanner" style="background:var(--g3);border-color:var(--g2)"><span style="font-size:1rem;flex-shrink:0">ℹ️</span><p style="color:#1B4d2a">Payment via bank transfer within 3 working days. Our team will WhatsApp payment details after confirmation.</p></div>
+        <button class="btn btn-green btn-full" onclick="submitOrder()">✓ Confirm & Place Order</button>
+      </div>
+      <div style="height:80px"></div>
+    </div>
+    <!-- ORDERS LIST -->
+    <div id="cOrders" class="cScr">
+      <div class="cHdr"><h2>My Orders</h2></div>
+      <div class="oCard" onclick="showOrderDash('CE-2026-10234')">
+        <div class="oCard-top"><div><div class="oCard-bin">🏗 RoRo Bin — Medium</div><div class="oCard-ref">CE-2026-10234 · 14-Day</div></div><span class="badge b-yellow">Confirmed</span></div>
+        <div class="oCard-meta"><div class="mChip">📅 23 May – 5 Jun</div><div class="mChip">💰 RM850</div></div>
+      </div>
+      <div class="oCard" onclick="showOrderDash('CE-2026-10198')">
+        <div class="oCard-top"><div><div class="oCard-bin">🗑 Garbage Bin — 240L</div><div class="oCard-ref">CE-2026-10198 · Weekly</div></div><span class="badge b-gray">Completed</span></div>
+        <div class="oCard-meta"><div class="mChip">📅 1–7 May</div><div class="mChip">💰 RM65</div></div>
+      </div>
+    </div>
+    <!-- ORDER DASHBOARD -->
+    <div id="cOrderDash" class="cScr">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="backFromDash()" style="background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:7px 13px;font-family:var(--fn);font-size:.82rem;font-weight:800;cursor:pointer;color:var(--tx2)">← Back</button>
+        <div><div style="font-size:.72rem;color:var(--tx3);font-weight:700" id="dashRef">—</div><div style="font-size:1rem;font-weight:900" id="dashBin">—</div></div>
+        <div style="margin-left:auto" id="dashBadge"></div>
+      </div>
+      <!-- Order info header -->
+      <div class="card" style="background:var(--g1);color:#fff;margin-bottom:12px;padding:14px">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;font-weight:700;opacity:.9" id="dashMeta"></div>
+      </div>
+      <!-- Stage timeline -->
+      <div class="sLabel">Order Progress</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="stageList" id="dashStages"></div>
+      </div>
+      <!-- Chat -->
+      <div class="sLabel">💬 Chat with Driver</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="chatWrap" style="height:320px">
+          <div class="chatMsgs" id="dashChat">
+            <div class="chatMsg sys">Order CE-2026-10234 created · 21 May, 9:14am</div>
+            <div class="chatMsg them"><div class="cmSender">Driver — Roslan</div>Hi, saya Roslan driver anda. Saya akan sampai sekitar 10:15am esok. Ada apa-apa instruction tambahan?<div class="cmTime">21 May, 2:30pm</div></div>
+            <div class="chatMsg me">OK terima kasih. Gate code kami 1234. Sila park dalam compound.<div class="cmTime">21 May, 2:45pm</div></div>
+            <div class="chatMsg sys">Reminder: Delivery tomorrow 23 May · 10:00–11:00am</div>
+          </div>
+          <div class="chatInput">
+            <input type="text" id="chatInputField" placeholder="Type a message…" onkeypress="if(event.key==='Enter')sendChat()">
+            <button class="chatSend" onclick="sendChat()">➤</button>
+          </div>
+        </div>
+      </div>
+      <!-- D/O & Invoice buttons -->
+      <div class="sLabel">Documents</div>
+      <div style="display:flex;gap:9px;margin-bottom:20px">
+        <button class="btn btn-ghost" style="flex:1" onclick="showDoc('do')">📄 Delivery Order</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="showDoc('inv')">🧾 Invoice</button>
+      </div>
+    </div>
+    <!-- PROFILE -->
+    <div id="cProfile" class="cScr">
+      <div class="cHdr"><h2>My Profile</h2></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">
+          <div style="width:50px;height:50px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff">AH</div>
+          <div><div style="font-size:.98rem;font-weight:900">Ahmad Hairul</div><div style="font-size:.8rem;color:var(--tx2);font-weight:600">012-345 6789</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="fLabel">Full Name</div><input class="fInput" type="text" value="Ahmad Hairul">
+        <div class="fLabel">Phone</div><input class="fInput" type="tel" value="012-345 6789">
+        <div class="fLabel">Email</div><input class="fInput" type="email" value="ahmad@company.com">
+        <div class="fLabel">Company</div><input class="fInput" type="text" value="AH Holdings Sdn. Bhd.">
+        <div class="fLabel">Default Address</div><input class="fInput" type="text" value="No. 12, Jalan Kepong, 52100 KL">
+        <button class="btn btn-green btn-full" onclick="toast('✅ Profile updated!')">Save Changes</button>
+        <div style="margin-top:10px"><button onclick="doLogout()" class="btn btn-red btn-full">Logout</button></div>
+      </div>
+    </div>
+    <!-- BOTTOM NAV -->
+    <div class="cNav">
+      <div class="cNavItem on" onclick="cNav('cHome',this)"><span class="nIco">🏠</span>Home</div>
+      <div class="cNavItem" onclick="goNewOrder()"><span class="nIco">➕</span>New Order</div>
+      <div class="cNavItem" onclick="cNav('cOrders',this)"><span class="nIco">📋</span>Orders</div>
+      <div class="cNavItem" onclick="cNav('cProfile',this)"><span class="nIco">👤</span>Profile</div>
+    </div>
+  </div>
+</div>
+<!-- ORDER ACTION BAR -->
+<div id="oActBar">
+  <button id="oBack" onclick="orderBack()" style="padding:12px 18px;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer;color:var(--tx2);display:none">← Back</button>
+  <button id="oNext" onclick="orderNext()" class="btn btn-green" style="flex:1;border-radius:var(--rads)">Next →</button>
+</div>
+
+<!-- ══════════════════════════════════════ ADMIN PANEL ══════════════════════════════════════ -->
+<div id="adminPanel" class="panel">
+  <div class="aSide">
+    <div class="aLogo"><h3>Cemerlang Endas</h3><p>Admin Dashboard</p></div>
+    <div class="aMenu">
+      <div class="aMenuItem on" onclick="adminNav('aOrders',this)"><span class="ami">📦</span>New Orders<span class="aBadge">3</span></div>
+      <div class="aMenuItem" onclick="adminNav('aSchedule',this)"><span class="ami">📅</span>Schedule</div>
+      <div class="aMenuItem" onclick="adminNav('aOrderDash',this)"><span class="ami">🪟</span>Order Dashboards</div>
+      <div class="aMenuItem" onclick="adminNav('aDrivers',this)"><span class="ami">🚛</span>Drivers</div>
+      <div class="aMenuItem" onclick="adminNav('aCustomers',this)"><span class="ami">👥</span>Customers</div>
+      <div class="aMenuItem" onclick="adminNav('aReports',this)"><span class="ami">📊</span>Reports</div>
+    </div>
+  </div>
+  <div class="aMain" id="aMain"></div>
+</div>
+
+<!-- DRIVER ASSIGN MODAL -->
+<div class="modal" id="assignModal">
+  <div class="mBox">
+    <span class="mClose" onclick="closeModal('assignModal')">✕</span>
+    <h3>Assign Driver</h3>
+    <div id="driverListModal"></div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn btn-blue" style="flex:1" onclick="confirmAssign()">Assign Driver</button>
+      <button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT MODAL -->
+<div class="modal" id="docModal">
+  <div class="mBox" id="docModalBox">
+    <span class="mClose" onclick="closeModal('docModal')">✕</span>
+    <div id="docContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ DRIVER PANEL ══════════════════════════════════════ -->
+<div id="drvPanel" class="panel">
+  <div style="position:relative;flex:1;overflow:hidden">
+    <!-- JOBS -->
+    <div id="dJobs" class="drvScr on">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div><div style="color:#555;font-size:.75rem;font-weight:700">Driver App</div><div style="color:#fff;font-size:1.2rem;font-weight:900">Roslan bin Mat</div></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:50%;background:#4caf50"></div><div style="color:#888;font-size:.8rem;font-weight:700">Online</div></div>
+      </div>
+      <div style="background:#1a1a0a;border:1.5px solid var(--y1);border-radius:var(--rads);padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;align-items:flex-start">
+        <span style="font-size:1.1rem;flex-shrink:0">🔔</span>
+        <p style="font-size:.8rem;font-weight:700;color:#c47a00;line-height:1.5">New job assigned! CE-2026-10240 · RoRo Bin Medium, Kepong. Accept or decline below.</p>
+      </div>
+      <!-- New job card with full dashboard -->
+      <div class="sLabel" style="color:#666">New Assignment</div>
+      <div class="dJobCard urgent">
+        <div class="djTop">
+          <div><div class="djBin">🏗 RoRo Bin — Medium</div><div class="djRef">CE-2026-10240 · 14-Day Rental</div></div>
+          <span class="badge b-yellow">New Job</span>
+        </div>
+        <div class="djMeta">
+          <div class="djMetaRow"><span class="ic">📅</span><span>Deliver: <span class="val">Fri 23 May 2026</span></span></div>
+          <div class="djMetaRow"><span class="ic">🕙</span><span>Time window: <span class="val">10:00–11:00am</span></span></div>
+          <div class="djMetaRow"><span class="ic">📍</span><span>Location: <span class="val">No. 5, Jalan Kepong, 52100 Kuala Lumpur</span></span></div>
+          <div class="djMetaRow"><span class="ic">👤</span><span>Contact: <span class="val">Encik Farid · 012-999 8888</span></span></div>
+          <div class="djMetaRow"><span class="ic">🔄</span><span>Collect on: <span class="val">Thu 5 Jun · 2:00–3:00pm</span></span></div>
+          <div class="djMetaRow"><span class="ic">📝</span><span>Notes: <span class="val">Gate code 1234, park inside compound</span></span></div>
+          <div class="djMetaRow"><span class="ic">💰</span><span>Job value: <span class="val">RM850</span></span></div>
+        </div>
+        <div class="djActions">
+          <button class="djBtn djBtnAccept" onclick="drvAccept(this)">✓ Accept Job</button>
+          <button class="djBtnDecline" onclick="drvDecline(this)">Decline</button>
+        </div>
+      </div>
+      <!-- Active job with stage dashboard -->
+      <div class="sLabel" style="color:#666;margin-top:6px">Active Jobs</div>
+      <div class="dJobCard">
+        <div class="djTop">
+          <div><div class="djBin">🗑 Garbage Bin — 240L</div><div class="djRef">CE-2026-10230</div></div>
+          <span class="badge b-green">Active</span>
+        </div>
+        <div class="djMeta" style="margin-bottom:8px">
+          <div class="djMetaRow"><span class="ic">📅</span><span>Deliver: <span class="val">Today, 22 May</span></span></div>
+          <div class="djMetaRow"><span class="ic">🕙</span><span>Window: <span class="val">2:00–3:00pm</span></span></div>
+          <div class="djMetaRow"><span class="ic">📍</span><span><span class="val">Sri Damansara, KL</span></span></div>
+          <div class="djMetaRow"><span class="ic">👤</span><span><span class="val">Puan Siti · 016-777 1234</span></span></div>
+        </div>
+        <!-- Stage dashboard for driver -->
+        <div class="dStageLine">
+          <div class="dStageRow"><div class="dsDot done">✓</div><div class="dsContent"><div class="dsTitle">Job accepted</div><div class="dsSub">22 May, 9:02am · You accepted this job</div></div></div>
+          <div class="dStageRow"><div class="dsDot active">●</div><div class="dsContent"><div class="dsTitle">Deliver bin today</div><div class="dsSub">Window: 2:00–3:00pm · Sri Damansara</div><div class="dsActions">
+            <button class="djBtn djBtnDone btn-sm" style="flex:none;padding:8px 14px;font-size:.78rem" onclick="drvDelivered(this)">📸 Mark Delivered</button>
+          </div></div></div>
+          <div class="dStageRow"><div class="dsDot pending">6</div><div class="dsContent"><div class="dsTitle">Collect bin — 28 May</div><div class="dsSub">Window: 2:00–3:00pm</div></div></div>
+          <div class="dStageRow"><div class="dsDot pending">7</div><div class="dsContent"><div class="dsTitle">Close case</div><div class="dsSub">After collection, submit photos + close</div></div></div>
+        </div>
+        <!-- Chat with customer -->
+        <div class="drvChatWrap" style="margin-top:10px">
+          <div class="drvChatHdr"><span>💬 Chat — Puan Siti</span><span style="color:var(--g2);font-size:.7rem;font-weight:800">2 messages</span></div>
+          <div class="drvChatMsgs" id="drvChat1">
+            <div class="drvCMsg sys">Order CE-2026-10230 assigned to you</div>
+            <div class="drvCMsg them"><div class="cSender">Customer</div>Hi, saya di rumah sepanjang hari. TQ</div>
+          </div>
+          <div class="drvChatInput">
+            <input type="text" placeholder="Message customer…" id="dc1Input" onkeypress="if(event.key==='Enter')drvSendChat('drvChat1','dc1Input')">
+            <button onclick="drvSendChat('drvChat1','dc1Input')">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- HISTORY -->
+    <div id="dHistory" class="drvScr">
+      <div style="color:#fff;font-size:1.15rem;font-weight:900;margin-bottom:14px">Job History</div>
+      <div class="sLabel" style="color:#555">This Week</div>
+      <div class="dJobCard done" style="margin-bottom:8px">
+        <div class="djTop"><div><div class="djBin">🗑 Garbage Bin — 240L</div><div class="djRef">CE-2026-10228 · Collected</div></div><span class="badge" style="background:#1a3a1a;color:#4caf50">Done</span></div>
+        <div class="djMeta"><div class="djMetaRow"><span class="ic">📅</span><span>Mon 19 May</span></div><div class="djMetaRow"><span class="ic">📍</span><span class="val">Rawang Industrial Park</span></div></div>
+      </div>
+      <div class="dJobCard done">
+        <div class="djTop"><div><div class="djBin">🗂 Leach Bin — 1,500L</div><div class="djRef">CE-2026-10215 · Collected</div></div><span class="badge" style="background:#1a3a1a;color:#4caf50">Done</span></div>
+        <div class="djMeta"><div class="djMetaRow"><span class="ic">📅</span><span>Wed 14 May</span></div><div class="djMetaRow"><span class="ic">📍</span><span class="val">Kepong Industrial Area</span></div></div>
+      </div>
+    </div>
+    <div class="drvNav">
+      <div class="dNavItem on" onclick="drvNav('dJobs',this)"><span class="nIco">📋</span>Jobs</div>
+      <div class="dNavItem" onclick="drvNav('dHistory',this)"><span class="nIco">🕐</span>History</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div class="modal" id="photoModal">
+  <div class="mBox">
+    <span class="mClose" onclick="closeModal('photoModal')">✕</span>
+    <h3 id="photoModalTitle">Submit Proof Photos</h3>
+    <p style="font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:14px">Upload 2 photos as proof of delivery / collection.</p>
+    <div class="photoProofGrid">
+      <div class="photoProofSlot" id="ps1" onclick="fakePhoto('ps1')"><span style="font-size:1.5rem">📷</span>Photo 1</div>
+      <div class="photoProofSlot" id="ps2" onclick="fakePhoto('ps2')"><span style="font-size:1.5rem">📷</span>Photo 2</div>
+    </div>
+    <button class="btn btn-green btn-full" id="photoSubmitBtn" onclick="submitPhotos()">Submit & Mark Done</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+const BINS=[
+  {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³ · 7.6 m³',dims:'14\'×7\'×4\'H',best:'Light construction, furniture, renovation debris',w:380,f:620,m:950},
+  {id:'roro-m',ico:'🏗',name:'RoRo Bin — Medium',size:'20 yd³ · 15 m³',dims:'20\'×8\'×5\'H',best:'Commercial, factories, canteen waste',w:520,f:850,m:1350,pop:true},
+  {id:'roro-l',ico:'🏗',name:'RoRo Bin — Large',size:'30 yd³ · 23 m³',dims:'24\'×8\'×6\'H',best:'Large construction, industrial waste',w:720,f:1150,m:1800},
+  {id:'roro-xl',ico:'🏗',name:'RoRo Bin — XL Giant',size:'40 yd³ · 30 m³',dims:'30\'×8\'×7\'H',best:'Demolition, max 7–8 tonne payload',w:950,f:1500,m:2400},
+  {id:'leach-1100',ico:'🗂',name:'Leach Bin — 1,100L',size:'1,100 Litres',dims:'1700×1330×1170mm',best:'Canteen, central kitchen, organic wet waste',w:280,f:460,m:720},
+  {id:'leach-1500',ico:'🗂',name:'Leach Bin — 1,500L',size:'1,500 Litres',dims:'2100×1315×1190mm',best:'Large food processing, industrial wet waste',w:360,f:590,m:920,pop:true},
+  {id:'gb-120',ico:'🗑',name:'Garbage Bin — 120L',size:'120L · 2-wheel',dims:'460×550×940mm',best:'Residential, small offices',w:45,f:75,m:120},
+  {id:'gb-240',ico:'🗑',name:'Garbage Bin — 240L',size:'240L · 2-wheel',dims:'590×730×1007mm',best:'Households, small businesses',w:65,f:105,m:170,pop:true},
+  {id:'gb-660',ico:'🗑',name:'Garbage Bin — 660L',size:'660L · 4-wheel',dims:'1340×805×1260mm',best:'Commercial, condominiums, retail',w:130,f:210,m:340},
+  {id:'gb-1100',ico:'🗑',name:'Garbage Bin — 1,100L',size:'1,100L · 4-wheel',dims:'1340×1030×1330mm',best:'Factories, condo blocks, high volume',w:190,f:310,m:490},
+];
+const DRIVERS=[
+  {id:'d1',name:'Roslan bin Mat',ava:'RM',status:'Online · Available',plate:'VDD 3312',jobs:2},
+  {id:'d2',name:'Hairul bin Ahmad',ava:'HA',status:'Online · On Route',plate:'WQK 8821',jobs:3},
+  {id:'d3',name:'Chong Wei Keat',ava:'CW',status:'Online · Available',plate:'BJB 4490',jobs:1},
+  {id:'d4',name:'Muthu Selvam',ava:'MS',status:'Offline',plate:'PGY 2201',jobs:0},
+];
+const ORDERS=[
+  {ref:'CE-2026-10240',ico:'🏗',bin:'RoRo Bin — Medium',cust:'Farid Construction',contact:'Encik Farid · 012-999 8888',addr:'No. 5, Jalan Kepong, 52100 KL',plan:'14-Day',delDate:'Fri 23 May',delTime:'10:00–11:00',colDate:'Thu 5 Jun',colTime:'2:00–3:00',price:'RM 850',status:'pending',driver:null,stage:1},
+  {ref:'CE-2026-10241',ico:'🗂',bin:'Leach Bin — 1,500L',cust:'Golden Palace Restaurant',contact:'Ms. Lim · 011-222 3333',addr:'Lot 12, SS2, Petaling Jaya',plan:'Monthly',delDate:'Sat 24 May',delTime:'9:00–10:00',colDate:'Sun 22 Jun',colTime:'3:00–4:00',price:'RM 920',status:'pending',driver:null,stage:1},
+  {ref:'CE-2026-10242',ico:'🗑',bin:'Garbage Bin — 1,100L',cust:'Evergreen Condo',contact:'Mr. Raj · 016-555 7777',addr:'Block A, Evergreen Condo, Cheras',plan:'Monthly',delDate:'Sun 25 May',delTime:'8:00–9:00',colDate:'Mon 23 Jun',colTime:'8:00–9:00',price:'RM 490',status:'pending',driver:null,stage:1},
+  {ref:'CE-2026-10234',ico:'🏗',bin:'RoRo Bin — Medium',cust:'Ahmad Hairul',contact:'Ahmad · 012-345 6789',addr:'No. 12, Jalan Kepong, 52100 KL',plan:'14-Day',delDate:'Fri 23 May',delTime:'10:00–11:00',colDate:'Thu 5 Jun',colTime:'4:00–5:00',price:'RM 850',status:'confirmed',driver:'Roslan bin Mat',stage:3},
+];
+const CUSTOMERS=[
+  {name:'Ahmad Hairul',company:'AH Holdings Sdn. Bhd.',phone:'012-345 6789',email:'ahmad@company.com',addr:'No. 12, Jalan Kepong, 52100 KL',orders:4},
+  {name:'Farid Construction',company:'Farid Construction Sdn. Bhd.',phone:'012-999 8888',email:'farid@faridcon.com',addr:'No. 5, Jalan Kepong, 52100 KL',orders:2},
+  {name:'Ms. Lim',company:'Golden Palace Restaurant',phone:'011-222 3333',email:'goldenpalace@resto.my',addr:'Lot 12, SS2, PJ',orders:7},
+  {name:'Mr. Raj',company:'Evergreen Condo Corp.',phone:'016-555 7777',email:'raj@evergreen.my',addr:'Block A, Evergreen Condo, Cheras',orders:1},
+];
+
+// Order stage definitions
+const STAGES=[
+  {n:1,title:'Order placed',sub:'Customer submitted order with full details'},
+  {n:2,title:'Company arranging',sub:'Admin received order — selecting driver'},
+  {n:3,title:'Driver assigned & confirmed',sub:'Driver accepted job — confirmation sent to customer'},
+  {n:4,title:'Bin delivered',sub:'Driver delivered bin on start date'},
+  {n:5,title:'Customer accepted delivery',sub:'Customer confirmed bin received in good condition'},
+  {n:6,title:'Collection day',sub:'Driver collects bin on end date'},
+  {n:7,title:'Case closed',sub:'Both driver and customer closed the case'},
+];
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let oState={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};
+let selDriver=null;
+let notifToggle=false; // false = Option A (admin sends separately), true = Option B (simultaneous)
+let photoCount=0;
+let currentPhotoContext='';
+
+// ═══════════════════════════════
+// TOAST
+// ═══════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2900);
+}
+
+// ═══════════════════════════════
+// PORTAL SWITCHER
+// ═══════════════════════════════
+function switchPortal(p,tab){
+  ['cust','admin','driver'].forEach(x=>document.getElementById(x+'Panel').classList.remove('on'));
+  document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));
+  document.getElementById(p+'Panel').classList.add('on');
+  if(tab) tab.classList.add('on');
+  if(p==='admin') renderAdmin('aOrders');
+}
+
+// ═══════════════════════════════
+// MODAL
+// ═══════════════════════════════
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+// ═══════════════════════════════
+// AUTH
+// ═══════════════════════════════
+function showAuth(s){
+  document.getElementById('authLogin').style.display=s==='login'?'flex':'none';
+  document.getElementById('authReg').style.display=s==='reg'?'flex':'none';
+}
+function doLogin(){
+  if(!document.getElementById('lPhone').value){toast('⚠️ Enter phone number');return;}
+  document.getElementById('authLogin').style.display='none';
+  document.getElementById('custApp').style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative';
+  toast('✅ Welcome back!');
+}
+function doReg(){
+  if(!document.getElementById('rName').value){toast('⚠️ Enter your name');return;}
+  document.getElementById('custName').textContent=document.getElementById('rName').value;
+  document.getElementById('authReg').style.display='none';
+  document.getElementById('custApp').style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative';
+  toast('✅ Account created!');
+}
+function doLogout(){
+  document.getElementById('custApp').style.display='none';
+  showAuth('login');
+  document.getElementById('authLogin').style.display='flex';
+}
+
+// ═══════════════════════════════
+// CUSTOMER NAV
+// ═══════════════════════════════
+function cNav(id,tab){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  if(tab) tab.classList.add('on');
+  document.getElementById('oActBar').classList.remove('show');
+}
+function goNewOrder(){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('cOrder').classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.cNavItem')[1].classList.add('on');
+  oState={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};
+  renderBins();updateStep();
+}
+function backFromDash(){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('cOrders').classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.cNavItem')[2].classList.add('on');
+}
+
+// ═══════════════════════════════
+// ORDER FLOW
+// ═══════════════════════════════
+function renderBins(){
+  document.getElementById('binList').innerHTML=BINS.map(b=>`
+    <div class="binCard ${oState.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')">
+      <div class="bIco">${b.ico}</div>
+      <div style="flex:1">
+        ${b.pop?'<span class="badge b-green" style="margin-bottom:5px">Popular</span>':''}
+        <div class="bName">${b.name}</div>
+        <div class="bSub">${b.size} · ${b.dims}</div>
+        <div class="bSub">${b.best}</div>
+        <div class="bPrices" style="margin-top:7px">
+          <span class="pPill">Weekly RM${b.w}</span>
+          <span class="pPill hl">14-Day RM${b.f}</span>
+          <span class="pPill">Monthly RM${b.m}</span>
+        </div>
+      </div>
+      <div class="selCheck">✓</div>
+    </div>`).join('');
+}
+function pickBin(id){oState.bin=BINS.find(b=>b.id===id);renderBins();renderDur();}
+function renderDur(){
+  if(!oState.bin) return;
+  const b=oState.bin;
+  document.getElementById('durGrid').innerHTML=[
+    {k:'w',l:'Weekly',d:'7 days',p:b.w,u:'week'},
+    {k:'f',l:'14 Days',d:'2 weeks',p:b.f,u:'period',save:'Best value 💚'},
+    {k:'m',l:'Monthly',d:'30 days',p:b.m,u:'month'},
+  ].map(x=>`<div class="durCard ${oState.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${parseInt(x.d)})">
+    <div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div>
+    <div class="dPrice">RM${x.p}</div>${x.save?`<div class="dSave">${x.save}</div>`:''}
+  </div>`).join('');
+}
+function pickDur(k,days){oState.dur=k;oState.durDays=days;renderDur();}
+function buildTimeGrid(gridId,stateKey){
+  const el=document.getElementById(gridId);el.innerHTML='';
+  for(let h=8;h<20;h++){
+    const lbl=`${h}:00–${h+1}:00`;
+    const d=document.createElement('div');
+    d.className='tSlot'+(oState[stateKey]===lbl?' sel':'');
+    d.textContent=lbl;
+    d.onclick=()=>{el.querySelectorAll('.tSlot').forEach(s=>s.classList.remove('sel'));d.classList.add('sel');oState[stateKey]=lbl;};
+    el.appendChild(d);
+  }
+}
+function updateDates(){
+  const v=document.getElementById('oStartDate').value;
+  if(!v||!oState.dur) return;
+  const days={w:7,f:14,m:30}[oState.dur]||7;
+  const s=new Date(v+'T00:00:00'),e=new Date(s);
+  e.setDate(e.getDate()+days-1);
+  oState.startDate=s;oState.endDate=e;
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const fmt=d=>D[d.getDay()]+', '+d.getDate()+' '+M[d.getMonth()];
+  document.getElementById('oDelDate').textContent=fmt(s);
+  document.getElementById('oColDate').textContent=fmt(e);
+  document.getElementById('oDateResult').style.display='block';
+  buildTimeGrid('delTimeGrid','delTime');
+  buildTimeGrid('colTimeGrid','colTime');
+}
+function buildSummary(){
+  if(!oState.bin) return;
+  const b=oState.bin,price={w:b.w,f:b.f,m:b.m}[oState.dur];
+  const durLbl={w:'Weekly (7 days)',f:'14-Day (Fortnight)',m:'Monthly (30 days)'}[oState.dur];
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const fmt=d=>D[d.getDay()]+', '+d.getDate()+' '+M[d.getMonth()];
+  document.getElementById('oSummCard').innerHTML=`
+    <div class="oCard-top"><div><div class="oCard-bin">${b.ico} ${b.name}</div><div class="oCard-ref">${durLbl}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">RM${price}</div></div>
+    <div class="oCard-meta">
+      <div class="mChip">📅 ${oState.startDate?fmt(oState.startDate):'—'} → ${oState.endDate?fmt(oState.endDate):'—'}</div>
+      <div class="mChip">🚚 Deliver ${oState.delTime||'TBC'}</div>
+      <div class="mChip">📦 Collect ${oState.colTime||'TBC'}</div>
+      <div class="mChip">📍 ${document.getElementById('oStreet')?.value||'—'}, ${document.getElementById('oCity')?.value||'—'}</div>
+      <div class="mChip">👤 ${document.getElementById('oContact')?.value||'—'} · ${document.getElementById('oPhone')?.value||'—'}</div>
+    </div>`;
+}
+function orderNext(){
+  const s=oState.step;
+  if(s===1&&!oState.bin){toast('⚠️ Select a bin first');return;}
+  if(s===2&&!oState.dur){toast('⚠️ Choose a duration');return;}
+  if(s===3){
+    if(!oState.startDate){toast('⚠️ Pick a start date');return;}
+    if(!oState.delTime){toast('⚠️ Choose delivery time');return;}
+    if(!oState.colTime){toast('⚠️ Choose collection time');return;}
+  }
+  if(s===4){
+    if(!document.getElementById('oContact').value||!document.getElementById('oStreet').value){toast('⚠️ Fill in contact & address');return;}
+    buildSummary();
+  }
+  if(s===5) return;
+  oState.step++;updateStep();
+}
+function orderBack(){if(oState.step>1){oState.step--;updateStep();}}
+function updateStep(){
+  for(let i=1;i<=5;i++){
+    document.getElementById('oStep'+i).style.display='none';
+    const si=document.getElementById('sp'+i);
+    si.classList.remove('on','done');
+    if(i<oState.step) si.classList.add('done');
+  }
+  document.getElementById('oStep'+oState.step).style.display='block';
+  document.getElementById('sp'+oState.step).classList.add('on');
+  const ab=document.getElementById('oActBar');
+  ab.classList.toggle('show',oState.step<5);
+  document.getElementById('oBack').style.display=oState.step>1?'block':'none';
+  document.getElementById('oNext').textContent=oState.step===4?'Review →':'Next →';
+  if(oState.step===2) renderDur();
+  document.getElementById('cOrder').scrollTop=0;
+}
+function submitOrder(){
+  toast('🎉 Order placed! We\'ll WhatsApp you shortly.');
+  setTimeout(()=>{cNav('cOrders',null);document.querySelectorAll('.cNavItem')[2].classList.add('on');document.getElementById('oActBar').classList.remove('show');},500);
+}
+
+// ═══════════════════════════════
+// ORDER DASHBOARD (Customer view)
+// ═══════════════════════════════
+function showOrderDash(ref){
+  const o=ORDERS.find(x=>x.ref===ref)||{ref,bin:'RoRo Bin — Medium',ico:'🏗',plan:'14-Day',delDate:'23 May',delTime:'10:00–11:00',colDate:'5 Jun',colTime:'4:00–5:00',price:'RM 850',status:'confirmed',driver:'Roslan bin Mat',stage:3,cust:'Ahmad Hairul',contact:'Ahmad · 012-345 6789',addr:'No. 12, Jalan Kepong, 52100 KL'};
+  document.getElementById('dashRef').textContent=o.ref;
+  document.getElementById('dashBin').textContent=o.ico+' '+o.bin;
+  const statBadge={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'};
+  document.getElementById('dashBadge').innerHTML=`<span class="badge ${statBadge[o.status]||'b-gray'}">${o.status}</span>`;
+  document.getElementById('dashMeta').innerHTML=`
+    <span>📅 ${o.delDate} – ${o.colDate}</span>
+    <span>🚚 Deliver ${o.delTime}</span>
+    <span>📦 Collect ${o.colTime}</span>
+    <span>💰 ${o.price}</span>
+    <span>🚛 Driver: ${o.driver||'Arranging…'}</span>`;
+  const curStage=o.stage||1;
+  document.getElementById('dashStages').innerHTML=STAGES.map(s=>{
+    const done=s.n<curStage,active=s.n===curStage;
+    const dotCls=done?'done':active?'active':'pending';
+    const dotTxt=done?'✓':active?'●':s.n;
+    let actions='';
+    if(active&&s.n===5) actions=`<div class="stageActions"><button class="btn btn-green btn-sm" onclick="custAcceptDelivery()">✓ Accept Delivery</button></div>`;
+    if(active&&s.n===7) actions=`<div class="stageActions"><button class="btn btn-green btn-sm" onclick="custCloseCase()">🔒 Close Case</button></div>`;
+    return `<div class="stageRow">
+      <div class="stageDot ${dotCls}">${dotTxt}</div>
+      <div class="stageContent">
+        <div class="stageTitle">${s.title}</div>
+        <div class="stageSub">${s.sub}</div>
+        ${done?`<div class="stageTime">✓ Completed</div>`:''}
+        ${active?`<div class="stageTime" style="color:var(--y3)">● In progress</div>`:''}
+        ${actions}
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('cOrderDash').classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.cNavItem')[2].classList.add('on');
+  document.getElementById('oActBar').classList.remove('show');
+}
+function custAcceptDelivery(){toast('✅ Delivery accepted! Company notified.');}
+function custCloseCase(){toast('🔒 Case closed. Thank you!');}
+
+// Chat
+function sendChat(){
+  const inp=document.getElementById('chatInputField');
+  const msg=inp.value.trim();if(!msg) return;
+  const wrap=document.getElementById('dashChat');
+  const el=document.createElement('div');
+  el.className='chatMsg me';
+  el.innerHTML=msg+'<div class="cmTime">Now</div>';
+  wrap.appendChild(el);inp.value='';
+  wrap.scrollTop=wrap.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div');
+    r.className='chatMsg sys';r.textContent='Message sent to driver';
+    wrap.appendChild(r);wrap.scrollTop=wrap.scrollHeight;
+  },800);
+}
+
+// D/O and Invoice
+function showDoc(type){
+  const isDO=type==='do';
+  document.getElementById('docContent').innerHTML=isDO?buildDO():buildInvoice();
+  document.getElementById('docModal').classList.add('show');
+}
+function buildDO(){return `
+  <div style="font-family:var(--fn)">
+    <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
+      <div style="font-size:.7rem;font-weight:700;opacity:.7;margin-bottom:4px">DELIVERY ORDER</div>
+      <div style="font-size:1.1rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div>
+      <div style="font-size:.75rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
+      <div style="font-size:.75rem;opacity:.8">Tel: 03-6251 3977 / 6251 6933</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:.8rem">
+      <div><div style="color:var(--tx3);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">D/O Number</div><div style="font-weight:900;font-size:.95rem">DO-2026-10234</div></div>
+      <div style="text-align:right"><div style="color:var(--tx3);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Date</div><div style="font-weight:800">23 May 2026</div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:12px;font-size:.82rem">
+      <div style="font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Deliver To</div>
+      <div style="font-weight:800">Ahmad Hairul / AH Holdings Sdn. Bhd.</div>
+      <div style="color:var(--tx2);font-weight:600">No. 12, Jalan Kepong, 52100 Kuala Lumpur</div>
+      <div style="color:var(--tx2);font-weight:600">Tel: 012-345 6789</div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:.82rem">
+      <div style="font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Items Delivered</div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-weight:700"><span>🏗 RoRo Bin — Medium (20 yd³)</span><span>1 unit</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.75rem;color:var(--tx2);font-weight:600"><span>Rental Period</span><span>14 Days (23 May – 5 Jun 2026)</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.75rem;color:var(--tx2);font-weight:600"><span>Delivery Time Window</span><span>10:00–11:00am</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.75rem;color:var(--tx2);font-weight:600"><span>Driver</span><span>Roslan bin Mat (VDD 3312)</span></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.78rem">
+      <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;text-align:center"><div style="color:var(--tx3);font-size:.65rem;font-weight:800;text-transform:uppercase;margin-bottom:22px">Customer Signature</div><div style="border-top:1px solid var(--bdr);padding-top:6px;color:var(--tx3);font-weight:700">Name & Date</div></div>
+      <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;text-align:center"><div style="color:var(--tx3);font-size:.65rem;font-weight:800;text-transform:uppercase;margin-bottom:22px">Driver Signature</div><div style="border-top:1px solid var(--bdr);padding-top:6px;color:var(--tx3);font-weight:700">Name & Date</div></div>
+    </div>
+    <div style="margin-top:14px;padding:10px;background:var(--bg);border-radius:var(--rads);font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.5">This document serves as proof of delivery. Please retain for your records.</div>
+    <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="toast('🖨 Print / Save as PDF — use browser Print dialog')">🖨 Print / Save PDF</button>
+  </div>`;}
+function buildInvoice(){return `
+  <div style="font-family:var(--fn)">
+    <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
+      <div style="font-size:.7rem;font-weight:700;opacity:.7;margin-bottom:4px">TAX INVOICE</div>
+      <div style="font-size:1.1rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div>
+      <div style="font-size:.75rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
+      <div style="font-size:.75rem;opacity:.8">Tel: 03-6251 3977  ·  Fax: 03-6252 0977</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.8rem">
+      <div><div style="color:var(--tx3);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Invoice No.</div><div style="font-weight:900;font-size:.95rem">INV-2026-10234</div></div>
+      <div style="text-align:right"><div style="color:var(--tx3);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Invoice Date</div><div style="font-weight:800">23 May 2026</div><div style="color:var(--r1);font-weight:800;font-size:.72rem;margin-top:2px">Due: 26 May 2026</div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:12px;font-size:.82rem">
+      <div style="font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Bill To</div>
+      <div style="font-weight:800">Ahmad Hairul / AH Holdings Sdn. Bhd.</div>
+      <div style="color:var(--tx2);font-weight:600">No. 12, Jalan Kepong, 52100 Kuala Lumpur</div>
+      <div style="color:var(--tx2);font-weight:600">Tel: 012-345 6789</div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:.82rem;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr)">
+        <span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Amount</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:9px 0;border-bottom:1px solid var(--bdr)">
+        <div><div style="font-weight:800">RoRo Bin — Medium (20 yd³)</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">14-Day Rental · 23 May – 5 Jun 2026</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">Incl. delivery & collection</div></div>
+        <div style="text-align:right;font-weight:700">1</div>
+        <div style="text-align:right;font-weight:900">RM 850.00</div>
+      </div>
+    </div>
+    <div style="font-size:.82rem">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>RM 850.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:2px solid var(--g1);margin-top:5px;font-weight:900;font-size:.95rem"><span>Total</span><span style="color:var(--g1)">RM 850.00</span></div>
+    </div>
+    <div class="divider"></div>
+    <div style="background:var(--b2);border-radius:var(--rads);padding:13px;font-size:.8rem;margin-bottom:12px">
+      <div style="font-weight:900;color:var(--b3);margin-bottom:7px">💳 Payment Details</div>
+      <div style="color:var(--b3);font-weight:700;line-height:1.8">
+        Bank: <b>Maybank Berhad</b><br>
+        Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>
+        Account No.: <b>1234-5678-9012</b><br>
+        Reference: <b>INV-2026-10234</b>
+      </div>
+    </div>
+    <div style="font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">Payment due within 3 working days. Please use the invoice number as payment reference and WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).</div>
+    <button class="btn btn-ghost btn-full" onclick="toast('🖨 Print / Save as PDF — use browser Print dialog')">🖨 Print / Save PDF</button>
+  </div>`;}
+
+// ═══════════════════════════════
+// ADMIN
+// ═══════════════════════════════
+function adminNav(screen,item){
+  document.querySelectorAll('.aMenuItem').forEach(m=>m.classList.remove('on'));
+  if(item) item.classList.add('on');
+  renderAdmin(screen);
+}
+function renderAdmin(screen){
+  const el=document.getElementById('aMain');
+  if(screen==='aOrders'){
+    const pending=ORDERS.filter(o=>o.status==='pending');
+    el.innerHTML=`<h2>📦 New Orders <span style="color:var(--r1);font-size:.75rem;font-weight:700">${pending.length} pending</span></h2>
+    <div class="aStats">
+      <div class="aStat"><div class="asNum">${ORDERS.length}</div><div class="asLbl">Today</div><div class="asSub">+3 new</div></div>
+      <div class="aStat"><div class="asNum">${pending.length}</div><div class="asLbl">Pending</div><div class="asSub">Action needed</div></div>
+      <div class="aStat"><div class="asNum">${ORDERS.filter(o=>o.status==='confirmed'||o.status==='active').length}</div><div class="asLbl">Active</div></div>
+      <div class="aStat"><div class="asNum">RM 3,110</div><div class="asLbl">This Month</div></div>
+    </div>
+    <div class="notifToggleBox">
+      <div>
+        <div style="color:#fff;font-size:.82rem;font-weight:800;margin-bottom:3px">Confirmation Notification Mode</div>
+        <div style="font-size:.75rem;color:#6a9a6a">Option A: Admin sends confirmation manually · Option B: Auto-notify customer & company simultaneously</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="notifToggle" onchange="notifToggle=this.checked;toast(this.checked?'Mode B: Auto simultaneous notify active':'Mode A: Manual confirmation active')">
+        <div class="toggleTrack"><div class="toggleThumb"></div></div>
+        <span id="notifMode">Mode A</span>
+      </label>
+    </div>
+    ${pending.map(o=>adminOrderCard(o)).join('')}
+    <div style="color:#4a7a4a;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px">Confirmed Orders</div>
+    ${ORDERS.filter(o=>o.status==='confirmed').map(o=>adminOrderCard(o)).join('')}`;
+    document.getElementById('notifToggle').checked=notifToggle;
+    document.getElementById('notifMode').textContent=notifToggle?'Mode B':'Mode A';
+  } else if(screen==='aSchedule'){
+    el.innerHTML=`<h2>📅 Daily Schedule</h2>
+    <div style="background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:1rem;font-weight:900;color:#fff">Thursday, 22 May 2026</div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="abtn abtn-ghost" onclick="toast('← Previous day')">◀</button>
+        <button class="abtn abtn-ghost" onclick="toast('Next day →')">▶</button>
+      </div>
+    </div>
+    ${ORDERS.map(o=>`<div class="aRow">
+      <div class="arTop"><div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan}</div></div><span class="badge ${o.status==='pending'?'b-yellow':o.status==='confirmed'?'b-blue':'b-green'}">${o.status}</span></div>
+      <div class="arMeta">
+        <div class="arMetaItem"><span class="ic">🏢</span>${o.cust}</div>
+        <div class="arMetaItem"><span class="ic">📅</span>Deliver ${o.delDate} · ${o.delTime}</div>
+        <div class="arMetaItem"><span class="ic">📍</span>${o.addr}</div>
+        <div class="arMetaItem"><span class="ic">🚛</span>${o.driver||'No driver yet'}</div>
+      </div>
+    </div>`).join('')}`;
+  } else if(screen==='aOrderDash'){
+    el.innerHTML=`<h2>🪟 Order Dashboards</h2>
+    <div style="font-size:.78rem;color:#5a7a5a;font-weight:700;margin-bottom:14px">Each order has a live dashboard tracking all 8 stages. Company can view, act, and join customer–driver chat.</div>
+    ${ORDERS.map(o=>adminOrderDash(o)).join('')}`;
+  } else if(screen==='aDrivers'){
+    el.innerHTML=`<h2>🚛 Driver Management</h2>
+    <div class="aStats">
+      <div class="aStat"><div class="asNum">${DRIVERS.filter(d=>d.status.startsWith('Online')).length}</div><div class="asLbl">Online</div></div>
+      <div class="aStat"><div class="asNum">${DRIVERS.filter(d=>d.status.includes('Available')).length}</div><div class="asLbl">Available</div></div>
+      <div class="aStat"><div class="asNum">${DRIVERS.reduce((a,d)=>a+d.jobs,0)}</div><div class="asLbl">Jobs Today</div></div>
+      <div class="aStat"><div class="asNum">${DRIVERS.length}</div><div class="asLbl">Total</div></div>
+    </div>
+    ${DRIVERS.map(d=>`<div class="aRow">
+      <div class="arTop">
+        <div style="display:flex;gap:11px;align-items:center">
+          <div class="drvAva" style="background:var(--g1);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#fff;flex-shrink:0">${d.ava}</div>
+          <div><div class="arBin">${d.name}</div><div class="arRef">${d.plate} · ${d.jobs} jobs today</div></div>
+        </div>
+        <span class="badge ${d.status.startsWith('Online')?'b-green':'b-gray'}">${d.status.split('·')[0].trim()}</span>
+      </div>
+      <div class="arMeta"><div class="arMetaItem"><span class="ic">🔄</span>${d.status}</div></div>
+    </div>`).join('')}
+    <button class="abtn abtn-green" style="margin-top:6px" onclick="toast('+ Add Driver — full version feature')">+ Add Driver</button>`;
+  } else if(screen==='aCustomers'){
+    el.innerHTML=`<h2>👥 Customers</h2>
+    <div style="display:flex;gap:9px;margin-bottom:14px">
+      <input placeholder="Search…" style="flex:1;padding:9px 12px;background:#1e2a1e;border:1px solid #2a3a2a;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.85rem;outline:none">
+      <button class="abtn abtn-green" onclick="showAddCust()">+ Add</button>
+    </div>
+    <div style="background:#131d14;border:1px solid #233023;border-radius:var(--rads);overflow:hidden">
+      <table class="custTbl">
+        <thead><tr><th>Name / Company</th><th>Contact</th><th>Orders</th></tr></thead>
+        <tbody>${CUSTOMERS.map(c=>`<tr>
+          <td><div class="tdName">${c.name}</div><div>${c.company}</div></td>
+          <td><div>${c.phone}</div><div style="color:#5a8a5a;font-size:.73rem">${c.email}</div><div style="font-size:.7rem;color:#4a6a4a;margin-top:2px">${c.addr}</div></td>
+          <td><span class="badge b-green">${c.orders}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div id="addCustForm" style="display:none;margin-top:12px">
+      <div class="aRow">
+        <div style="color:#fff;font-size:.9rem;font-weight:900;margin-bottom:12px">Add New Customer</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          ${['Full Name','Company','Phone','Email'].map(l=>`<div><div style="color:#5a7a5a;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${l}</div><input placeholder="${l}" style="width:100%;padding:9px 11px;background:#0e1410;border:1px solid #233023;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.82rem;outline:none"></div>`).join('')}
+        </div>
+        <div style="margin-top:9px"><div style="color:#5a7a5a;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Default Address</div><input placeholder="Full address" style="width:100%;padding:9px 11px;background:#0e1410;border:1px solid #233023;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.82rem;outline:none"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="abtn abtn-green" style="flex:1" onclick="toast('✅ Customer saved!');document.getElementById('addCustForm').style.display='none'">Save</button>
+          <button class="abtn abtn-ghost" onclick="document.getElementById('addCustForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  } else if(screen==='aReports'){
+    el.innerHTML=`<h2>📊 Reports</h2>
+    <div class="aStats">
+      <div class="aStat"><div class="asNum">RM 12,480</div><div class="asLbl">May Revenue</div><div class="asSub">↑ 14% vs Apr</div></div>
+      <div class="aStat"><div class="asNum">47</div><div class="asLbl">Orders</div></div>
+      <div class="aStat"><div class="asNum">23</div><div class="asLbl">Active</div></div>
+      <div class="aStat"><div class="asNum">${CUSTOMERS.length}</div><div class="asLbl">Customers</div></div>
+    </div>
+    <div class="aRow"><div style="color:#ccc;font-size:.82rem;font-weight:800;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Revenue by Bin Type</div>
+      ${[['RoRo Bins','RM 7,200','58%','#27924f'],['Leach Bins','RM 3,040','24%','#F5A623'],['Garbage Bins','RM 2,240','18%','#1565C0']].map(([n,v,p,c])=>`
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="color:#ccc;font-size:.8rem;font-weight:700">${n}</span><span style="color:#fff;font-size:.8rem;font-weight:900">${v} <span style="color:#4a7a4a">${p}</span></span></div>
+          <div style="height:7px;background:#1e2a1e;border-radius:99px;overflow:hidden"><div style="height:100%;width:${p};background:${c};border-radius:99px"></div></div>
+        </div>`).join('')}
+    </div>`;
+  }
+}
+
+function adminOrderCard(o){
+  const isPending=o.status==='pending';
+  const waMsg=encodeURIComponent(`*Order Confirmed — Cemerlang Endas*\nRef: ${o.ref}\nBin: ${o.bin}\nDeliver: ${o.delDate} ${o.delTime}\nCollect: ${o.colDate} ${o.colTime}\nAddress: ${o.addr}\nTotal: ${o.price}\n\nPlease ensure site is accessible. Driver will call before arrival.`);
+  return `<div class="aRow">
+    <div class="arTop">
+      <div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan}</div></div>
+      <span class="badge ${isPending?'b-yellow':'b-blue'}">${isPending?'Pending':'Confirmed'}</span>
+    </div>
+    <div class="arMeta">
+      <div class="arMetaItem"><span class="ic">🏢</span>${o.cust}</div>
+      <div class="arMetaItem"><span class="ic">👤</span>${o.contact}</div>
+      <div class="arMetaItem"><span class="ic">📍</span>${o.addr}</div>
+      <div class="arMetaItem"><span class="ic">🚚</span>${o.delDate} · ${o.delTime}</div>
+      <div class="arMetaItem"><span class="ic">📦</span>Collect ${o.colDate} · ${o.colTime}</div>
+      <div class="arMetaItem"><span class="ic">💰</span>${o.price}</div>
+      ${o.driver?`<div class="arMetaItem"><span class="ic">🚛</span>${o.driver}</div>`:''}
+    </div>
+    <div class="arActions">
+      ${isPending?`
+        <button class="abtn abtn-green" onclick="toast('✅ ${o.ref} accepted! Customer notified.')">✓ Accept</button>
+        <button class="abtn abtn-blue" onclick="openAssign('${o.ref}')">Assign Driver</button>
+        <a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-ghost" style="background:#25D366;color:#fff">WhatsApp</button></a>
+        <button class="abtn abtn-ghost" onclick="showDoc('inv')">🧾 Invoice</button>
+        <button class="abtn abtn-ghost" onclick="showDoc('do')">📄 D/O</button>
+      `:`
+        <button class="abtn abtn-blue" onclick="openAssign('${o.ref}')">Change Driver</button>
+        <a href="https://wa.me/?text=${encodeURIComponent('Reminder for order '+o.ref)}" target="_blank"><button class="abtn abtn-ghost" style="background:#25D366;color:#fff">WhatsApp Client</button></a>
+        <button class="abtn abtn-ghost" onclick="showDoc('inv')">🧾 Invoice</button>
+        <button class="abtn abtn-ghost" onclick="showDoc('do')">📄 D/O</button>
+      `}
+    </div>
+  </div>`;}
+
+function adminOrderDash(o){
+  const curStage=o.stage||1;
+  const stages=STAGES.map(s=>{
+    const done=s.n<curStage,active=s.n===curStage;
+    const dotCls=done?'done':active?'active':'pending';
+    const dotTxt=done?'✓':active?'●':s.n;
+    let actions='';
+    if(active&&s.n===2) actions=`<div class="asActions"><button class="abtn abtn-blue abtn-sm" onclick="openAssign('${o.ref}')">Assign Driver</button>${notifToggle?`<button class="abtn abtn-ghost" onclick="toast('📱 Auto-notifying customer & company simultaneously…')">Notify Both</button>`:`<button class="abtn abtn-green" onclick="toast('📱 Confirmation sent to customer!')">Send Confirmation</button>`}</div>`;
+    if(active&&s.n===3) actions=`<div class="asActions">${notifToggle?'<span style="color:#5a7a5a;font-size:.72rem;font-weight:700">Mode B: Auto-notified simultaneously</span>':`<button class="abtn abtn-green" onclick="toast('📱 Order confirmation sent to client!')">Send Confirmation to Client</button>`}</div>`;
+    return `<div class="aStageRow">
+      <div class="asDot ${dotCls}">${dotTxt}</div>
+      <div class="asContent">
+        <div class="asTitle">${s.title}</div>
+        <div class="asSub2">${s.sub}</div>
+        ${done?'<div style="color:#4a7a4a;font-size:.68rem;font-weight:700;margin-top:3px">✓ Completed</div>':''}
+        ${active?'<div style="color:var(--y1);font-size:.68rem;font-weight:700;margin-top:3px">● Active</div>':''}
+        ${actions}
+      </div>
+    </div>`;}).join('');
+  const chatMsgs=`<div class="acMsg cust"><div class="acSender">Customer</div>Gate code 1234, park inside compound.</div>
+    <div class="acMsg drv"><div class="acSender">Driver</div>Noted, saya sampai around 10:15am.</div>`;
+  return `<div class="aOrdDash">
+    <div class="aodHdr">
+      <div>
+        <div style="color:#5a7a5a;font-size:.7rem;font-weight:700;margin-bottom:2px">${o.ref} · ${o.plan}</div>
+        <h4>${o.ico} ${o.bin}</h4>
+        <div style="color:#8aaa8a;font-size:.75rem;font-weight:700;margin-top:3px">${o.cust} · ${o.delDate} → ${o.colDate} · ${o.price}</div>
+      </div>
+      <span class="badge ${o.status==='pending'?'b-yellow':o.status==='confirmed'?'b-blue':'b-green'}">${o.status}</span>
+    </div>
+    ${stages}
+    <div class="adminChat">
+      <div class="acHdr"><span>💬 Order Chat</span><button style="background:none;border:none;color:var(--y1);font-size:.75rem;font-weight:800;cursor:pointer" onclick="adminJoinChat(this)">Join Chat</button></div>
+      <div class="acMsgs" id="ac-${o.ref.replace(/-/g,'_')}">${chatMsgs}</div>
+      <div class="adminChatInput" id="adminChatBar-${o.ref.replace(/-/g,'_')}" style="display:none">
+        <input placeholder="Admin message…" id="adminCI-${o.ref.replace(/-/g,'_')}" onkeypress="if(event.key==='Enter')adminSendChat('${o.ref.replace(/-/g,'_')}')">
+        <button onclick="adminSendChat('${o.ref.replace(/-/g,'_')}')">Send</button>
+      </div>
+    </div>
+  </div>`;}
+
+function adminJoinChat(btn){
+  const ref=btn.closest('.aOrdDash').querySelector('.aodHdr h4').textContent;
+  const bar=btn.closest('.adminChat').querySelector('.adminChatInput');
+  bar.style.display=bar.style.display==='none'?'flex':'none';
+  btn.textContent=bar.style.display==='none'?'Join Chat':'Leave Chat';
+  if(bar.style.display!=='none') toast('💬 You joined the chat as Admin');
+}
+function adminSendChat(id){
+  const inp=document.getElementById('adminCI-'+id);
+  const msg=inp.value.trim();if(!msg) return;
+  const wrap=document.getElementById('ac-'+id);
+  const el=document.createElement('div');
+  el.className='acMsg admin';el.textContent='Admin: '+msg;
+  wrap.appendChild(el);inp.value='';wrap.scrollTop=wrap.scrollHeight;
+}
+function showAddCust(){
+  const f=document.getElementById('addCustForm');
+  if(f) f.style.display=f.style.display==='none'?'block':'none';
+}
+
+// Driver assign
+function openAssign(ref){
+  document.querySelector('#assignModal .mBox h3').textContent='Assign Driver — '+ref;
+  selDriver=null;
+  document.getElementById('driverListModal').innerHTML=DRIVERS.map(d=>`
+    <div class="drvRow" onclick="pickDriver('${d.id}',this)">
+      <div class="drvAva">${d.ava}</div>
+      <div style="flex:1">
+        <div class="drvName">${d.name}</div>
+        <div class="drvSub">${d.status} · 🚛 ${d.plate}</div>
+        <div class="drvSub">${d.jobs} jobs today</div>
+      </div>
+      <div style="font-size:1.1rem;color:var(--bdr2)">○</div>
+    </div>`).join('');
+  document.getElementById('assignModal').classList.add('show');
+}
+function pickDriver(id,row){
+  document.querySelectorAll('.drvRow').forEach(r=>{r.classList.remove('sel');r.querySelector('div:last-child').textContent='○';});
+  row.classList.add('sel');row.querySelector('div:last-child').textContent='●';
+  selDriver=DRIVERS.find(d=>d.id===id);
+}
+function confirmAssign(){
+  if(!selDriver){toast('⚠️ Select a driver first');return;}
+  closeModal('assignModal');
+  toast('🚛 '+selDriver.name+' assigned — driver notified!');
+}
+
+// ═══════════════════════════════
+// DRIVER
+// ═══════════════════════════════
+function drvNav(id,tab){
+  document.querySelectorAll('.drvScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
+  if(tab) tab.classList.add('on');
+}
+function drvAccept(btn){
+  const card=btn.closest('.dJobCard');
+  card.querySelector('.djActions').innerHTML=`<button class="djBtn djBtnDone" onclick="openPhotoModal('delivery',this)">📸 Mark Delivered + Photos</button>`;
+  card.style.borderColor='#4caf50';
+  card.querySelector('.badge').textContent='Accepted';
+  card.querySelector('.badge').className='badge b-green';
+  toast('✅ Job accepted! Admin & customer notified.');
+}
+function drvDecline(btn){
+  btn.closest('.dJobCard').remove();
+  toast('Job declined. Admin notified.');
+}
+function openPhotoModal(context,btn){
+  currentPhotoContext=context;
+  photoCount=0;
+  document.getElementById('ps1').className='photoProofSlot';
+  document.getElementById('ps1').innerHTML='<span style="font-size:1.5rem">📷</span>Photo 1';
+  document.getElementById('ps2').className='photoProofSlot';
+  document.getElementById('ps2').innerHTML='<span style="font-size:1.5rem">📷</span>Photo 2';
+  document.getElementById('photoModalTitle').textContent=context==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';
+  document.getElementById('photoModal').classList.add('show');
+}
+function fakePhoto(slotId){
+  const slot=document.getElementById(slotId);
+  slot.className='photoProofSlot filled';
+  slot.innerHTML='<span style="font-size:1.5rem">✅</span>Photo uploaded';
+  photoCount++;
+}
+function submitPhotos(){
+  if(photoCount<2){toast('⚠️ Please upload both photos');return;}
+  closeModal('photoModal');
+  if(currentPhotoContext==='delivery'){
+    toast('📸 Delivery confirmed! Customer & company notified.');
+  } else {
+    toast('📸 Collection confirmed! Case closure sent to company.');
+  }
+}
+function drvDelivered(btn){
+  openPhotoModal('delivery',btn);
+}
+function drvSendChat(chatId,inputId){
+  const inp=document.getElementById(inputId);
+  const msg=inp.value.trim();if(!msg) return;
+  const wrap=document.getElementById(chatId);
+  const el=document.createElement('div');
+  el.className='drvCMsg me';
+  el.innerHTML='<div class="cSender">You</div>'+msg;
+  wrap.appendChild(el);inp.value='';wrap.scrollTop=wrap.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div');r.className='drvCMsg sys';r.textContent='Delivered to customer';
+    wrap.appendChild(r);wrap.scrollTop=wrap.scrollHeight;
+  },700);
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAdmin('aOrders');
+  const d=new Date();d.setDate(d.getDate()+2);
+  const mn=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
+  const el=document.getElementById('oStartDate');if(el) el.min=`${d.getFullYear()}-${mn}-${dd}`;
+});
+</script>
+</body>
+</html>
