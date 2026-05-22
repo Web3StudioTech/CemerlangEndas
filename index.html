@@ -26,7 +26,7 @@ html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;backg
 .pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
 .pTab.on{color:#fff;border-bottom-color:var(--y1)}
 .panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden;width:100%;min-height:0}
-.panel.on{display:flex!important}
+.panel.on{display:flex!important;width:100%;height:calc(100vh - 46px)}
 /* shared */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .b-green{background:var(--g3);color:#0f5a28}.b-yellow{background:var(--y2);color:var(--y3)}.b-red{background:var(--r2);color:var(--r1)}.b-blue{background:var(--b2);color:var(--b3)}.b-gray{background:#eee;color:#555}
@@ -217,10 +217,10 @@ select.fInp{cursor:pointer}
 .custTbl tr:hover td{background:#131d14}
 .tdName{color:#fff;font-weight:800;font-size:.85rem}
 /* ===== DRIVER ===== */
-#drvPanel{background:#0d0d0d;min-height:0}
-.drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none}
-.drvScr.on{display:block}
-.drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50}
+#drvPanel{background:#0d0d0d;min-height:0;height:100%;flex-direction:column}
+.drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none;-webkit-overflow-scrolling:touch}
+.drvScr.on{display:block!important}
+.drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50;width:100%}
 .dNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#444;transition:color .15s}
 .dNavItem.on{color:var(--y1)}
 .dNavItem .nIco{font-size:1.3rem}
@@ -465,7 +465,7 @@ select.fInp{cursor:pointer}
 
 <!-- ██████ DRIVER ██████ -->
 <div id="drvPanel" class="panel">
-  <div style="position:relative;flex:1;overflow:hidden">
+  <div style="position:relative;flex:1;overflow:hidden;width:100%;height:100%">
     <div id="dJobs" class="drvScr on">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div><div style="color:#555;font-size:.74rem;font-weight:700">Driver App</div><div style="color:#fff;font-size:1.2rem;font-weight:900">Roslan bin Mat</div></div>
@@ -609,9 +609,20 @@ function switchPortal(p,tab){
   if(tab)tab.classList.add('on');
   if(p==='admin'){renderAdmin('aOrders');}
   if(p==='driver'){
-    // make sure driver screens are visible
-    document.querySelectorAll('.drvScr').forEach(s=>s.classList.remove('on'));
-    const dj=document.getElementById('dJobs');if(dj)dj.classList.add('on');
+    // force driver panel content visible
+    const dp=document.getElementById('drvPanel');
+    if(dp){
+      dp.style.display='flex';
+      dp.style.flexDirection='column';
+      dp.style.height='calc(100vh - 46px)';
+      const inner=dp.querySelector('div');
+      if(inner){inner.style.position='relative';inner.style.flex='1';inner.style.height='100%';inner.style.overflow='hidden';}
+    }
+    document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
+    const dj=document.getElementById('dJobs');
+    if(dj){dj.classList.add('on');dj.style.display='block';}
+    const dn=document.getElementById('dHistory');
+    if(dn){dn.style.display='none';}
   }
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
@@ -880,7 +891,13 @@ function resetPass(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);
 function toggleActive(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);if(i<0)return;s.customers[i].active=!s.customers[i].active;saveStore(s);toast(s.customers[i].active?'✅ Customer activated':'⛔ Customer deactivated');renderAdmin('aCustomers');}
 
 // ═══ DRIVER ═══
-function drvNavFn(id,tab){document.querySelectorAll('.drvScr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));if(tab)tab.classList.add('on');}
+function drvNavFn(id,tab){
+  document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
+  const target=document.getElementById(id);
+  if(target){target.classList.add('on');target.style.display='block';}
+  document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
+  if(tab)tab.classList.add('on');
+}
 function drvAccept(btn){const card=btn.closest('.dJob');card.querySelector('.djActs').innerHTML=`<button class="djBtn djDone" onclick="openPhotoModal('delivery')">📸 Mark as Delivered</button>`;card.style.borderColor='#4caf50';card.querySelector('.badge').textContent='Accepted';card.querySelector('.badge').className='badge b-green';toast('✅ Job accepted! Admin & customer notified.');}
 function drvDecline(btn){btn.closest('.dJob').remove();toast('Job declined. Admin notified.');}
 function openPhotoModal(ctx){photoCtx=ctx;photoCnt=0;['ps1','ps2'].forEach(id=>{const el=document.getElementById(id);el.className='photoSlot';el.innerHTML='<span style="font-size:1.4rem">📷</span>'+(id==='ps1'?'Photo 1':'Photo 2')+'<br><span style="font-size:.68rem">Tap to upload</span>';});document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';document.getElementById('photoModal').classList.add('show');}
