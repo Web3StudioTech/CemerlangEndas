@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B6B3A">
-<title>CE Bin Rental — Customer</title>
+<title>Cemerlang Endas — Bin Rental</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -18,21 +18,25 @@
   --bdr:#E2E5DF;--bdr2:#C5CCC0;
   --tx:#14180F;--tx2:#4A5544;--tx3:#8A9485;
   --rad:14px;--rads:9px;--radx:6px;
-  --sh:0 2px 12px rgba(0,0,0,.08);
+  --sh:0 2px 12px rgba(0,0,0,.08);--shl:0 6px 28px rgba(0,0,0,.14);
   --fn:'Nunito',sans-serif;
 }
 html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
-/* Shared */
+#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g1);display:flex;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
+.pTab.on{color:#fff;border-bottom-color:var(--y1)}
+.panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
+.panel.on{display:flex}
+/* shared */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
-.b-g{background:var(--g3);color:#0f5a28}.b-y{background:var(--y2);color:var(--y3)}.b-r{background:var(--r2);color:var(--r1)}.b-b{background:var(--b2);color:var(--b3)}.b-gr{background:#eee;color:#555}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--rads);font-family:var(--fn);font-size:.9rem;font-weight:800;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;letter-spacing:.01em}
+.b-green{background:var(--g3);color:#0f5a28}.b-yellow{background:var(--y2);color:var(--y3)}.b-red{background:var(--r2);color:var(--r1)}.b-blue{background:var(--b2);color:var(--b3)}.b-gray{background:#eee;color:#555}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-g{background:var(--g1);color:#fff}.btn-g:hover{background:var(--g2)}
 .btn-b{background:var(--b1);color:#fff}
 .btn-r{background:var(--r2);color:var(--r1);border:1.5px solid var(--r1)}
 .btn-ghost{background:var(--sur2);color:var(--tx2);border:1.5px solid var(--bdr2)}
-.btn-wa{background:#25D366;color:#fff}
-.fw{width:100%}.sm{padding:8px 14px;font-size:.78rem}
+.btn-full{width:100%}.btn-sm{padding:8px 13px;font-size:.78rem}
 .fLbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);margin-bottom:5px}
 .fInp{width:100%;padding:12px 14px;border:2px solid var(--bdr);border-radius:var(--rads);font-family:var(--fn);font-size:.92rem;font-weight:600;color:var(--tx);background:var(--sur);outline:none;transition:border-color .15s;margin-bottom:12px}
 .fInp:focus{border-color:var(--g1);background:#fff}
@@ -45,45 +49,36 @@ select.fInp{cursor:pointer}
 .warnBox p{font-size:.8rem;font-weight:700;color:var(--y3);line-height:1.55}
 .infoBox{background:var(--b2);border-radius:var(--rads);padding:11px 13px;margin-bottom:12px}
 .infoBox p{font-size:.8rem;font-weight:700;color:var(--b3);line-height:1.55}
-/* Toast */
-#toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--tx);color:#fff;border-radius:99px;padding:10px 22px;font-size:.84rem;font-weight:700;z-index:9999;transition:transform .28s;white-space:nowrap;box-shadow:0 6px 28px rgba(0,0,0,.18);max-width:88vw;text-align:center}
+#toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--tx);color:#fff;border-radius:99px;padding:10px 22px;font-size:.84rem;font-weight:700;z-index:9999;transition:transform .28s;white-space:nowrap;box-shadow:var(--shl);max-width:88vw;text-align:center}
 #toast.show{transform:translateX(-50%) translateY(0)}
-/* Modal */
 .modal{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
 .modal.show{display:flex}
-.mBox{background:var(--sur);border-radius:var(--rad) var(--rad) 0 0;padding:22px 20px 36px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
+.mBox{background:var(--sur);border-radius:var(--rad) var(--rad) 0 0;padding:22px 20px 32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shl)}
 .mBox h3{font-size:1.05rem;font-weight:900;margin-bottom:4px}
-.mClose{float:right;font-size:1.4rem;cursor:pointer;color:var(--tx3);line-height:1;margin-top:-3px}
+.mClose{float:right;font-size:1.3rem;cursor:pointer;color:var(--tx3);line-height:1;margin-top:-2px}
 .mSub{font-size:.8rem;color:var(--tx2);font-weight:600;margin-bottom:16px}
-/* Auth */
-.authWrap{position:fixed;inset:0;overflow-y:auto;padding:24px 18px 40px;background:var(--bg);display:flex;flex-direction:column;z-index:100}
+/* ===== CUSTOMER ===== */
+#custPanel{background:var(--bg)}
+.authWrap{flex:1;overflow-y:auto;padding:24px 18px 40px;display:flex;flex-direction:column}
 .authLogo{text-align:center;padding:16px 0 22px}
-.lMark{width:64px;height:64px;border-radius:18px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px}
+.authLogo .lMark{width:62px;height:62px;border-radius:18px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:1.9rem;margin-bottom:10px}
 .authLogo h1{font-size:1.45rem;font-weight:900}
 .authLogo p{font-size:.82rem;color:var(--tx2);font-weight:600;margin-top:3px}
-.authCard{background:var(--sur);border-radius:var(--rad);padding:22px;box-shadow:var(--sh);border:1.5px solid var(--bdr)}
+.authCard{background:var(--sur);border-radius:var(--rad);padding:20px;box-shadow:var(--sh);border:1.5px solid var(--bdr)}
 .authCard h2{font-size:1.1rem;font-weight:900;margin-bottom:5px}
-.authSub{font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:18px}
+.authSub{font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:16px}
 .authSwitch{text-align:center;margin-top:14px;font-size:.86rem;color:var(--tx2);font-weight:600}
 .authSwitch a{color:var(--g1);font-weight:800;cursor:pointer}
-.forgotLink{text-align:right;margin-top:-8px;margin-bottom:14px;font-size:.8rem;color:var(--g1);font-weight:700;cursor:pointer}
-.demoBox{margin-top:14px;padding:12px 14px;background:var(--b2);border-radius:var(--rads)}
-.demoBox .dt{font-size:.68rem;font-weight:800;color:var(--b3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
-.demoBox .dv{font-size:.79rem;font-weight:600;color:var(--b3)}
-/* App layout */
-#app{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--bg)}
-/* Bottom nav */
-.cNav{position:absolute;bottom:0;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);display:flex;height:64px;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
-.cNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);transition:color .15s;position:relative}
+.forgotLink{text-align:right;margin-top:-8px;margin-bottom:12px;font-size:.8rem;color:var(--g1);font-weight:700;cursor:pointer}
+.cNav{position:absolute;bottom:0;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);display:flex;height:62px;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.cNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);transition:color .15s}
 .cNavItem.on{color:var(--g1)}
-.cNavItem .nIco{font-size:1.35rem}
-/* Screens */
-.scr{position:absolute;top:0;left:0;right:0;bottom:64px;overflow-y:auto;padding:16px 16px 24px;display:none}
-.scr.on{display:block}
-.cHdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-top:2px}
+.cNavItem .nIco{font-size:1.3rem}
+.cScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px 14px 20px;display:none}
+.cScr.on{display:block}
+.cHdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-top:2px}
 .cHdr h2{font-size:1.25rem;font-weight:900}
 .cHdr .greet{font-size:.8rem;color:var(--tx2);font-weight:600}
-/* Order cards */
 .oCard{background:var(--sur);border-radius:var(--rad);border:1.5px solid var(--bdr);padding:14px;margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;transition:border-color .15s}
 .oCard:hover{border-color:var(--g2)}
 .oCardTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px}
@@ -91,12 +86,10 @@ select.fInp{cursor:pointer}
 .oCardRef{font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px}
 .oCardMeta{display:flex;flex-wrap:wrap;gap:6px;padding-top:9px;border-top:1px solid var(--bdr)}
 .mChip{font-size:.75rem;font-weight:700;color:var(--tx2)}
-/* Order steps */
 .stepBar{display:flex;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;background:var(--sur);border-radius:var(--rads);border:1.5px solid var(--bdr);padding:4px}
 .stepBar::-webkit-scrollbar{display:none}
 .sStep{flex-shrink:0;padding:7px 10px;border-radius:7px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);white-space:nowrap;transition:all .15s}
 .sStep.on{background:var(--g1);color:#fff}.sStep.done{color:var(--g2)}
-/* Bin cards */
 .binCard{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--rad);padding:13px;margin-bottom:9px;cursor:pointer;display:flex;gap:11px;align-items:flex-start;transition:all .15s}
 .binCard.sel{border-color:var(--g1);background:var(--g3)}
 .bIco{font-size:1.9rem;flex-shrink:0;margin-top:1px}
@@ -105,813 +98,867 @@ select.fInp{cursor:pointer}
 .bPrices{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
 .pPill{padding:3px 8px;border-radius:99px;font-size:.68rem;font-weight:800;color:var(--tx2);background:var(--bg);border:1px solid var(--bdr)}
 .pPill.hl{background:var(--y2);color:var(--y3);border-color:#f5d090}
-.selChk{width:22px;height:22px;border-radius:50%;background:var(--g1);color:#fff;display:none;align-items:center;justify-content:center;font-size:.72rem;font-weight:900;flex-shrink:0;margin-top:2px}
+.selChk{width:20px;height:20px;border-radius:50%;background:var(--g1);color:#fff;display:none;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;margin-top:2px}
 .binCard.sel .selChk{display:flex}
-/* Duration */
 .durGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
-.durCard{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--rads);padding:14px 6px;text-align:center;cursor:pointer;transition:all .15s}
+.durCard{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--rads);padding:12px 6px;text-align:center;cursor:pointer;transition:all .15s}
 .durCard.sel{border-color:var(--g1);background:var(--g3)}
-.dLbl{font-size:.85rem;font-weight:900}
-.dDays{font-size:.7rem;color:var(--tx2);font-weight:700;margin:2px 0 8px}
-.dPrice{font-size:1.05rem;font-weight:900;color:var(--g1)}
-.dSave{font-size:.65rem;color:var(--y3);font-weight:800;margin-top:3px}
-/* Time slots */
-.tGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.durCard .dLbl{font-size:.85rem;font-weight:900}
+.durCard .dDays{font-size:.7rem;color:var(--tx2);font-weight:700;margin:2px 0 7px}
+.durCard .dPrice{font-size:1rem;font-weight:900;color:var(--g1)}
+.durCard .dSave{font-size:.64rem;color:var(--y3);font-weight:800;margin-top:2px}
+.tGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
 .tSlot{padding:9px 4px;text-align:center;border:2px solid var(--bdr);border-radius:var(--radx);font-size:.73rem;font-weight:800;color:var(--tx2);cursor:pointer;background:var(--sur);transition:all .15s}
 .tSlot.sel{background:var(--g1);border-color:var(--g1);color:#fff}
-/* Date result */
-.dateResult{display:flex;gap:9px;margin-bottom:14px}
-.dateBox{flex:1;padding:12px;background:var(--sur);border-radius:var(--rads);border:1.5px solid var(--bdr)}
-.dateBox .dl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:4px}
-.dateBox .dv{font-size:.9rem;font-weight:800}
-/* Stage timeline */
 .stageList{display:flex;flex-direction:column}
-.stageRow{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.stageRow{display:flex;gap:12px;align-items:flex-start;padding:11px 0}
 .stageRow:not(:last-child){border-bottom:1px solid var(--bdr)}
-.sDot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:900;flex-shrink:0;margin-top:1px}
-.sDot.done{background:var(--g1);color:#fff}
-.sDot.active{background:var(--y1);color:#fff}
-.sDot.pending{background:var(--bdr);color:var(--tx3)}
-.stageTitle{font-size:.9rem;font-weight:800;margin-bottom:2px}
-.stageSub{font-size:.76rem;color:var(--tx2);font-weight:600;line-height:1.45}
-.stageTime{font-size:.69rem;font-weight:700;margin-top:4px}
-.stageActs{margin-top:9px;display:flex;gap:8px;flex-wrap:wrap}
-/* Chat */
-.chatMsgs{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:260px}
-.chatMsg{max-width:78%;padding:9px 13px;border-radius:14px;font-size:.85rem;font-weight:600;line-height:1.45}
+.sDot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0;margin-top:1px}
+.sDot.done{background:var(--g1);color:#fff}.sDot.active{background:var(--y1);color:#fff}.sDot.pending{background:var(--bdr);color:var(--tx3)}
+.stageTitle{font-size:.88rem;font-weight:800;margin-bottom:2px}
+.stageSub{font-size:.75rem;color:var(--tx2);font-weight:600;line-height:1.4}
+.stageTime{font-size:.68rem;font-weight:700;margin-top:3px}
+.stageActs{margin-top:8px;display:flex;gap:7px;flex-wrap:wrap}
+.chatMsgs{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:240px}
+.chatMsg{max-width:78%;padding:9px 13px;border-radius:14px;font-size:.84rem;font-weight:600;line-height:1.45}
 .chatMsg.me{background:var(--g1);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .chatMsg.them{background:var(--sur);border:1.5px solid var(--bdr);color:var(--tx);align-self:flex-start;border-bottom-left-radius:4px}
 .chatMsg.sys{background:var(--y2);color:var(--y3);align-self:center;border-radius:99px;font-size:.72rem;padding:5px 14px;max-width:90%;text-align:center}
 .cmSender{font-size:.64rem;font-weight:800;opacity:.7;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
 .cmTime{font-size:.62rem;opacity:.6;margin-top:3px;text-align:right}
 .chatRow{display:flex;gap:8px;padding:10px 12px;background:var(--sur);border-top:1.5px solid var(--bdr)}
-.chatRow input{flex:1;padding:10px 14px;border:2px solid var(--bdr);border-radius:99px;font-family:var(--fn);font-size:.88rem;font-weight:600;color:var(--tx);outline:none}
+.chatRow input{flex:1;padding:10px 14px;border:2px solid var(--bdr);border-radius:99px;font-family:var(--fn);font-size:.87rem;font-weight:600;color:var(--tx);outline:none}
 .chatRow input:focus{border-color:var(--g1)}
-.chatSend{width:40px;height:40px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-/* Order action bar */
-#oActBar{position:fixed;bottom:64px;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);padding:10px 16px;display:none;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+.chatSendBtn{width:38px;height:38px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#oActBar{position:fixed;bottom:62px;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);padding:10px 14px;display:none;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
 #oActBar.show{display:flex;gap:9px}
-@media(min-width:540px){
-  .authWrap,.modal .mBox,#app{max-width:480px;left:50%;transform:translateX(-50%);right:auto;width:100%}
-  #oActBar{max-width:480px;left:50%;transform:translateX(-50%)}
-  #toast{top:20px}
+/* ===== ADMIN ===== */
+#adminPanel{flex-direction:row;background:#0e1410}
+.aSide{width:200px;background:#131d14;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #233023;overflow-y:auto}
+.aSide .aLogo{padding:16px;border-bottom:1px solid #233023}
+.aLogo h3{color:#fff;font-size:.88rem;font-weight:900;line-height:1.3}
+.aLogo p{color:#4a7a4a;font-size:.68rem;font-weight:700;margin-top:2px}
+.aMenu{flex:1;padding:8px 0}
+.aMenuItem{display:flex;align-items:center;gap:9px;padding:11px 15px;cursor:pointer;font-size:.78rem;font-weight:800;color:#5a8a5a;transition:all .15s;border-left:3px solid transparent}
+.aMenuItem:hover{color:#aaddaa;background:rgba(255,255,255,.03)}
+.aMenuItem.on{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--y1)}
+.aMenuItem .ami{font-size:1rem;width:18px;text-align:center}
+.aBadge{margin-left:auto;background:var(--r1);color:#fff;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:99px}
+.aMain{flex:1;overflow-y:auto;padding:18px;background:#0e1410}
+.aMain h2{color:#fff;font-size:1.1rem;font-weight:900;margin-bottom:14px}
+.aStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
+.aStat{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:12px}
+.asNum{font-size:1.4rem;font-weight:900;color:#fff;line-height:1}
+.asLbl{font-size:.66rem;font-weight:700;color:#4a7a4a;margin-top:4px;text-transform:uppercase;letter-spacing:.07em}
+.asSub{font-size:.68rem;color:var(--y1);font-weight:700;margin-top:2px}
+.aRow{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:14px;margin-bottom:9px}
+.aRow:hover{border-color:#3a5a3a}
+.arTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;gap:8px}
+.arBin{font-size:.9rem;font-weight:900;color:#fff}
+.arRef{font-size:.7rem;color:#4a7a4a;font-weight:700;margin-top:2px}
+.arMeta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.arMI{display:flex;align-items:center;gap:4px;font-size:.76rem;font-weight:700;color:#7aaa7a}
+.arActs{display:flex;gap:6px;flex-wrap:wrap}
+.abtn{padding:7px 12px;border-radius:var(--radx);border:none;font-family:var(--fn);font-size:.74rem;font-weight:800;cursor:pointer;transition:all .15s}
+.abtn:active{transform:scale(.97)}
+.abtn-g{background:var(--g1);color:#fff}.abtn-b{background:var(--b1);color:#fff}.abtn-wa{background:#25D366;color:#fff}.abtn-ghost{background:#1e2e1e;color:#aaa;border:1px solid #2e3e2e}.abtn-r{background:var(--r1);color:#fff}
+.toggle{position:relative;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;font-weight:700;color:#8aaa8a}
+.toggle input{position:absolute;opacity:0;width:0;height:0}
+.trkOuter{width:36px;height:20px;background:#2a3a2a;border-radius:99px;transition:background .2s;flex-shrink:0;position:relative}
+.toggle input:checked ~ .trkOuter{background:var(--y1)}
+.trkThumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none}
+.toggle input:checked ~ .trkOuter .trkThumb{transform:translateX(16px)}
+/* admin customer reg */
+.cRegCard{background:#1a2a1a;border:1px solid #2a3a2a;border-radius:var(--rad);padding:15px;margin-bottom:9px}
+.cRegTop{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px}
+.cAva{width:40px;height:40px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:900;color:#fff;flex-shrink:0}
+.cRegName{font-size:.9rem;font-weight:900;color:#fff}
+.cRegComp{font-size:.73rem;color:#5a8a5a;font-weight:700;margin-top:2px}
+.cRegMeta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.cRegMI{font-size:.74rem;font-weight:700;color:#6a9a6a}
+.cRegActs{display:flex;gap:7px;flex-wrap:wrap}
+.credBox{background:#0a140a;border:1.5px solid var(--g2);border-radius:var(--rads);padding:13px;margin-top:10px}
+.credTitle{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--g2);margin-bottom:10px}
+.credRow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.cKey{font-size:.72rem;font-weight:700;color:#5a8a5a;width:80px;flex-shrink:0}
+.cVal{font-size:.82rem;font-weight:800;color:#fff;flex:1;word-break:break-all}
+.cCopy{padding:4px 10px;background:#1a2a1a;border:1px solid #2a3a2a;border-radius:99px;font-family:var(--fn);font-size:.68rem;font-weight:800;cursor:pointer;color:#8aaa8a;flex-shrink:0}
+.cCopy:hover{color:var(--y1);border-color:var(--y1)}
+.aInp{width:100%;padding:10px 12px;background:#0e1410;border:1.5px solid #2a3a2a;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.85rem;font-weight:600;outline:none;transition:border-color .15s;margin-bottom:10px}
+.aInp:focus{border-color:var(--g2)}
+.aLab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#5a8a5a;margin-bottom:5px}
+.notifBox{background:#1a2a1a;border:1px solid #2a3a2a;border-radius:var(--rads);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.notifBox p{font-size:.78rem;font-weight:700;color:#8aaa8a;max-width:340px;line-height:1.5}
+/* order dashboard (admin) */
+.aODash{background:#131d14;border:1px solid #233023;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.aODashHdr{background:#1a2a1a;padding:13px 15px;border-bottom:1px solid #233023;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.aODashHdr h4{color:#fff;font-size:.88rem;font-weight:900}
+.aStRow{display:flex;gap:10px;align-items:flex-start;padding:10px 15px;border-bottom:1px solid #152015}
+.aStRow:last-child{border-bottom:none}
+.asDot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;flex-shrink:0;margin-top:1px}
+.asDot.done{background:var(--g1);color:#fff}.asDot.active{background:var(--y1);color:#111}.asDot.pending{background:#233023;color:#4a7a4a}
+.asTitle{font-size:.82rem;font-weight:800;color:#ccc;margin-bottom:2px}
+.asSub2{font-size:.72rem;color:#5a7a5a;font-weight:600;line-height:1.4}
+.asActs{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+.aChatBar{border-top:1px solid #233023}
+.aChatHdr{background:#131d14;padding:9px 14px;font-size:.76rem;font-weight:800;color:#5a8a5a;display:flex;align-items:center;justify-content:space-between}
+.aChatMsgs{background:#0a140a;padding:10px;display:flex;flex-direction:column;gap:6px;max-height:150px;overflow-y:auto}
+.acMsg{font-size:.78rem;font-weight:600;padding:7px 11px;border-radius:10px;max-width:84%}
+.acMsg.cust{background:#131d14;color:#aaa;align-self:flex-start;border:1px solid #233023}
+.acMsg.drv{background:#1a2a1a;color:#8aaa8a;align-self:flex-end}
+.acMsg.adm{background:#2a2a10;color:var(--y1);align-self:center;border-radius:99px;font-size:.68rem;padding:3px 12px}
+.acSender{font-size:.62rem;font-weight:800;opacity:.6;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.aChatInputRow{display:flex;gap:7px;padding:9px 12px;background:#131d14;border-top:1px solid #233023}
+.aChatInputRow input{flex:1;padding:8px 12px;background:#0a140a;border:1px solid #233023;border-radius:99px;font-family:var(--fn);font-size:.82rem;color:#ccc;outline:none}
+.aChatInputRow button{padding:8px 14px;background:var(--y1);border:none;border-radius:99px;font-family:var(--fn);font-size:.76rem;font-weight:800;cursor:pointer;color:#fff;flex-shrink:0}
+.custTbl{width:100%;border-collapse:collapse}
+.custTbl th{background:#1a2a1a;color:#4a7a4a;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;text-align:left}
+.custTbl td{padding:11px 12px;border-bottom:1px solid #1a2a1a;font-size:.79rem;color:#aaa;font-weight:600;vertical-align:top}
+.custTbl tr:hover td{background:#131d14}
+.tdName{color:#fff;font-weight:800;font-size:.85rem}
+/* ===== DRIVER ===== */
+#drvPanel{background:#0d0d0d}
+.drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none}
+.drvScr.on{display:block}
+.drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50}
+.dNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#444;transition:color .15s}
+.dNavItem.on{color:var(--y1)}
+.dNavItem .nIco{font-size:1.3rem}
+.dJob{background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:var(--rad);padding:14px;margin-bottom:11px}
+.dJob.urgent{border-color:var(--y1)}.dJob.done{border-color:#1a3a1a;opacity:.75}
+.djTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;gap:8px}
+.djBin{font-size:.95rem;font-weight:900;color:#fff}
+.djRef{font-size:.7rem;color:#555;font-weight:700;margin-top:2px}
+.djMeta{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.djMR{display:flex;align-items:flex-start;gap:8px;font-size:.8rem;color:#888;font-weight:700}
+.djMR .ic{font-size:.85rem;width:18px;text-align:center;flex-shrink:0;margin-top:1px}
+.djMR .val{color:#ccc;flex:1}
+.djActs{display:flex;gap:8px;flex-wrap:wrap}
+.djBtn{flex:1;padding:12px;border:none;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:900;cursor:pointer;transition:all .15s}
+.djBtn:active{transform:scale(.97)}
+.djAccept{background:var(--y1);color:#111}.djDone{background:var(--g1);color:#fff}
+.djDecline{padding:12px 16px;background:#2a2a2a;color:#777;border:none;border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer}
+.dStageLine{background:#111;border:1px solid #2a2a2a;border-radius:var(--rads);overflow:hidden;margin-bottom:10px}
+.dStRow{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-bottom:1px solid #1a2a1a}
+.dStRow:last-child{border-bottom:none}
+.dStDot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0;margin-top:2px}
+.dStDot.done{background:var(--g1);color:#fff}.dStDot.active{background:var(--y1);color:#111}.dStDot.pending{background:#2a2a2a;color:#555}
+.dsTitle{font-size:.82rem;font-weight:800;color:#ccc;margin-bottom:2px}
+.dsSub{font-size:.72rem;color:#666;font-weight:600;line-height:1.4}
+.dsActs{margin-top:7px;display:flex;gap:6px}
+.drvChat{background:#111;border:1px solid #2a2a2a;border-radius:var(--rads);overflow:hidden;margin-top:9px}
+.drvChatHdr{background:#1a1a1a;padding:9px 13px;font-size:.76rem;font-weight:800;color:#777;display:flex;align-items:center;justify-content:space-between}
+.drvChatMsgs{padding:10px;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.dCMsg{font-size:.79rem;font-weight:600;padding:7px 11px;border-radius:11px;max-width:82%}
+.dCMsg.me{background:var(--y1);color:#111;align-self:flex-end;border-bottom-right-radius:3px}
+.dCMsg.them{background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;align-self:flex-start;border-bottom-left-radius:3px}
+.dCMsg.sys{background:#1a1a0a;color:#a08000;align-self:center;border-radius:99px;font-size:.68rem;padding:3px 11px}
+.dCMsg .cS{font-size:.62rem;font-weight:800;opacity:.6;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.drvChatInp{display:flex;gap:7px;padding:8px 11px;background:#1a1a1a;border-top:1px solid #2a2a2a}
+.drvChatInp input{flex:1;padding:7px 11px;background:#111;border:1px solid #2a2a2a;border-radius:99px;font-family:var(--fn);font-size:.82rem;color:#ccc;outline:none}
+.drvChatInp button{width:32px;height:32px;border-radius:50%;background:var(--y1);border:none;color:#111;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.photoGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0}
+.photoSlot{aspect-ratio:4/3;border:2px dashed #333;border-radius:var(--rads);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:5px;font-size:.75rem;color:#555;font-weight:700;transition:all .15s;text-align:center;padding:8px}
+.photoSlot:hover{border-color:var(--y1);color:var(--y1)}
+.photoSlot.filled{border-style:solid;border-color:var(--g1);color:var(--g1);background:#0a1a0a}
+@media(max-width:640px){
+  #adminPanel{flex-direction:column}
+  .aSide{width:100%;height:46px;flex-direction:row;border-right:none;border-bottom:1px solid #233023;overflow-x:auto;overflow-y:hidden;flex-shrink:0}
+  .aSide .aLogo{display:none}
+  .aMenu{display:flex;flex-direction:row;padding:0;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+  .aMenu::-webkit-scrollbar{display:none}
+  .aMenuItem{flex-direction:column;gap:1px;padding:6px 12px;font-size:.58rem;border-left:none;border-bottom:3px solid transparent;flex-shrink:0}
+  .aMenuItem.on{border-left:none;border-bottom-color:var(--y1)}
+  .aMenuItem .ami{font-size:1.1rem}
+  .aStats{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:600px){
+  .panel,.modal{max-width:480px;left:50%;transform:translateX(-50%)}
+  #adminPanel{max-width:900px;left:50%;transform:translateX(-50%)}
+  #pBar{max-width:900px;left:50%;transform:translateX(-50%)}
 }
 </style>
 </head>
 <body>
-
-<!-- ══ AUTH: LOGIN ══ -->
-<div id="authLogin" class="authWrap">
-  <div class="authLogo">
-    <div class="lMark">🗑</div>
-    <h1>Cemerlang Endas</h1>
-    <p>Bin Rental — Customer Portal</p>
-  </div>
-  <div class="authCard">
-    <h2>Welcome Back 👋</h2>
-    <div class="authSub">Sign in with your registered email address</div>
-    <div class="fLbl">Email Address</div>
-    <input class="fInp" type="email" id="lEmail" placeholder="you@email.com" autocomplete="email">
-    <div class="fLbl">Password</div>
-    <input class="fInp" type="password" id="lPass" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()">
-    <div class="forgotLink" onclick="showAuth('forgot')">Forgot password?</div>
-    <button class="btn btn-g fw" onclick="doLogin()">Sign In</button>
-    <div class="authSwitch">New customer? <a onclick="showAuth('reg')">Register here</a></div>
-    <div class="demoBox">
-      <div class="dt">Demo Login</div>
-      <div class="dv">Email: <b>ahmad@test.com</b> &nbsp;·&nbsp; Password: <b>test1234</b></div>
-      <button class="btn btn-b fw sm" style="margin-top:9px" onclick="quickLogin()">Use Demo Account</button>
-    </div>
-  </div>
+<div id="pBar">
+  <div class="pTab on" onclick="switchPortal('cust',this)">👤 Customer</div>
+  <div class="pTab" onclick="switchPortal('admin',this)">🏢 Admin</div>
+  <div class="pTab" onclick="switchPortal('driver',this)">🚛 Driver</div>
 </div>
 
-<!-- ══ AUTH: REGISTER ══ -->
-<div id="authReg" class="authWrap" style="display:none">
-  <div class="authLogo"><div class="lMark">✍️</div><h1>Create Account</h1><p>Register as a new customer</p></div>
-  <div class="authCard">
-    <h2>New Customer</h2>
-    <div class="authSub">Your account will be reviewed by Cemerlang Endas before first order</div>
-    <div class="fLbl">Full Name *</div><input class="fInp" type="text" id="rName" placeholder="Your full name">
-    <div class="fLbl">Company (optional)</div><input class="fInp" type="text" id="rComp" placeholder="ABC Sdn. Bhd.">
-    <div class="fLbl">Email Address *</div><input class="fInp" type="email" id="rEmail" placeholder="you@email.com">
-    <div class="fLbl">Phone Number</div><input class="fInp" type="tel" id="rPhone" placeholder="01x-xxxx xxxx">
-    <div class="fLbl">Default Delivery Address</div><input class="fInp" type="text" id="rAddr" placeholder="No., Jalan, Postcode, City">
-    <div class="fLbl">Password (min 8 characters) *</div><input class="fInp" type="password" id="rPass" placeholder="Create password">
-    <button class="btn btn-g fw" onclick="doSelfReg()">Create Account</button>
-    <div class="authSwitch">Already registered? <a onclick="showAuth('login')">Sign in</a></div>
-  </div>
-</div>
-
-<!-- ══ AUTH: FORGOT ══ -->
-<div id="authForgot" class="authWrap" style="display:none">
-  <div class="authLogo"><div class="lMark">🔑</div><h1>Reset Password</h1><p>We'll look up your account</p></div>
-  <div class="authCard">
-    <h2>Forgot Password?</h2>
-    <div class="authSub">Enter your registered email — admin will send a new temporary password via WhatsApp</div>
-    <div class="fLbl">Email Address</div><input class="fInp" type="email" id="forgotEmail" placeholder="you@email.com">
-    <button class="btn btn-g fw" onclick="doForgot()">Request Password Reset</button>
-    <div class="authSwitch"><a onclick="showAuth('login')">← Back to Login</a></div>
-  </div>
-</div>
-
-<!-- ══ MAIN APP ══ -->
-<div id="app">
-  <!-- HOME -->
-  <div id="sHome" class="scr on">
-    <div class="cHdr">
-      <div><div class="greet" id="custGreet">Good morning 👋</div><h2 id="custName">—</h2></div>
-      <div style="font-size:1.7rem">🗑</div>
-    </div>
-    <div class="warnBox" id="reminderBox" style="display:none">
-      <span style="font-size:1.1rem;flex-shrink:0">🔔</span>
-      <p id="reminderTxt"></p>
-    </div>
-    <div class="sLbl">Active Rentals</div>
-    <div id="homeActive"><div style="font-size:.84rem;color:var(--tx3);font-weight:600;padding:8px 0 12px">No active rentals</div></div>
-    <div class="sLbl" style="margin-top:4px">Quick Order</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px">
-      <div class="card" style="text-align:center;cursor:pointer;padding:16px 8px;border:2px solid var(--bdr)" onclick="goNewOrder()">
-        <div style="font-size:1.8rem;margin-bottom:6px">🏗</div><div style="font-size:.7rem;font-weight:900">RORO BIN</div>
+<!-- ██████ CUSTOMER ██████ -->
+<div id="custPanel" class="panel on">
+  <!-- Login -->
+  <div id="authLogin" class="authWrap">
+    <div class="authLogo"><div class="lMark">🗑</div><h1>Cemerlang Endas</h1><p>Bin Rental — Customer Portal</p></div>
+    <div class="authCard">
+      <h2>Welcome Back 👋</h2>
+      <div class="authSub">Sign in with your registered email address</div>
+      <div class="fLbl">Email Address</div><input class="fInp" type="email" id="lEmail" placeholder="you@email.com">
+      <div class="fLbl">Password</div><input class="fInp" type="password" id="lPass" placeholder="••••••••">
+      <div class="forgotLink" onclick="showAuth('forgot')">Forgot password?</div>
+      <button class="btn btn-g btn-full" onclick="doLogin()">Sign In</button>
+      <div class="authSwitch">New customer? <a onclick="showAuth('reg')">Register here</a></div>
+      <div style="margin-top:14px;padding:11px 13px;background:var(--b2);border-radius:var(--rads)">
+        <div style="font-size:.68rem;font-weight:800;color:var(--b3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em">Demo Login</div>
+        <div style="font-size:.78rem;font-weight:600;color:var(--b3)">Email: <b>ahmad@test.com</b> &nbsp;·&nbsp; Password: <b>test1234</b></div>
+        <button class="btn btn-b btn-sm btn-full" style="margin-top:8px" onclick="quickLogin()">Use Demo Account</button>
       </div>
-      <div class="card" style="text-align:center;cursor:pointer;padding:16px 8px;border:2px solid var(--bdr)" onclick="goNewOrder()">
-        <div style="font-size:1.8rem;margin-bottom:6px">🗂</div><div style="font-size:.7rem;font-weight:900">LEACH BIN</div>
-      </div>
-      <div class="card" style="text-align:center;cursor:pointer;padding:16px 8px;border:2px solid var(--bdr)" onclick="goNewOrder()">
-        <div style="font-size:1.8rem;margin-bottom:6px">🗑</div><div style="font-size:.7rem;font-weight:900">GARBAGE BIN</div>
-      </div>
-    </div>
-    <div class="sLbl">Recent Orders</div>
-    <div id="homeRecent"><div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div></div>
-  </div>
-
-  <!-- NEW ORDER -->
-  <div id="sOrder" class="scr">
-    <div class="stepBar">
-      <div class="sStep on" id="sp1">1 · Bin</div>
-      <div class="sStep" id="sp2">2 · Duration</div>
-      <div class="sStep" id="sp3">3 · Dates</div>
-      <div class="sStep" id="sp4">4 · Location</div>
-      <div class="sStep" id="sp5">5 · Confirm</div>
-    </div>
-    <!-- Step 1 -->
-    <div id="oS1"><div class="sLbl">Select Bin Type & Size</div><div id="binList"></div></div>
-    <!-- Step 2 -->
-    <div id="oS2" style="display:none">
-      <div class="sLbl">Choose Rental Duration</div>
-      <div class="durGrid" id="durGrid"></div>
-      <div class="infoBox"><p>📋 Price includes delivery & collection. Minimum 2 working days advance booking. End date is fixed per plan.</p></div>
-    </div>
-    <!-- Step 3 -->
-    <div id="oS3" style="display:none">
-      <div class="sLbl">Delivery Start Date</div>
-      <input type="date" class="fInp" id="oDate" onchange="updateDates()">
-      <div id="oDR" style="display:none">
-        <div class="dateResult">
-          <div class="dateBox"><div class="dl">📦 Delivery</div><div class="dv" id="oDD">—</div></div>
-          <div class="dateBox"><div class="dl">🔄 Collection</div><div class="dv" id="oCD">—</div></div>
-        </div>
-        <div class="sLbl">🚚 Preferred Delivery Time Window</div>
-        <div class="tGrid" id="dtGrid"></div>
-        <div class="sLbl">📦 Preferred Collection Time Window</div>
-        <div class="tGrid" id="ctGrid"></div>
-        <div class="infoBox"><p>⏰ Time slots are 1-hour windows. Driver will call 30 minutes before arrival.</p></div>
-      </div>
-    </div>
-    <!-- Step 4 -->
-    <div id="oS4" style="display:none">
-      <div class="sLbl">Site Contact Person</div>
-      <div class="fLbl">Full Name</div><input class="fInp" type="text" id="oContact" placeholder="Name of person on site">
-      <div class="fLbl">Phone Number</div><input class="fInp" type="tel" id="oPhone" placeholder="01x-xxxx xxxx">
-      <div class="sLbl" style="margin-top:2px">Delivery Address</div>
-      <div class="fLbl">Street Address</div><input class="fInp" type="text" id="oStreet" placeholder="No., Jalan, Taman…">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><div class="fLbl">Postcode</div><input class="fInp" type="text" id="oPost" maxlength="5" placeholder="52100"></div>
-        <div><div class="fLbl">City / Area</div><input class="fInp" type="text" id="oCity" placeholder="Kepong"></div>
-      </div>
-      <div class="fLbl">Bin Placement</div>
-      <select class="fInp" id="oPlacement">
-        <option value="">Select placement type…</option>
-        <option>Private compound / yard</option>
-        <option>Loading bay / basement</option>
-        <option>Ground floor — driveway</option>
-        <option>Public road (council permit needed)</option>
-        <option>Public walkway (council permit needed)</option>
-      </select>
-      <div class="fLbl">Special Notes (optional)</div>
-      <textarea class="fInp" id="oNotes" rows="3" placeholder="Gate code, access instructions, landmark, slope warnings…"></textarea>
-    </div>
-    <!-- Step 5 -->
-    <div id="oS5" style="display:none">
-      <div class="sLbl">Review Your Order</div>
-      <div class="oCard" id="oSumm" style="cursor:default;margin-bottom:14px"></div>
-      <div class="warnBox" style="background:var(--g3);border-color:var(--g4)">
-        <span style="flex-shrink:0;font-size:1rem">ℹ️</span>
-        <p style="color:#1B4d2a">Payment via bank transfer within 3 working days. Our team will WhatsApp you the payment details after order confirmation.</p>
-      </div>
-      <button class="btn btn-g fw" onclick="submitOrder()" id="submitBtn">✓ Confirm & Place Order</button>
-    </div>
-    <div style="height:90px"></div>
-  </div>
-
-  <!-- MY ORDERS -->
-  <div id="sOrders" class="scr">
-    <div class="cHdr"><h2>My Orders</h2></div>
-    <div id="ordersList"></div>
-  </div>
-
-  <!-- ORDER DASHBOARD -->
-  <div id="sODash" class="scr">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <button onclick="backFromDash()" style="background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:8px 14px;font-family:var(--fn);font-size:.82rem;font-weight:800;cursor:pointer;color:var(--tx2)">← Back</button>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.72rem;color:var(--tx3);font-weight:700" id="dashRef">—</div>
-        <div style="font-size:1rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="dashBin">—</div>
-      </div>
-      <div id="dashBadge"></div>
-    </div>
-    <!-- Order info bar -->
-    <div style="background:var(--g1);color:#fff;border-radius:var(--rad);padding:14px;margin-bottom:14px">
-      <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:.77rem;font-weight:700;opacity:.92" id="dashMeta"></div>
-    </div>
-    <!-- Stage timeline -->
-    <div class="sLbl">Order Progress</div>
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
-      <div class="stageList" id="dashStages" style="padding:0 16px"></div>
-    </div>
-    <!-- Chat -->
-    <div class="sLbl">💬 Chat with Driver</div>
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
-      <div class="chatMsgs" id="dashChat"></div>
-      <div class="chatRow">
-        <input type="text" id="chatInp" placeholder="Type a message to driver…" onkeypress="if(event.key==='Enter')sendChat()">
-        <button class="chatSend" onclick="sendChat()">➤</button>
-      </div>
-    </div>
-    <!-- Documents -->
-    <div class="sLbl">Documents</div>
-    <div style="display:flex;gap:9px;margin-bottom:24px">
-      <button class="btn btn-ghost sm" style="flex:1" onclick="showDoc('do')">📄 Delivery Order</button>
-      <button class="btn btn-ghost sm" style="flex:1" onclick="showDoc('inv')">🧾 Invoice</button>
     </div>
   </div>
-
-  <!-- PROFILE -->
-  <div id="sProfile" class="scr">
-    <div class="cHdr"><h2>My Profile</h2></div>
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-        <div id="profAva" style="width:52px;height:52px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:900;color:#fff;flex-shrink:0">—</div>
-        <div>
-          <div style="font-size:1rem;font-weight:900" id="profNameDisp">—</div>
-          <div style="font-size:.8rem;color:var(--tx2);font-weight:600" id="profEmailDisp">—</div>
+  <!-- Register -->
+  <div id="authReg" class="authWrap" style="display:none">
+    <div class="authLogo"><div class="lMark">✍️</div><h1>Create Account</h1><p>Register as a new customer</p></div>
+    <div class="authCard">
+      <h2>New Customer</h2>
+      <div class="authSub">Your account will be reviewed by Cemerlang Endas before first order</div>
+      <div class="fLbl">Full Name *</div><input class="fInp" type="text" id="rName" placeholder="Your full name">
+      <div class="fLbl">Company (optional)</div><input class="fInp" type="text" id="rComp" placeholder="ABC Sdn. Bhd.">
+      <div class="fLbl">Email Address *</div><input class="fInp" type="email" id="rEmail" placeholder="you@email.com">
+      <div class="fLbl">Phone Number</div><input class="fInp" type="tel" id="rPhone" placeholder="01x-xxxx xxxx">
+      <div class="fLbl">Default Delivery Address</div><input class="fInp" type="text" id="rAddr" placeholder="No., Jalan, Postcode, City">
+      <div class="fLbl">Password (min 8 characters) *</div><input class="fInp" type="password" id="rPass" placeholder="Create password">
+      <button class="btn btn-g btn-full" onclick="doSelfReg()">Create Account</button>
+      <div class="authSwitch">Already registered? <a onclick="showAuth('login')">Sign in</a></div>
+    </div>
+  </div>
+  <!-- Forgot password -->
+  <div id="authForgot" class="authWrap" style="display:none">
+    <div class="authLogo"><div class="lMark">🔑</div><h1>Reset Password</h1><p>We'll send instructions to your email</p></div>
+    <div class="authCard">
+      <h2>Forgot Password?</h2>
+      <div class="authSub">Enter your registered email address</div>
+      <div class="fLbl">Email Address</div><input class="fInp" type="email" id="forgotEmail" placeholder="you@email.com">
+      <button class="btn btn-g btn-full" onclick="doForgot()">Send Reset Link</button>
+      <div class="authSwitch"><a onclick="showAuth('login')">← Back to Login</a></div>
+    </div>
+  </div>
+  <!-- Main App -->
+  <div id="custApp" style="display:none;position:relative;flex:1;overflow:hidden">
+    <!-- Home -->
+    <div id="cHome" class="cScr on">
+      <div class="cHdr"><div><div class="greet" id="custGreet">Good morning 👋</div><h2 id="custName">—</h2></div><div style="font-size:1.6rem">🗑</div></div>
+      <div class="warnBox"><span style="font-size:1.05rem;flex-shrink:0">🔔</span><p id="homeReminder">No upcoming deliveries.</p></div>
+      <div class="sLbl">Active Rentals</div>
+      <div id="homeActive"><div style="font-size:.84rem;color:var(--tx3);font-weight:600;margin-bottom:10px">No active rentals</div></div>
+      <div class="sLbl" style="margin-top:4px">Quick Order</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px">
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🏗</div><div style="font-size:.7rem;font-weight:900">RORO BIN</div></div>
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🗂</div><div style="font-size:.7rem;font-weight:900">LEACH BIN</div></div>
+        <div class="card" style="text-align:center;cursor:pointer;padding:14px 8px" onclick="goNewOrder()"><div style="font-size:1.7rem;margin-bottom:5px">🗑</div><div style="font-size:.7rem;font-weight:900">GARBAGE BIN</div></div>
+      </div>
+      <div class="sLbl">Recent Orders</div>
+      <div id="homeRecent"><div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div></div>
+    </div>
+    <!-- New Order -->
+    <div id="cOrder" class="cScr">
+      <div class="stepBar"><div class="sStep on" id="sp1">1·Bin</div><div class="sStep" id="sp2">2·Duration</div><div class="sStep" id="sp3">3·Dates</div><div class="sStep" id="sp4">4·Location</div><div class="sStep" id="sp5">5·Confirm</div></div>
+      <div id="oS1"><div class="sLbl">Select Bin Type & Size</div><div id="binList"></div></div>
+      <div id="oS2" style="display:none"><div class="sLbl">Rental Duration</div><div class="durGrid" id="durGrid"></div><div class="infoBox"><p>📋 Price includes delivery & collection. Min. 2 working days advance booking.</p></div></div>
+      <div id="oS3" style="display:none">
+        <div class="sLbl">Delivery Start Date</div>
+        <input type="date" class="fInp" id="oDate" onchange="updateDates()">
+        <div id="oDR" style="display:none">
+          <div style="display:flex;gap:9px;margin-bottom:13px">
+            <div class="card" style="flex:1;padding:12px"><div class="sLbl">📦 Delivery</div><div style="font-size:.9rem;font-weight:800" id="oDD">—</div></div>
+            <div class="card" style="flex:1;padding:12px"><div class="sLbl">🔄 Collection</div><div style="font-size:.9rem;font-weight:800" id="oCD">—</div></div>
+          </div>
+          <div class="sLbl">🚚 Preferred Delivery Time</div><div class="tGrid" id="dtGrid"></div>
+          <div class="sLbl">📦 Preferred Collection Time</div><div class="tGrid" id="ctGrid"></div>
         </div>
       </div>
-      <div class="divider"></div>
-      <div class="fLbl">Full Name</div><input class="fInp" type="text" id="pfName">
-      <div class="fLbl">Company</div><input class="fInp" type="text" id="pfComp">
-      <div class="fLbl">Email (cannot change)</div><input class="fInp" type="email" id="pfEmail" readonly style="opacity:.6">
-      <div class="fLbl">Phone</div><input class="fInp" type="tel" id="pfPhone">
-      <div class="fLbl">Default Delivery Address</div><input class="fInp" type="text" id="pfAddr">
-      <div class="divider"></div>
-      <div class="fLbl">Change Password (leave blank to keep current)</div>
-      <input class="fInp" type="password" id="pfNewPass" placeholder="New password — min 8 characters">
-      <button class="btn btn-g fw" onclick="saveProfile()">Save Changes</button>
-      <div style="margin-top:10px"><button onclick="doLogout()" class="btn btn-r fw">Logout</button></div>
+      <div id="oS4" style="display:none">
+        <div class="sLbl">Site Contact</div>
+        <div class="fLbl">Contact Person on Site</div><input class="fInp" type="text" id="oContact" placeholder="Name">
+        <div class="fLbl">Phone</div><input class="fInp" type="tel" id="oPhone" placeholder="01x-xxxx xxxx">
+        <div class="sLbl" style="margin-top:2px">Delivery Address</div>
+        <div class="fLbl">Street Address</div><input class="fInp" type="text" id="oStreet" placeholder="No., Jalan, Taman…">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><div class="fLbl">Postcode</div><input class="fInp" type="text" id="oPost" maxlength="5" placeholder="52100"></div>
+          <div><div class="fLbl">City</div><input class="fInp" type="text" id="oCity" placeholder="Kepong"></div>
+        </div>
+        <div class="fLbl">Placement Type</div>
+        <select class="fInp" id="oPlacement"><option value="">Select…</option><option>Private compound / yard</option><option>Loading bay / basement</option><option>Ground floor — driveway</option><option>Public road (permit needed)</option><option>Public walkway (permit needed)</option></select>
+        <div class="fLbl">Special Notes (optional)</div>
+        <textarea class="fInp" id="oNotes" rows="3" placeholder="Gate code, access instructions, landmark…"></textarea>
+      </div>
+      <div id="oS5" style="display:none">
+        <div class="sLbl">Review Your Order</div>
+        <div class="oCard" id="oSumm" style="cursor:default"></div>
+        <div class="warnBox" style="background:var(--g3);border-color:var(--g4)"><span style="flex-shrink:0;font-size:1rem">ℹ️</span><p style="color:#1B4d2a">Payment via bank transfer within 3 working days. We'll WhatsApp payment details after confirmation.</p></div>
+        <button class="btn btn-g btn-full" onclick="submitOrder()" id="submitBtn">✓ Confirm & Place Order</button>
+      </div>
+      <div style="height:80px"></div>
+    </div>
+    <!-- Orders List -->
+    <div id="cOrders" class="cScr">
+      <div class="cHdr"><h2>My Orders</h2></div>
+      <div id="ordersList"><div style="text-align:center;padding:32px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div></div>
+    </div>
+    <!-- Order Dashboard -->
+    <div id="cODash" class="cScr">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="backFromDash()" style="background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:7px 13px;font-family:var(--fn);font-size:.82rem;font-weight:800;cursor:pointer;color:var(--tx2)">← Back</button>
+        <div style="flex:1;min-width:0"><div style="font-size:.72rem;color:var(--tx3);font-weight:700" id="dashRef">—</div><div style="font-size:1rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="dashBin">—</div></div>
+        <div id="dashBadge"></div>
+      </div>
+      <div style="background:var(--g1);color:#fff;border-radius:var(--rad);padding:14px;margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:8px;font-size:.76rem;font-weight:700;opacity:.9" id="dashMeta"></div></div>
+      <div class="sLbl">Order Progress</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="stageList" id="dashStages"></div></div>
+      <div class="sLbl">💬 Chat with Driver</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="chatMsgs" id="dashChat"></div>
+        <div class="chatRow"><input type="text" id="chatInp" placeholder="Type a message…" onkeypress="if(event.key==='Enter')sendChat()"><button class="chatSendBtn" onclick="sendChat()">➤</button></div>
+      </div>
+      <div class="sLbl">Documents</div>
+      <div style="display:flex;gap:9px;margin-bottom:20px">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="showDoc('do')">📄 Delivery Order</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="showDoc('inv')">🧾 Invoice</button>
+      </div>
+    </div>
+    <!-- Profile -->
+    <div id="cProfile" class="cScr">
+      <div class="cHdr"><h2>My Profile</h2></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">
+          <div id="profAva" style="width:50px;height:50px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff">—</div>
+          <div><div style="font-size:.98rem;font-weight:900" id="profName2">—</div><div style="font-size:.8rem;color:var(--tx2);font-weight:600" id="profEmail2">—</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="fLbl">Full Name</div><input class="fInp" type="text" id="pfName">
+        <div class="fLbl">Company</div><input class="fInp" type="text" id="pfComp">
+        <div class="fLbl">Email (cannot change)</div><input class="fInp" type="email" id="pfEmail" readonly style="opacity:.65">
+        <div class="fLbl">Phone</div><input class="fInp" type="tel" id="pfPhone">
+        <div class="fLbl">Default Address</div><input class="fInp" type="text" id="pfAddr">
+        <div class="divider"></div>
+        <div class="fLbl">New Password (leave blank to keep current)</div><input class="fInp" type="password" id="pfNewPass" placeholder="Min. 8 characters">
+        <button class="btn btn-g btn-full" onclick="saveProfile()">Save Changes</button>
+        <div style="margin-top:10px"><button onclick="doLogout()" class="btn btn-r btn-full">Logout</button></div>
+      </div>
+    </div>
+    <!-- Bottom Nav -->
+    <div class="cNav">
+      <div class="cNavItem on" onclick="cNav('cHome',this)"><span class="nIco">🏠</span>Home</div>
+      <div class="cNavItem" onclick="goNewOrder()"><span class="nIco">➕</span>New Order</div>
+      <div class="cNavItem" onclick="cNav('cOrders',this)"><span class="nIco">📋</span>Orders</div>
+      <div class="cNavItem" onclick="cNav('cProfile',this)"><span class="nIco">👤</span>Profile</div>
     </div>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="cNav">
-    <div class="cNavItem on" onclick="cNav('sHome',this)"><span class="nIco">🏠</span>Home</div>
-    <div class="cNavItem" onclick="goNewOrder()"><span class="nIco">➕</span>New Order</div>
-    <div class="cNavItem" onclick="cNav('sOrders',this)"><span class="nIco">📋</span>Orders</div>
-    <div class="cNavItem" onclick="cNav('sProfile',this)"><span class="nIco">👤</span>Profile</div>
-  </div>
 </div>
-
-<!-- ORDER ACTION BAR -->
 <div id="oActBar">
   <button id="oBack" onclick="orderBack()" style="padding:12px 18px;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rads);font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer;color:var(--tx2);display:none">← Back</button>
-  <button id="oNext" onclick="orderNext()" class="btn btn-g" style="flex:1">Next →</button>
+  <button id="oNext" onclick="orderNext()" class="btn btn-g" style="flex:1;border-radius:var(--rads)">Next →</button>
 </div>
 
-<!-- DOC MODAL -->
-<div class="modal" id="docModal">
-  <div class="mBox">
-    <span class="mClose" onclick="closeModal('docModal')">✕</span>
-    <div id="docContent"></div>
+<!-- ██████ ADMIN ██████ -->
+<div id="adminPanel" class="panel">
+  <div class="aSide">
+    <div class="aLogo"><h3>Cemerlang Endas</h3><p>Admin Dashboard</p></div>
+    <div class="aMenu">
+      <div class="aMenuItem on" onclick="adminNav('aOrders',this)"><span class="ami">📦</span>Orders<span class="aBadge" id="aBadge">0</span></div>
+      <div class="aMenuItem" onclick="adminNav('aODash',this)"><span class="ami">🪟</span>Dashboards</div>
+      <div class="aMenuItem" onclick="adminNav('aCustomers',this)"><span class="ami">👥</span>Customers</div>
+      <div class="aMenuItem" onclick="adminNav('aDrivers',this)"><span class="ami">🚛</span>Drivers</div>
+      <div class="aMenuItem" onclick="adminNav('aReports',this)"><span class="ami">📊</span>Reports</div>
+    </div>
+  </div>
+  <div class="aMain" id="aMain"></div>
+</div>
+
+<!-- ██████ DRIVER ██████ -->
+<div id="drvPanel" class="panel">
+  <div style="position:relative;flex:1;overflow:hidden">
+    <div id="dJobs" class="drvScr on">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div><div style="color:#555;font-size:.74rem;font-weight:700">Driver App</div><div style="color:#fff;font-size:1.2rem;font-weight:900">Roslan bin Mat</div></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:50%;background:#4caf50"></div><div style="color:#888;font-size:.8rem;font-weight:700">Online</div></div>
+      </div>
+      <div style="background:#1a1a0a;border:1.5px solid var(--y1);border-radius:var(--rads);padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;align-items:flex-start">
+        <span style="font-size:1.1rem;flex-shrink:0">🔔</span>
+        <p style="font-size:.8rem;font-weight:700;color:#c47a00;line-height:1.5">New job assigned! CE-2026-10240 · RoRo Bin Medium, Kepong. Accept or decline below.</p>
+      </div>
+      <div class="sLbl" style="color:#666">New Assignment</div>
+      <div class="dJob urgent">
+        <div class="djTop"><div><div class="djBin">🏗 RoRo Bin — Medium</div><div class="djRef">CE-2026-10240 · 14-Day</div></div><span class="badge b-yellow">New Job</span></div>
+        <div class="djMeta">
+          <div class="djMR"><span class="ic">📅</span><span>Deliver: <span class="val">Fri 23 May 2026</span></span></div>
+          <div class="djMR"><span class="ic">🕙</span><span>Window: <span class="val">10:00–11:00am</span></span></div>
+          <div class="djMR"><span class="ic">📍</span><span>Address: <span class="val">No. 5, Jalan Kepong, 52100 KL</span></span></div>
+          <div class="djMR"><span class="ic">👤</span><span>Contact: <span class="val">Encik Farid · 012-999 8888</span></span></div>
+          <div class="djMR"><span class="ic">🔄</span><span>Collect: <span class="val">Thu 5 Jun · 2:00–3:00pm</span></span></div>
+          <div class="djMR"><span class="ic">📝</span><span>Notes: <span class="val">Gate code 1234, park inside compound</span></span></div>
+          <div class="djMR"><span class="ic">💰</span><span>Value: <span class="val">RM 850</span></span></div>
+        </div>
+        <div class="djActs"><button class="djBtn djAccept" onclick="drvAccept(this)">✓ Accept Job</button><button class="djDecline" onclick="drvDecline(this)">Decline</button></div>
+      </div>
+      <div class="sLbl" style="color:#666;margin-top:6px">Active Job</div>
+      <div class="dJob">
+        <div class="djTop"><div><div class="djBin">🗑 Garbage Bin — 240L</div><div class="djRef">CE-2026-10230</div></div><span class="badge b-green">Active</span></div>
+        <div class="djMeta" style="margin-bottom:8px">
+          <div class="djMR"><span class="ic">📅</span><span>Deliver today · <span class="val">2:00–3:00pm</span></span></div>
+          <div class="djMR"><span class="ic">📍</span><span><span class="val">Sri Damansara, KL</span></span></div>
+          <div class="djMR"><span class="ic">👤</span><span><span class="val">Puan Siti · 016-777 1234</span></span></div>
+        </div>
+        <div class="dStageLine">
+          <div class="dStRow"><div class="dStDot done">✓</div><div><div class="dsTitle">Job accepted</div><div class="dsSub">22 May, 9:02am</div></div></div>
+          <div class="dStRow"><div class="dStDot active">●</div><div style="flex:1"><div class="dsTitle">Deliver bin today</div><div class="dsSub">2:00–3:00pm · Sri Damansara</div><div class="dsActs"><button class="djBtn djDone" style="flex:none;padding:8px 13px;font-size:.76rem" onclick="openPhotoModal('delivery')">📸 Mark Delivered</button></div></div></div>
+          <div class="dStRow"><div class="dStDot pending">6</div><div><div class="dsTitle">Collect bin — 28 May</div><div class="dsSub">2:00–3:00pm window</div></div></div>
+          <div class="dStRow"><div class="dStDot pending">7</div><div><div class="dsTitle">Close case + 2 photos</div><div class="dsSub">Submit proof & confirm</div></div></div>
+        </div>
+        <div class="drvChat">
+          <div class="drvChatHdr"><span>💬 Chat — Puan Siti</span></div>
+          <div class="drvChatMsgs" id="drvChat1">
+            <div class="dCMsg sys">CE-2026-10230 assigned to you</div>
+            <div class="dCMsg them"><div class="cS">Customer</div>Hi, saya di rumah sepanjang hari. TQ</div>
+          </div>
+          <div class="drvChatInp"><input type="text" id="dc1" placeholder="Message customer…" onkeypress="if(event.key==='Enter')drvChat('drvChat1','dc1')"><button onclick="drvChat('drvChat1','dc1')">➤</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="dHistory" class="drvScr">
+      <div style="color:#fff;font-size:1.1rem;font-weight:900;margin-bottom:14px">Job History</div>
+      <div class="dJob done" style="margin-bottom:9px"><div class="djTop"><div><div class="djBin">🗑 Garbage Bin — 240L</div><div class="djRef">CE-2026-10228</div></div><span class="badge" style="background:#1a3a1a;color:#4caf50">Done</span></div><div class="djMeta"><div class="djMR"><span class="ic">📅</span><span>Mon 19 May · Sri Damansara</span></div></div></div>
+      <div class="dJob done"><div class="djTop"><div><div class="djBin">🗂 Leach Bin — 1,500L</div><div class="djRef">CE-2026-10215</div></div><span class="badge" style="background:#1a3a1a;color:#4caf50">Done</span></div><div class="djMeta"><div class="djMR"><span class="ic">📅</span><span>Wed 14 May · Kepong Industrial</span></div></div></div>
+    </div>
+    <div class="drvNav">
+      <div class="dNavItem on" onclick="drvNavFn('dJobs',this)"><span class="nIco">📋</span>Jobs</div>
+      <div class="dNavItem" onclick="drvNavFn('dHistory',this)"><span class="nIco">🕐</span>History</div>
+    </div>
   </div>
 </div>
 
+<!-- MODALS -->
+<div class="modal" id="assignModal"><div class="mBox"><span class="mClose" onclick="closeModal('assignModal')">✕</span><h3>Assign Driver</h3><div class="mSub" id="assignRef">—</div><div id="drvListModal"></div><div style="display:flex;gap:9px;margin-top:14px"><button class="btn btn-b" style="flex:1" onclick="confirmAssign()">Assign Driver</button><button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button></div></div></div>
+<div class="modal" id="docModal"><div class="mBox"><span class="mClose" onclick="closeModal('docModal')">✕</span><div id="docContent"></div></div></div>
+<div class="modal" id="photoModal">
+  <div class="mBox"><span class="mClose" onclick="closeModal('photoModal')">✕</span><h3 id="photoTitle">Submit Proof Photos</h3><div class="mSub">Upload 2 photos as proof</div>
+    <div class="photoGrid"><div class="photoSlot" id="ps1" onclick="fakePhoto('ps1')"><span style="font-size:1.4rem">📷</span>Photo 1<br><span style="font-size:.68rem">Tap to upload</span></div><div class="photoSlot" id="ps2" onclick="fakePhoto('ps2')"><span style="font-size:1.4rem">📷</span>Photo 2<br><span style="font-size:.68rem">Tap to upload</span></div></div>
+    <button class="btn btn-g btn-full" onclick="submitPhotos()">Submit & Confirm</button>
+  </div>
+</div>
+<div class="modal" id="credModal">
+  <div class="mBox"><span class="mClose" onclick="closeModal('credModal')">✕</span><h3>Customer Login Details</h3><div class="mSub" id="credSub">Share these details with your customer</div>
+    <div class="credBox">
+      <div class="credTitle">Login Credentials — Keep Confidential</div>
+      <div class="credRow"><span class="cKey">Email</span><span class="cVal" id="credEmail">—</span><button class="cCopy" onclick="copyTxt('credEmail','Email')">Copy</button></div>
+      <div class="credRow"><span class="cKey">Password</span><span class="cVal" id="credPass">—</span><button class="cCopy" onclick="copyTxt('credPass','Password')">Copy</button></div>
+      <div class="credRow"><span class="cKey">Login at</span><span class="cVal" style="font-size:.7rem;color:#5a8a5a">Customer portal (this app)</span></div>
+    </div>
+    <div style="margin-top:12px;background:#0a140a;border-radius:var(--rads);padding:12px">
+      <div style="font-size:.68rem;font-weight:800;color:#4a7a4a;text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px">WhatsApp Message Preview</div>
+      <div style="font-size:.76rem;color:#8aaa8a;font-weight:600;line-height:1.65;white-space:pre-line" id="waPrev"></div>
+    </div>
+    <button id="waBtn" style="width:100%;padding:12px;font-size:.85rem;border-radius:var(--rads);margin-top:10px;background:#25D366;color:#fff;border:none;font-family:var(--fn);font-weight:800;cursor:pointer">📱 Open WhatsApp with Pre-filled Message</button>
+    <button class="abtn abtn-ghost" style="width:100%;padding:11px;border-radius:var(--rads);margin-top:8px;background:#1e2e1e;color:#aaa;border:1px solid #2e3e2e;font-family:var(--fn);font-weight:800;cursor:pointer" onclick="closeModal('credModal')">Done</button>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
-// ══ STORE ══
+// ═══ DATA STORE (localStorage) ═══
 const SK='CE_v3';
-function getStore(){try{return JSON.parse(localStorage.getItem(SK))||initStore();}catch(e){return initStore();}}
+function getStore(){try{return JSON.parse(localStorage.getItem(SK))||init();}catch(e){return init();}}
 function saveStore(s){localStorage.setItem(SK,JSON.stringify(s));}
-function initStore(){
+function init(){
   const s={
     customers:[{id:'c001',name:'Ahmad Hairul',company:'AH Holdings Sdn. Bhd.',email:'ahmad@test.com',phone:'012-345 6789',addr:'No. 12, Jalan Kepong, 52100 KL',password:'test1234',createdBy:'admin',orders:['o001'],active:true}],
-    orders:[{id:'o001',ref:'CE-2026-10234',custId:'c001',ico:'🏗',bin:'RoRo Bin — Medium',plan:'14-Day',delDate:'Fri 23 May',delTime:'10:00–11:00',colDate:'Thu 5 Jun',colTime:'4:00–5:00',price:'RM 850',status:'confirmed',driver:'Roslan bin Mat',stage:3,addr:'No. 12, Jalan Kepong, 52100 KL',contact:'Ahmad · 012-345 6789',notes:'Gate code 1234'}],
-    drivers:[],notifMode:'A',currentUser:null
+    orders:[{id:'o001',ref:'CE-2026-10234',custId:'c001',ico:'🏗',bin:'RoRo Bin — Medium',plan:'14-Day',delDate:'Fri 23 May',delTime:'10:00–11:00',colDate:'Thu 5 Jun',colTime:'4:00–5:00',price:'RM 850',status:'confirmed',driver:'Roslan bin Mat',stage:3,addr:'No. 12, Jalan Kepong, 52100 KL',contact:'Ahmad · 012-345 6789',notes:''}],
+    drivers:[
+      {id:'d1',name:'Roslan bin Mat',ava:'RM',phone:'012-345 1122',emerg:'',vtype:'🚛 Lorry (RoRo)',plate:'VDD 3312',model:'Hino 500',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Online · Available',jobs:2,active:true},
+      {id:'d2',name:'Hairul bin Ahmad',ava:'HA',phone:'013-456 2233',emerg:'',vtype:'🚜 Crane (20T)',plate:'WQK 8821',model:'KATO NK-200',licence:'CDL (Crane/Heavy)',ic:'',notes:'KATO crane operator certified',status:'Online · On Route',jobs:3,active:true},
+      {id:'d3',name:'Chong Wei Keat',ava:'CW',phone:'016-789 3344',emerg:'',vtype:'🏗 Sky-Lift',plate:'BJB 4490',model:'Hino Sky-Lift',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Online · Available',jobs:1,active:true},
+      {id:'d4',name:'Muthu Selvam',ava:'MS',phone:'011-234 4455',emerg:'',vtype:'🚛 Lorry (RoRo)',plate:'PGY 2201',model:'Isuzu NPR',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Offline',jobs:0,active:true},
+    ],
+    notifMode:'A',currentUser:null
   };
   saveStore(s);return s;
 }
-
 const BINS=[
-  {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³ · 7.6 m³',dims:"14'×7'×4'H",best:'Construction debris, furniture, renovation waste',w:380,f:620,m:950},
+  {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³ · 7.6 m³',dims:"14'×7'×4'H",best:'Light construction, furniture, renovation debris',w:380,f:620,m:950},
   {id:'roro-m',ico:'🏗',name:'RoRo Bin — Medium',size:'20 yd³ · 15 m³',dims:"20'×8'×5'H",best:'Commercial, factories, canteen waste',w:520,f:850,m:1350,pop:true},
   {id:'roro-l',ico:'🏗',name:'RoRo Bin — Large',size:'30 yd³ · 23 m³',dims:"24'×8'×6'H",best:'Large construction, industrial waste',w:720,f:1150,m:1800},
-  {id:'roro-xl',ico:'🏗',name:'RoRo Bin — XL Giant',size:'40 yd³ · 30 m³',dims:"30'×8'×7'H",best:'Heavy demolition, max 7–8 tonne payload',w:950,f:1500,m:2400},
-  {id:'leach-1100',ico:'🗂',name:'Leach Bin — 1,100L',size:'1,100 Litres',dims:'1700×1330×1170mm',best:'Canteen, kitchen, organic & wet waste',w:280,f:460,m:720},
+  {id:'roro-xl',ico:'🏗',name:'RoRo Bin — XL Giant',size:'40 yd³ · 30 m³',dims:"30'×8'×7'H",best:'Heavy demolition, max 7–8 tonne',w:950,f:1500,m:2400},
+  {id:'leach-1100',ico:'🗂',name:'Leach Bin — 1,100L',size:'1,100 Litres',dims:'1700×1330×1170mm',best:'Canteen, kitchen, organic wet waste',w:280,f:460,m:720},
   {id:'leach-1500',ico:'🗂',name:'Leach Bin — 1,500L',size:'1,500 Litres',dims:'2100×1315×1190mm',best:'Large food processing, industrial wet waste',w:360,f:590,m:920,pop:true},
-  {id:'gb-120',ico:'🗑',name:'Garbage Bin — 120L',size:'120L · 2-wheel',dims:'460×550×940mm',best:'Residential, small offices, low daily volume',w:45,f:75,m:120},
+  {id:'gb-120',ico:'🗑',name:'Garbage Bin — 120L',size:'120L · 2-wheel',dims:'460×550×940mm',best:'Residential, small offices',w:45,f:75,m:120},
   {id:'gb-240',ico:'🗑',name:'Garbage Bin — 240L',size:'240L · 2-wheel',dims:'590×730×1007mm',best:'Households, small businesses',w:65,f:105,m:170,pop:true},
-  {id:'gb-660',ico:'🗑',name:'Garbage Bin — 660L',size:'660L · 4-wheel',dims:'1340×805×1260mm',best:'Commercial buildings, condominiums, retail',w:130,f:210,m:340},
-  {id:'gb-1100',ico:'🗑',name:'Garbage Bin — 1,100L',size:'1,100L · 4-wheel',dims:'1340×1030×1330mm',best:'Factories, condo blocks, high daily volume',w:190,f:310,m:490},
+  {id:'gb-660',ico:'🗑',name:'Garbage Bin — 660L',size:'660L · 4-wheel',dims:'1340×805×1260mm',best:'Commercial, condominiums, retail',w:130,f:210,m:340},
+  {id:'gb-1100',ico:'🗑',name:'Garbage Bin — 1,100L',size:'1,100L · 4-wheel',dims:'1340×1030×1330mm',best:'Factories, condo blocks, high volume',w:190,f:310,m:490},
 ];
 const STAGES=[
-  {n:1,title:'Order Placed',sub:'You submitted the order with full details'},
-  {n:2,title:'Company Arranging',sub:'Cemerlang Endas received your order and is selecting a driver'},
-  {n:3,title:'Driver Assigned & Confirmed',sub:'Driver accepted the job — your order is confirmed'},
-  {n:4,title:'Bin Delivered',sub:'Driver is delivering your bin on the start date'},
-  {n:5,title:'Accept Delivery',sub:'Please confirm you received the bin in good condition'},
-  {n:6,title:'Collection Day',sub:'Driver will collect the bin on your end date'},
-  {n:7,title:'Case Closed',sub:'Order complete — thank you for using Cemerlang Endas'},
+  {n:1,title:'Order placed',sub:'Customer submitted order with full details'},
+  {n:2,title:'Company arranging',sub:'Admin received — selecting driver'},
+  {n:3,title:'Driver assigned & confirmed',sub:'Driver accepted — confirmation sent to customer'},
+  {n:4,title:'Bin delivered',sub:'Driver delivered bin on start date'},
+  {n:5,title:'Customer accepted delivery',sub:'Customer confirmed bin received in good condition'},
+  {n:6,title:'Collection day',sub:'Driver collecting bin on end date'},
+  {n:7,title:'Case closed',sub:'Both driver and customer confirmed closure'},
 ];
+let oSt={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};
+let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
 
-let oSt={step:1,bin:null,dur:null,startDate:null,endDate:null,delTime:null,colTime:null};
-let curUser=null,curODash=null;
-
-// ══ TOAST ══
-function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
+function switchPortal(p,tab){['cust','admin','driver'].forEach(x=>document.getElementById(x+'Panel').classList.remove('on'));document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));document.getElementById(p+'Panel').classList.add('on');if(tab)tab.classList.add('on');if(p==='admin')renderAdmin('aOrders');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
-// ══ AUTH ══
-function showAuth(s){
-  ['authLogin','authReg','authForgot'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById(s==='login'?'authLogin':s==='reg'?'authReg':'authForgot').style.display='flex';
-}
+// ═══ AUTH ═══
+function showAuth(s){['authLogin','authReg','authForgot'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById(s==='login'?'authLogin':s==='reg'?'authReg':'authForgot').style.display='flex';}
 function quickLogin(){document.getElementById('lEmail').value='ahmad@test.com';document.getElementById('lPass').value='test1234';doLogin();}
 function doLogin(){
-  const em=document.getElementById('lEmail').value.trim().toLowerCase();
-  const pw=document.getElementById('lPass').value;
-  if(!em||!pw){toast('⚠️ Please enter email and password');return;}
-  const s=getStore();
-  const c=s.customers.find(x=>x.email.toLowerCase()===em&&x.password===pw&&x.active);
-  if(!c){toast('❌ Incorrect email or password');return;}
+  const em=document.getElementById('lEmail').value.trim().toLowerCase(),pw=document.getElementById('lPass').value;
+  if(!em||!pw){toast('⚠️ Enter email and password');return;}
+  const s=getStore(),c=s.customers.find(x=>x.email.toLowerCase()===em&&x.password===pw&&x.active);
+  if(!c){toast('❌ Email or password incorrect');return;}
   curUser=c;s.currentUser=c.id;saveStore(s);launchApp(c);
 }
 function doSelfReg(){
-  const name=document.getElementById('rName').value.trim();
-  const em=document.getElementById('rEmail').value.trim().toLowerCase();
-  const pw=document.getElementById('rPass').value;
-  if(!name||!em||!pw){toast('⚠️ Name, email and password are required');return;}
+  const name=document.getElementById('rName').value.trim(),em=document.getElementById('rEmail').value.trim().toLowerCase(),pw=document.getElementById('rPass').value;
+  if(!name||!em||!pw){toast('⚠️ Name, email and password required');return;}
   if(pw.length<8){toast('⚠️ Password must be at least 8 characters');return;}
   const s=getStore();
-  if(s.customers.find(c=>c.email.toLowerCase()===em)){toast('⚠️ This email is already registered');return;}
+  if(s.customers.find(c=>c.email.toLowerCase()===em)){toast('⚠️ Email already registered');return;}
   const nc={id:'c'+Date.now(),name,company:document.getElementById('rComp').value.trim(),email:em,phone:document.getElementById('rPhone').value.trim(),addr:document.getElementById('rAddr').value.trim(),password:pw,createdBy:'self',orders:[],active:true};
   s.customers.push(nc);saveStore(s);curUser=nc;launchApp(nc);toast('✅ Account created! Welcome.');
 }
 function doForgot(){
   const em=document.getElementById('forgotEmail').value.trim();
-  if(!em){toast('⚠️ Enter your email address');return;}
+  if(!em){toast('⚠️ Enter your email');return;}
   const s=getStore();
-  if(!s.customers.find(c=>c.email.toLowerCase()===em.toLowerCase())){toast('❌ Email not found. Please contact Cemerlang Endas.');return;}
-  toast('📧 Request sent! Admin will WhatsApp you a new temporary password.',4000);
-  setTimeout(()=>showAuth('login'),2500);
+  if(!s.customers.find(c=>c.email.toLowerCase()===em.toLowerCase())){toast('❌ Email not found in system');return;}
+  toast('📧 Reset link sent (simulated). Check your email.');
+  setTimeout(()=>showAuth('login'),1600);
 }
-function doLogout(){
-  curUser=null;const s=getStore();s.currentUser=null;saveStore(s);
-  document.getElementById('app').style.display='none';
-  showAuth('login');document.getElementById('authLogin').style.display='flex';
-  document.getElementById('oActBar').classList.remove('show');
-}
+function doLogout(){curUser=null;const s=getStore();s.currentUser=null;saveStore(s);document.getElementById('custApp').style.display='none';showAuth('login');document.getElementById('authLogin').style.display='flex';document.getElementById('oActBar').classList.remove('show');}
 function launchApp(c){
   ['authLogin','authReg','authForgot'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('app').style.display='flex';
+  const app=document.getElementById('custApp');app.style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative';
   const h=new Date().getHours();
   document.getElementById('custGreet').textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
   document.getElementById('custName').textContent=c.name;
   const ini=c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('profAva').textContent=ini;
-  document.getElementById('profNameDisp').textContent=c.name;
-  document.getElementById('profEmailDisp').textContent=c.email;
+  document.getElementById('profName2').textContent=c.name;
+  document.getElementById('profEmail2').textContent=c.email;
   document.getElementById('pfName').value=c.name;
   document.getElementById('pfComp').value=c.company||'';
   document.getElementById('pfEmail').value=c.email;
   document.getElementById('pfPhone').value=c.phone||'';
   document.getElementById('pfAddr').value=c.addr||'';
-  loadOrders(c);cNav('sHome',document.querySelector('.cNavItem'));
+  loadOrders(c);cNav('cHome',document.querySelector('.cNavItem'));
 }
 function saveProfile(){
   if(!curUser)return;
   const s=getStore(),i=s.customers.findIndex(c=>c.id===curUser.id);if(i<0)return;
-  s.customers[i].name=document.getElementById('pfName').value.trim()||s.customers[i].name;
-  s.customers[i].company=document.getElementById('pfComp').value.trim();
-  s.customers[i].phone=document.getElementById('pfPhone').value.trim();
-  s.customers[i].addr=document.getElementById('pfAddr').value.trim();
+  s.customers[i].name=document.getElementById('pfName').value;
+  s.customers[i].company=document.getElementById('pfComp').value;
+  s.customers[i].phone=document.getElementById('pfPhone').value;
+  s.customers[i].addr=document.getElementById('pfAddr').value;
   const np=document.getElementById('pfNewPass').value;
   if(np&&np.length>=8){s.customers[i].password=np;document.getElementById('pfNewPass').value='';}
-  else if(np&&np.length>0){toast('⚠️ New password must be at least 8 characters');return;}
-  curUser=s.customers[i];saveStore(s);
-  document.getElementById('custName').textContent=curUser.name;
-  document.getElementById('profNameDisp').textContent=curUser.name;
-  toast('✅ Profile updated successfully!');
+  else if(np){toast('⚠️ Password must be 8+ characters');return;}
+  curUser=s.customers[i];saveStore(s);document.getElementById('custName').textContent=curUser.name;toast('✅ Profile updated!');
 }
-
-// ══ ORDERS ══
 function loadOrders(c){
-  const s=getStore(),all=s.orders.filter(o=>o.custId===c.id);
-  const active=all.filter(o=>o.status!=='completed');
-  document.getElementById('homeActive').innerHTML=active.length?active.map(oCard).join(''):'<div style="font-size:.84rem;color:var(--tx3);font-weight:600;padding:8px 0 12px">No active rentals — place an order below!</div>';
-  document.getElementById('homeRecent').innerHTML=all.length?all.slice().reverse().slice(0,3).map(oCard).join(''):'<div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div>';
-  document.getElementById('ordersList').innerHTML=all.length?all.slice().reverse().map(oCard).join(''):'<div style="text-align:center;padding:36px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div>';
+  const s=getStore(),orders=s.orders.filter(o=>o.custId===c.id);
+  const active=orders.filter(o=>o.status!=='completed'),recent=orders.slice().reverse().slice(0,3);
+  document.getElementById('homeActive').innerHTML=active.length?active.map(oCardHTML).join(''):'<div style="font-size:.84rem;color:var(--tx3);font-weight:600;margin-bottom:10px">No active rentals</div>';
+  document.getElementById('homeRecent').innerHTML=recent.length?recent.map(oCardHTML).join(''):'<div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div>';
+  document.getElementById('ordersList').innerHTML=orders.length?orders.slice().reverse().map(oCardHTML).join(''):'<div style="text-align:center;padding:32px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div>';
   const up=active[0];
-  if(up){
-    document.getElementById('reminderBox').style.display='flex';
-    document.getElementById('reminderTxt').innerHTML=`<b>Upcoming:</b> ${up.bin} delivery on ${up.delDate} · ${up.delTime}. Please ensure your site is accessible.`;
-  } else {
-    document.getElementById('reminderBox').style.display='none';
-  }
+  document.getElementById('homeReminder').innerHTML=up?`<b>Reminder:</b> ${up.bin} delivery on ${up.delDate} · ${up.delTime}. Ensure site is accessible.`:'No upcoming deliveries. Place a new order anytime.';
+  document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;
 }
-function oCard(o){
-  const bc={pending:'b-y',confirmed:'b-b',active:'b-g',completed:'b-gr'}[o.status]||'b-gr';
-  const sl={pending:'Pending',confirmed:'Confirmed',active:'Active',completed:'Completed'}[o.status]||o.status;
-  return `<div class="oCard" onclick="showODash('${o.id}')">
-    <div class="oCardTop"><div><div class="oCardBin">${o.ico} ${o.bin}</div><div class="oCardRef">${o.ref} · ${o.plan}</div></div><span class="badge ${bc}">${sl}</span></div>
-    <div class="oCardMeta"><div class="mChip">📅 ${o.delDate} – ${o.colDate}</div><div class="mChip">💰 ${o.price}</div>${o.driver?`<div class="mChip">🚛 ${o.driver}</div>`:''}</div>
-  </div>`;
-}
+function oCardHTML(o){const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';return `<div class="oCard" onclick="showODash('${o.id}')"><div class="oCardTop"><div><div class="oCardBin">${o.ico} ${o.bin}</div><div class="oCardRef">${o.ref} · ${o.plan}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="oCardMeta"><div class="mChip">📅 ${o.delDate} – ${o.colDate}</div><div class="mChip">💰 ${o.price}</div></div></div>`;}
 
-// ══ NAV ══
-function cNav(id,tab){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
-  if(tab)tab.classList.add('on');
-  document.getElementById('oActBar').classList.remove('show');
-}
-function goNewOrder(){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  document.getElementById('sOrder').classList.add('on');
-  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.cNavItem')[1].classList.add('on');
-  oSt={step:1,bin:null,dur:null,startDate:null,endDate:null,delTime:null,colTime:null};
-  renderBins();updateStep();
-}
-function backFromDash(){
-  if(curUser)loadOrders(curUser);
-  cNav('sOrders',document.querySelectorAll('.cNavItem')[2]);
-}
+// ═══ CUSTOMER NAV ═══
+function cNav(id,tab){document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));if(tab)tab.classList.add('on');document.getElementById('oActBar').classList.remove('show');}
+function goNewOrder(){document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cOrder').classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[1].classList.add('on');oSt={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};renderBins();updateStep();}
+function backFromDash(){if(curUser)loadOrders(curUser);document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cOrders').classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');}
 
-// ══ ORDER FLOW ══
-function renderBins(){
-  document.getElementById('binList').innerHTML=BINS.map(b=>`
-    <div class="binCard ${oSt.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')">
-      <div class="bIco">${b.ico}</div>
-      <div style="flex:1">
-        ${b.pop?'<span class="badge b-g" style="margin-bottom:6px;display:inline-flex">Popular</span><br>':''}
-        <div class="bName">${b.name}</div>
-        <div class="bSub">${b.size} · ${b.dims}</div>
-        <div class="bSub">${b.best}</div>
-        <div class="bPrices">
-          <span class="pPill">Weekly RM${b.w}</span>
-          <span class="pPill hl">14-Day RM${b.f}</span>
-          <span class="pPill">Monthly RM${b.m}</span>
-        </div>
-      </div>
-      <div class="selChk">✓</div>
-    </div>`).join('');
-}
+// ═══ ORDER FLOW ═══
+function renderBins(){document.getElementById('binList').innerHTML=BINS.map(b=>`<div class="binCard ${oSt.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')"><div class="bIco">${b.ico}</div><div style="flex:1">${b.pop?'<span class="badge b-green" style="margin-bottom:5px;display:inline-flex">Popular</span><br>':''}<div class="bName">${b.name}</div><div class="bSub">${b.size} · ${b.dims}</div><div class="bSub">${b.best}</div><div class="bPrices"><span class="pPill">Weekly RM${b.w}</span><span class="pPill hl">14-Day RM${b.f}</span><span class="pPill">Monthly RM${b.m}</span></div></div><div class="selChk">✓</div></div>`).join('');}
 function pickBin(id){oSt.bin=BINS.find(b=>b.id===id);renderBins();renderDur();}
-function renderDur(){
-  if(!oSt.bin)return;
-  const b=oSt.bin;
-  document.getElementById('durGrid').innerHTML=[
-    {k:'w',l:'Weekly',d:'7 days',p:b.w},
-    {k:'f',l:'14 Days',d:'2 weeks',p:b.f,sv:'Best value 💚'},
-    {k:'m',l:'Monthly',d:'30 days',p:b.m},
-  ].map(x=>`<div class="durCard ${oSt.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${x.k==='w'?7:x.k==='f'?14:30})">
-    <div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div>
-    <div class="dPrice">RM${x.p}</div>${x.sv?`<div class="dSave">${x.sv}</div>`:''}
-  </div>`).join('');
-}
+function renderDur(){if(!oSt.bin)return;const b=oSt.bin;document.getElementById('durGrid').innerHTML=[{k:'w',l:'Weekly',d:'7 days',p:b.w},{k:'f',l:'14 Days',d:'2 weeks',p:b.f,sv:'Best value 💚'},{k:'m',l:'Monthly',d:'30 days',p:b.m}].map(x=>`<div class="durCard ${oSt.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${parseInt(x.d)})"><div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div><div class="dPrice">RM${x.p}</div>${x.sv?`<div class="dSave">${x.sv}</div>`:''}</div>`).join('');}
 function pickDur(k,days){oSt.dur=k;oSt.durDays=days;renderDur();}
-function buildTGrid(gid,sk){
-  const el=document.getElementById(gid);el.innerHTML='';
-  for(let h=8;h<20;h++){
-    const lbl=`${h}:00 – ${h+1}:00`,d=document.createElement('div');
-    d.className='tSlot'+(oSt[sk]===lbl?' sel':'');
-    d.textContent=lbl;
-    d.onclick=()=>{el.querySelectorAll('.tSlot').forEach(s=>s.classList.remove('sel'));d.classList.add('sel');oSt[sk]=lbl;};
-    el.appendChild(d);
-  }
-}
+function buildTGrid(gid,sk){const el=document.getElementById(gid);el.innerHTML='';for(let h=8;h<20;h++){const lbl=`${h}:00–${h+1}:00`,d=document.createElement('div');d.className='tSlot'+(oSt[sk]===lbl?' sel':'');d.textContent=lbl;d.onclick=()=>{el.querySelectorAll('.tSlot').forEach(s=>s.classList.remove('sel'));d.classList.add('sel');oSt[sk]=lbl;};el.appendChild(d);}}
 function updateDates(){
   const v=document.getElementById('oDate').value;if(!v||!oSt.dur)return;
-  const days={w:7,f:14,m:30}[oSt.dur]||7;
-  const sv=new Date(v+'T00:00:00'),ev=new Date(sv);ev.setDate(ev.getDate()+days-1);
+  const days={w:7,f:14,m:30}[oSt.dur]||7,sv=new Date(v+'T00:00:00'),ev=new Date(sv);ev.setDate(ev.getDate()+days-1);
   oSt.startDate=sv;oSt.endDate=ev;
   const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const fmt=d=>D[d.getDay()]+', '+d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
-  document.getElementById('oDD').textContent=fmt(sv);
-  document.getElementById('oCD').textContent=fmt(ev);
-  document.getElementById('oDR').style.display='block';
-  oSt.delTime=null;oSt.colTime=null;
-  buildTGrid('dtGrid','delTime');buildTGrid('ctGrid','colTime');
+  const fmt=d=>D[d.getDay()]+', '+d.getDate()+' '+M[d.getMonth()];
+  document.getElementById('oDD').textContent=fmt(sv);document.getElementById('oCD').textContent=fmt(ev);
+  document.getElementById('oDR').style.display='block';buildTGrid('dtGrid','delTime');buildTGrid('ctGrid','colTime');
 }
 function buildSumm(){
-  if(!oSt.bin)return;
-  const b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
+  if(!oSt.bin)return;const b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
   const dL={w:'Weekly (7 days)',f:'14-Day (Fortnight)',m:'Monthly (30 days)'}[oSt.dur];
-  document.getElementById('oSumm').innerHTML=`
-    <div class="oCardTop">
-      <div><div class="oCardBin">${b.ico} ${b.name}</div><div class="oCardRef">${dL} · ${b.size}</div></div>
-      <div style="font-size:1.1rem;font-weight:900;color:var(--g1)">RM ${price}</div>
-    </div>
-    <div class="oCardMeta">
-      <div class="mChip">📅 ${document.getElementById('oDD').textContent}</div>
-      <div class="mChip">→ ${document.getElementById('oCD').textContent}</div>
-      <div class="mChip">🚚 Deliver ${oSt.delTime||'TBC'}</div>
-      <div class="mChip">📦 Collect ${oSt.colTime||'TBC'}</div>
-      <div class="mChip">📍 ${document.getElementById('oStreet').value||'—'}, ${document.getElementById('oCity').value||'—'}</div>
-      <div class="mChip">👤 ${document.getElementById('oContact').value||'—'} · ${document.getElementById('oPhone').value||'—'}</div>
-    </div>`;
+  document.getElementById('oSumm').innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${b.ico} ${b.name}</div><div class="oCardRef">${dL}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">RM${price}</div></div><div class="oCardMeta"><div class="mChip">📅 ${document.getElementById('oDD').textContent} → ${document.getElementById('oCD').textContent}</div><div class="mChip">🚚 ${oSt.delTime||'TBC'}</div><div class="mChip">📦 ${oSt.colTime||'TBC'}</div><div class="mChip">📍 ${document.getElementById('oStreet').value||'—'}, ${document.getElementById('oCity').value||'—'}</div><div class="mChip">👤 ${document.getElementById('oContact').value||'—'} · ${document.getElementById('oPhone').value||'—'}</div></div>`;
 }
 function orderNext(){
   const s=oSt.step;
-  if(s===1&&!oSt.bin){toast('⚠️ Please select a bin first');return;}
-  if(s===2&&!oSt.dur){toast('⚠️ Please choose a rental duration');return;}
-  if(s===3){
-    if(!oSt.startDate){toast('⚠️ Please pick a start date');return;}
-    if(!oSt.delTime){toast('⚠️ Please choose a preferred delivery time');return;}
-    if(!oSt.colTime){toast('⚠️ Please choose a preferred collection time');return;}
-  }
-  if(s===4){
-    if(!document.getElementById('oContact').value.trim()){toast('⚠️ Please enter a contact person name');return;}
-    if(!document.getElementById('oStreet').value.trim()){toast('⚠️ Please enter the delivery address');return;}
-    if(!document.getElementById('oCity').value.trim()){toast('⚠️ Please enter the city');return;}
-    buildSumm();
-  }
-  if(s===5)return;
-  oSt.step++;updateStep();
+  if(s===1&&!oSt.bin){toast('⚠️ Select a bin first');return;}
+  if(s===2&&!oSt.dur){toast('⚠️ Choose a duration');return;}
+  if(s===3){if(!oSt.startDate){toast('⚠️ Pick a start date');return;}if(!oSt.delTime){toast('⚠️ Choose delivery time');return;}if(!oSt.colTime){toast('⚠️ Choose collection time');return;}}
+  if(s===4){if(!document.getElementById('oContact').value||!document.getElementById('oStreet').value){toast('⚠️ Fill in contact & address');return;}buildSumm();}
+  if(s===5)return;oSt.step++;updateStep();
 }
 function orderBack(){if(oSt.step>1){oSt.step--;updateStep();}}
 function updateStep(){
-  for(let i=1;i<=5;i++){
-    document.getElementById('oS'+i).style.display='none';
-    const si=document.getElementById('sp'+i);si.classList.remove('on','done');
-    if(i<oSt.step)si.classList.add('done');
-  }
-  document.getElementById('oS'+oSt.step).style.display='block';
-  document.getElementById('sp'+oSt.step).classList.add('on');
+  for(let i=1;i<=5;i++){document.getElementById('oS'+i).style.display='none';const si=document.getElementById('sp'+i);si.classList.remove('on','done');if(i<oSt.step)si.classList.add('done');}
+  document.getElementById('oS'+oSt.step).style.display='block';document.getElementById('sp'+oSt.step).classList.add('on');
   document.getElementById('oActBar').classList.toggle('show',oSt.step<5);
   document.getElementById('oBack').style.display=oSt.step>1?'block':'none';
-  document.getElementById('oNext').textContent=oSt.step===4?'Review Order →':'Next →';
-  if(oSt.step===2)renderDur();
-  document.getElementById('sOrder').scrollTop=0;
+  document.getElementById('oNext').textContent=oSt.step===4?'Review →':'Next →';
+  if(oSt.step===2)renderDur();document.getElementById('cOrder').scrollTop=0;
 }
 function submitOrder(){
   if(!curUser){toast('⚠️ Please log in first');return;}
-  const btn=document.getElementById('submitBtn');
-  btn.textContent='Placing order…';btn.disabled=true;
+  const btn=document.getElementById('submitBtn');btn.textContent='Placing order…';btn.disabled=true;
   const s=getStore(),b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
   const dL={w:'Weekly',f:'14-Day',m:'Monthly'}[oSt.dur];
-  const no={
-    id:'o'+Date.now(),
-    ref:'CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000),
-    custId:curUser.id,ico:b.ico,bin:b.name,plan:dL,
-    delDate:document.getElementById('oDD').textContent,
-    delTime:oSt.delTime,
-    colDate:document.getElementById('oCD').textContent,
-    colTime:oSt.colTime,
-    price:'RM '+price,status:'pending',driver:null,stage:1,
-    addr:document.getElementById('oStreet').value+', '+document.getElementById('oPost').value+' '+document.getElementById('oCity').value,
-    contact:document.getElementById('oContact').value+' · '+document.getElementById('oPhone').value,
-    placement:document.getElementById('oPlacement').value,
-    notes:document.getElementById('oNotes').value,
-    createdAt:new Date().toISOString()
-  };
-  s.orders.push(no);
-  const ci=s.customers.findIndex(c=>c.id===curUser.id);
-  if(ci>=0)s.customers[ci].orders.push(no.id);
-  saveStore(s);
-  setTimeout(()=>{
-    btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
-    toast('🎉 Order placed! Cemerlang Endas will WhatsApp you shortly.',4000);
-    loadOrders(curUser);
-    cNav('sOrders',document.querySelectorAll('.cNavItem')[2]);
-    document.getElementById('oActBar').classList.remove('show');
-    // reset form
-    ['oContact','oPhone','oStreet','oPost','oCity','oNotes'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('oPlacement').value='';
-    document.getElementById('oDR').style.display='none';
-    document.getElementById('oDate').value='';
-  },1400);
+  const no={id:'o'+Date.now(),ref:'CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000),custId:curUser.id,ico:b.ico,bin:b.name,plan:dL,delDate:document.getElementById('oDD').textContent,delTime:oSt.delTime,colDate:document.getElementById('oCD').textContent,colTime:oSt.colTime,price:'RM '+price,status:'pending',driver:null,stage:1,addr:document.getElementById('oStreet').value+', '+document.getElementById('oPost').value+' '+document.getElementById('oCity').value,contact:document.getElementById('oContact').value+' · '+document.getElementById('oPhone').value,notes:document.getElementById('oNotes').value};
+  s.orders.push(no);const ci=s.customers.findIndex(c=>c.id===curUser.id);if(ci>=0)s.customers[ci].orders.push(no.id);saveStore(s);
+  setTimeout(()=>{btn.textContent='✓ Confirm & Place Order';btn.disabled=false;toast('🎉 Order placed! We\'ll WhatsApp you shortly.');loadOrders(curUser);cNav('cOrders',document.querySelectorAll('.cNavItem')[2]);document.getElementById('oActBar').classList.remove('show');document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;},1200);
 }
 
-// ══ ORDER DASHBOARD ══
+// ═══ ORDER DASHBOARD ═══
 function showODash(id){
-  const s=getStore(),o=s.orders.find(x=>x.id===id);if(!o)return;
-  curODash=o;
-  document.getElementById('dashRef').textContent=o.ref;
-  document.getElementById('dashBin').textContent=o.ico+' '+o.bin;
-  const bc={pending:'b-y',confirmed:'b-b',active:'b-g',completed:'b-gr'}[o.status]||'b-gr';
-  const sl={pending:'Pending',confirmed:'Confirmed',active:'Active',completed:'Completed'}[o.status]||o.status;
-  document.getElementById('dashBadge').innerHTML=`<span class="badge ${bc}">${sl}</span>`;
-  document.getElementById('dashMeta').innerHTML=`
-    <span>📅 ${o.delDate} – ${o.colDate}</span>
-    <span>🚚 Deliver ${o.delTime}</span>
-    <span>📦 Collect ${o.colTime}</span>
-    <span>💰 ${o.price}</span>
-    <span>🚛 ${o.driver||'Driver being arranged…'}</span>`;
+  const s=getStore(),o=s.orders.find(x=>x.id===id);if(!o)return;curODash=o;
+  document.getElementById('dashRef').textContent=o.ref;document.getElementById('dashBin').textContent=o.ico+' '+o.bin;
+  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
+  document.getElementById('dashBadge').innerHTML=`<span class="badge ${bc}">${o.status}</span>`;
+  document.getElementById('dashMeta').innerHTML=`<span>📅 ${o.delDate} – ${o.colDate}</span><span>🚚 ${o.delTime}</span><span>📦 ${o.colTime}</span><span>💰 ${o.price}</span><span>🚛 ${o.driver||'Arranging…'}</span>`;
   const cur=o.stage||1;
   document.getElementById('dashStages').innerHTML=STAGES.map(st=>{
     const done=st.n<cur,active=st.n===cur;
-    const dc=done?'done':active?'active':'pending';
-    const dt=done?'✓':active?'●':st.n;
+    const dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
     let acts='';
-    if(active&&st.n===5)acts=`<div class="stageActs"><button class="btn btn-g sm" onclick="custAccept('${o.id}')">✓ Confirm Delivery Received</button></div>`;
-    if(active&&st.n===7)acts=`<div class="stageActs"><button class="btn btn-g sm" onclick="custClose('${o.id}')">🔒 Close Case & Confirm Collection</button></div>`;
-    return `<div class="stageRow">
-      <div class="sDot ${dc}">${dt}</div>
-      <div style="flex:1">
-        <div class="stageTitle">${st.title}</div>
-        <div class="stageSub">${st.sub}</div>
-        ${done?'<div class="stageTime" style="color:var(--g2)">✓ Completed</div>':''}
-        ${active?'<div class="stageTime" style="color:var(--y3)">● In progress now</div>':''}
-        ${acts}
-      </div>
-    </div>`;
+    if(active&&st.n===5)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custAccept('${o.id}')">✓ Accept Delivery</button></div>`;
+    if(active&&st.n===7)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custClose('${o.id}')">🔒 Close My Case</button></div>`;
+    return `<div class="stageRow"><div class="sDot ${dc}">${dt}</div><div class="stageContent"><div class="stageTitle">${st.title}</div><div class="stageSub">${st.sub}</div>${done?'<div class="stageTime" style="color:var(--g2)">✓ Completed</div>':''}${active?'<div class="stageTime" style="color:var(--y3)">● In progress</div>':''}${acts}</div></div>`;
   }).join('');
-  // Chat
   const chat=document.getElementById('dashChat');
-  chat.innerHTML=`<div class="chatMsg sys">Order ${o.ref} created — ${o.createdAt?new Date(o.createdAt).toLocaleDateString('en-MY'):''}</div>`;
-  if(o.stage>=3&&o.driver){
-    chat.innerHTML+=`<div class="chatMsg them"><div class="cmSender">Driver — ${o.driver}</div>Hi, I am your driver for this order. I will call you 30 minutes before arrival on delivery day.<div class="cmTime">Today</div></div>`;
-  }
-  if(o.stage>=4){
-    chat.innerHTML+=`<div class="chatMsg sys">Bin delivered ✓ — Please confirm receipt</div>`;
-  }
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  document.getElementById('sODash').classList.add('on');
-  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.cNavItem')[2].classList.add('on');
+  chat.innerHTML=`<div class="chatMsg sys">Order ${o.ref} created</div>`;
+  if(o.driver)chat.innerHTML+=`<div class="chatMsg them"><div class="cmSender">Driver — ${o.driver}</div>Hello, I am your driver. I will contact you 30 minutes before arrival.<div class="cmTime">Today</div></div>`;
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cODash').classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');
   document.getElementById('oActBar').classList.remove('show');
-  setTimeout(()=>{chat.scrollTop=chat.scrollHeight;},100);
 }
-function custAccept(id){
-  const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;
-  s.orders[i].stage=5;saveStore(s);
-  toast('✅ Delivery confirmed! Cemerlang Endas has been notified.',3500);
-  showODash(id);
-}
-function custClose(id){
-  const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;
-  s.orders[i].stage=7;s.orders[i].status='completed';saveStore(s);
-  toast('🔒 Case closed. Thank you for using Cemerlang Endas!',4000);
-  showODash(id);
-}
-function sendChat(){
-  const inp=document.getElementById('chatInp'),msg=inp.value.trim();if(!msg)return;
-  const w=document.getElementById('dashChat');
-  const el=document.createElement('div');el.className='chatMsg me';
-  el.innerHTML=msg+'<div class="cmTime">Just now</div>';
-  w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;
-  setTimeout(()=>{
-    const r=document.createElement('div');r.className='chatMsg sys';
-    r.textContent='Message delivered to driver';
-    w.appendChild(r);w.scrollTop=w.scrollHeight;
-  },800);
-}
+function custAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=5;saveStore(s);toast('✅ Delivery accepted! Company notified.');showODash(id);}
+function custClose(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=7;s.orders[i].status='completed';saveStore(s);toast('🔒 Case closed. Thank you!');showODash(id);}
+function sendChat(){const inp=document.getElementById('chatInp'),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('dashChat');const el=document.createElement('div');el.className='chatMsg me';el.innerHTML=msg+'<div class="cmTime">Now</div>';w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='chatMsg sys';r.textContent='Message delivered to driver';w.appendChild(r);w.scrollTop=w.scrollHeight;},700);}
 
-// ══ DOCUMENTS ══
-function showDoc(type){
-  const o=curODash;if(!o)return;
-  document.getElementById('docContent').innerHTML=type==='do'?buildDO(o):buildInv(o);
-  document.getElementById('docModal').classList.add('show');
-}
-function buildDO(o){
-  const num=o.ref.replace('CE-','');
-  return `<div>
-    <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
-      <div style="font-size:.68rem;font-weight:700;opacity:.75;margin-bottom:3px;letter-spacing:.06em">DELIVERY ORDER</div>
-      <div style="font-size:1.1rem;font-weight:900;margin-bottom:3px">Cemerlang Endas Sdn. Bhd.</div>
-      <div style="font-size:.76rem;opacity:.85">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
-      <div style="font-size:.76rem;opacity:.85">Tel: 03-6251 3977 / 6251 6933 &nbsp;·&nbsp; Fax: 03-6252 0977</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-      <div><div class="sLbl">D/O No.</div><div style="font-size:.95rem;font-weight:900">DO-${num}</div></div>
-      <div style="text-align:right"><div class="sLbl">Date</div><div style="font-size:.88rem;font-weight:800">${o.delDate}</div></div>
-    </div>
-    <div class="divider"></div>
-    <div style="margin-bottom:12px;font-size:.84rem">
-      <div class="sLbl">Deliver To</div>
-      <div style="font-weight:800">${o.contact.split('·')[0].trim()}</div>
-      <div style="color:var(--tx2);font-weight:600">${o.addr}</div>
-      <div style="color:var(--tx2);font-weight:600">${o.contact}</div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:.84rem">
-      <div class="sLbl">Items Delivered</div>
-      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bdr);font-weight:700">
-        <span>${o.ico} ${o.bin}</span><span>1 unit</span>
-      </div>
-      <div style="color:var(--tx2);font-size:.77rem;padding:6px 0 2px;font-weight:600">Rental Period: ${o.plan} · ${o.delDate} – ${o.colDate}</div>
-      <div style="color:var(--tx2);font-size:.77rem;padding-bottom:2px;font-weight:600">Delivery Time Window: ${o.delTime}</div>
-      <div style="color:var(--tx2);font-size:.77rem;font-weight:600">Driver: ${o.driver||'TBC'}</div>
-    </div>
-    <div class="divider"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.77rem">
-      <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;text-align:center">
-        <div style="color:var(--tx3);font-size:.64rem;font-weight:800;text-transform:uppercase;margin-bottom:22px">Customer Signature</div>
-        <div style="border-top:1px solid var(--bdr);padding-top:6px;color:var(--tx3);font-weight:700">Name & Date</div>
-      </div>
-      <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;text-align:center">
-        <div style="color:var(--tx3);font-size:.64rem;font-weight:800;text-transform:uppercase;margin-bottom:22px">Driver Signature</div>
-        <div style="border-top:1px solid var(--bdr);padding-top:6px;color:var(--tx3);font-weight:700">Name & Date</div>
-      </div>
-    </div>
-    <div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:var(--rads);font-size:.74rem;color:var(--tx2);font-weight:600;line-height:1.5">
-      This document serves as proof of delivery. Please retain for your records.
-    </div>
-    <button class="btn btn-ghost fw sm" style="margin-top:12px" onclick="toast('🖨 Use browser menu → Print → Save as PDF')">🖨 Print / Save as PDF</button>
-  </div>`;}
-function buildInv(o){
-  const num=o.ref.replace('CE-','');
-  return `<div>
-    <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
-      <div style="font-size:.68rem;font-weight:700;opacity:.75;margin-bottom:3px;letter-spacing:.06em">TAX INVOICE</div>
-      <div style="font-size:1.1rem;font-weight:900;margin-bottom:3px">Cemerlang Endas Sdn. Bhd.</div>
-      <div style="font-size:.76rem;opacity:.85">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
-      <div style="font-size:.76rem;opacity:.85">Tel: 03-6251 3977 &nbsp;·&nbsp; Fax: 03-6252 0977</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-      <div><div class="sLbl">Invoice No.</div><div style="font-size:.95rem;font-weight:900">INV-${num}</div></div>
-      <div style="text-align:right">
-        <div class="sLbl">Invoice Date</div>
-        <div style="font-size:.88rem;font-weight:800">${o.delDate}</div>
-        <div style="color:var(--r1);font-weight:800;font-size:.74rem;margin-top:2px">Due: 3 working days</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div style="margin-bottom:12px;font-size:.84rem">
-      <div class="sLbl">Bill To</div>
-      <div style="font-weight:800">${o.contact.split('·')[0].trim()}</div>
-      <div style="color:var(--tx2);font-weight:600">${o.addr}</div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:.84rem;margin-bottom:10px">
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:.68rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr)">
-        <span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Amount</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--bdr)">
-        <div>
-          <div style="font-weight:800">${o.bin}</div>
-          <div style="font-size:.74rem;color:var(--tx2);font-weight:600">${o.plan} Rental · ${o.delDate} – ${o.colDate}</div>
-          <div style="font-size:.74rem;color:var(--tx2);font-weight:600">Includes delivery & collection</div>
-        </div>
-        <div style="text-align:right;font-weight:700">1</div>
-        <div style="text-align:right;font-weight:900">${o.price}</div>
-      </div>
-    </div>
-    <div style="font-size:.84rem">
-      <div style="display:flex;justify-content:space-between;padding:5px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>${o.price}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid var(--g1);margin-top:5px;font-weight:900;font-size:.98rem">
-        <span>Total Payable</span><span style="color:var(--g1)">${o.price}</span>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div style="background:var(--b2);border-radius:var(--rads);padding:14px;font-size:.82rem;margin-bottom:12px">
-      <div style="font-weight:900;color:var(--b3);margin-bottom:8px">💳 Payment Details</div>
-      <div style="color:var(--b3);font-weight:700;line-height:2">
-        Bank: <b>Maybank Berhad</b><br>
-        Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>
-        Account No.: <b>1234-5678-9012</b><br>
-        Reference: <b>INV-${num}</b>
-      </div>
-    </div>
-    <div style="font-size:.74rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">
-      Payment is due within 3 working days of invoice date. Please use the invoice number as your payment reference and WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).
-    </div>
-    <button class="btn btn-ghost fw sm" onclick="toast('🖨 Use browser menu → Print → Save as PDF')">🖨 Print / Save as PDF</button>
-  </div>`;}
+// ═══ DOCUMENTS ═══
+function showDoc(type){const o=curODash;if(!o)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(o):buildInv(o);document.getElementById('docModal').classList.add('show');}
+function buildDO(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">DELIVERY ORDER</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 / 6251 6933 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem"><div><div class="sLbl">D/O Number</div><div style="font-weight:900">DO-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Deliver To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div><div style="color:var(--tx2);font-weight:600">${o.contact}</div></div><div class="divider"></div><div style="font-size:.82rem"><div class="sLbl">Items</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-weight:700"><span>${o.ico} ${o.bin}</span><span>1 unit</span></div><div style="color:var(--tx2);font-size:.76rem;padding:6px 0 2px">Rental: ${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="color:var(--tx2);font-size:.76rem;padding-bottom:2px">Delivery window: ${o.delTime}</div><div style="color:var(--tx2);font-size:.76rem">Driver: ${o.driver||'TBC'}</div></div><div class="divider"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:.76rem"><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Customer Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Driver Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div></div><button class="btn btn-ghost btn-full btn-sm" style="margin-top:12px" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
+function buildInv(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">TAX INVOICE</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.82rem"><div><div class="sLbl">Invoice No.</div><div style="font-weight:900">INV-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div><div style="color:var(--r1);font-weight:800;font-size:.72rem;margin-top:2px">Due 3 working days</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Bill To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div></div><div class="divider"></div><div style="font-size:.82rem;margin-bottom:10px"><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;font-size:.66rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr)"><span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Amount</span></div><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div><div style="font-weight:800">${o.bin}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">Incl. delivery & collection</div></div><div style="text-align:right;font-weight:700">1</div><div style="text-align:right;font-weight:900">${o.price}</div></div></div><div style="font-size:.82rem"><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>${o.price}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div><div style="display:flex;justify-content:space-between;padding:9px 0;border-top:2px solid var(--g1);margin-top:4px;font-weight:900;font-size:.95rem"><span>Total</span><span style="color:var(--g1)">${o.price}</span></div></div><div class="divider"></div><div style="background:var(--b2);border-radius:var(--rads);padding:12px;font-size:.8rem;margin-bottom:12px"><div style="font-weight:900;color:var(--b3);margin-bottom:7px">💳 Payment Details</div><div style="color:var(--b3);font-weight:700;line-height:1.9">Bank: <b>Maybank Berhad</b><br>Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>Account No.: <b>1234-5678-9012</b><br>Reference: <b>INV-${o.ref.split('-').pop()}</b></div></div><div style="font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">Payment due within 3 working days. WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).</div><button class="btn btn-ghost btn-full btn-sm" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
 
-// ══ INIT ══
-document.addEventListener('DOMContentLoaded',()=>{
+// ═══ ADMIN ═══
+function adminNav(s,item){document.querySelectorAll('.aMenuItem').forEach(m=>m.classList.remove('on'));if(item)item.classList.add('on');renderAdmin(s);}
+function renderAdmin(sc){
+  const s=getStore(),el=document.getElementById('aMain');
+  const pending=s.orders.filter(o=>o.status==='pending');
+  if(sc==='aOrders'){
+    el.innerHTML=`<h2>📦 Orders <span style="color:var(--r1);font-size:.75rem;font-weight:700">${pending.length} pending</span></h2>
+    <div class="aStats"><div class="aStat"><div class="asNum">${s.orders.length}</div><div class="asLbl">Total Orders</div></div><div class="aStat"><div class="asNum">${pending.length}</div><div class="asLbl">Pending</div><div class="asSub">Need action</div></div><div class="aStat"><div class="asNum">${s.orders.filter(o=>o.status==='confirmed'||o.status==='active').length}</div><div class="asLbl">Active</div></div><div class="aStat"><div class="asNum">${s.customers.length}</div><div class="asLbl">Customers</div></div></div>
+    <div class="notifBox"><p><b style="color:#fff">Confirmation Mode</b><br>A = Admin sends manually · B = Auto-notify customer &amp; company simultaneously</p><label class="toggle"><input type="checkbox" id="notifTog" ${s.notifMode==='B'?'checked':''} onchange="toggleNotif(this.checked)"><div class="trkOuter"><div class="trkThumb"></div></div><span id="notifLbl">${s.notifMode==='B'?'Mode B':'Mode A'}</span></label></div>
+    ${pending.length?pending.map(o=>adminORow(o,s)).join(''):'<div style="text-align:center;padding:24px;color:#4a7a4a;font-size:.85rem;font-weight:700">No pending orders 🎉</div>'}
+    <div style="color:#4a7a4a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 9px">All Orders</div>
+    ${s.orders.filter(o=>o.status!=='pending').map(o=>adminORow(o,s)).join('')}`;
+  } else if(sc==='aODash'){
+    el.innerHTML=`<h2>🪟 Order Dashboards</h2><p style="font-size:.8rem;color:#5a8a5a;font-weight:700;margin-bottom:14px">Live tracking for every order. Act, view chat, and join as admin.</p>${s.orders.map(o=>adminODash(o,s)).join('')}`;
+  } else if(sc==='aCustomers'){
+    el.innerHTML=`<h2>👥 Customers</h2>
+    <div style="background:#131d14;border:1px solid #233023;border-radius:var(--rad);padding:16px;margin-bottom:14px">
+      <div style="color:#fff;font-size:.92rem;font-weight:900;margin-bottom:14px">➕ Register New Customer</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div><div class="aLab">Full Name *</div><input class="aInp" type="text" id="ncName" placeholder="Customer full name"></div>
+        <div><div class="aLab">Company</div><input class="aInp" type="text" id="ncComp" placeholder="Sdn. Bhd. / Individual"></div>
+        <div><div class="aLab">Email Address *</div><input class="aInp" type="email" id="ncEmail" placeholder="customer@email.com"></div>
+        <div><div class="aLab">Phone Number</div><input class="aInp" type="tel" id="ncPhone" placeholder="01x-xxxx xxxx"></div>
+      </div>
+      <div style="margin-top:4px"><div class="aLab">Default Delivery Address</div><input class="aInp" type="text" id="ncAddr" placeholder="No., Jalan, Postcode, City"></div>
+      <div style="margin-top:4px"><div class="aLab">Temporary Password *</div>
+        <div style="display:flex;gap:8px;align-items:center"><input class="aInp" type="text" id="ncPass" placeholder="Min 8 chars — customer changes later" style="flex:1;margin-bottom:0"><button class="abtn abtn-ghost" onclick="genPass()" style="white-space:nowrap;flex-shrink:0">Generate</button></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="abtn abtn-g" style="flex:1;padding:11px;font-size:.84rem;border-radius:var(--rads)" onclick="adminRegCust()">✓ Register &amp; Get Login Details</button></div>
+    </div>
+    <div style="color:#4a7a4a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">Registered Customers (${s.customers.length})</div>
+    ${s.customers.map(c=>custRegCard(c,s)).join('')}`;
+  } else if(sc==='aDrivers'){
+    el.innerHTML=`<h2>🚛 Drivers</h2><div class="aStats"><div class="aStat"><div class="asNum">${s.drivers.filter(d=>d.status.startsWith('Online')).length}</div><div class="asLbl">Online</div></div><div class="aStat"><div class="asNum">${s.drivers.filter(d=>d.status.includes('Available')).length}</div><div class="asLbl">Available</div></div><div class="aStat"><div class="asNum">${s.drivers.reduce((a,d)=>a+d.jobs,0)}</div><div class="asLbl">Jobs Today</div></div><div class="aStat"><div class="asNum">${s.drivers.length}</div><div class="asLbl">Total</div></div></div>${s.drivers.map(d=>`<div class="aRow"><div class="arTop"><div style="display:flex;gap:11px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:900;color:#fff;flex-shrink:0">${d.ava}</div><div><div class="arBin">${d.name}</div><div class="arRef">${d.plate} · ${d.jobs} jobs today</div></div></div><span class="badge ${d.status.startsWith('Online')?'b-green':'b-gray'}">${d.status.split('·')[0].trim()}</span></div><div class="arMeta"><div class="arMI">🔄 ${d.status}</div></div></div>`).join('')}<button class="abtn abtn-g" style="margin-top:6px;padding:10px 16px;border-radius:var(--rads)" onclick="toast('+ Add Driver — coming in full version')">+ Add Driver</button>`;
+  } else if(sc==='aReports'){
+    el.innerHTML=`<h2>📊 Reports</h2><div class="aStats"><div class="aStat"><div class="asNum">RM 12,480</div><div class="asLbl">May Revenue</div><div class="asSub">↑14% vs Apr</div></div><div class="aStat"><div class="asNum">${s.orders.length}</div><div class="asLbl">Orders</div></div><div class="aStat"><div class="asNum">${s.customers.length}</div><div class="asLbl">Customers</div></div><div class="aStat"><div class="asNum">${s.drivers.length}</div><div class="asLbl">Drivers</div></div></div><div class="aRow"><div style="color:#ccc;font-size:.8rem;font-weight:800;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Revenue by Bin Type</div>${[['RoRo Bins','RM 7,200','58%','#27924f'],['Leach Bins','RM 3,040','24%','#F5A623'],['Garbage Bins','RM 2,240','18%','#1565C0']].map(([n,v,p,c])=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="color:#ccc;font-size:.8rem;font-weight:700">${n}</span><span style="color:#fff;font-size:.8rem;font-weight:900">${v} <span style="color:#4a7a4a">${p}</span></span></div><div style="height:7px;background:#1e2a1e;border-radius:99px;overflow:hidden"><div style="height:100%;width:${p};background:${c};border-radius:99px"></div></div></div>`).join('')}</div><div class="aRow"><div style="color:#ccc;font-size:.8rem;font-weight:800;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Customers</div>${s.customers.map(c=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2a1e"><div><div style="color:#fff;font-size:.84rem;font-weight:800">${c.name}</div><div style="color:#5a7a5a;font-size:.72rem">${c.email}</div></div><span class="badge b-green">${c.orders.length} orders</span></div>`).join('')}</div>`;
+  }
+}
+function adminORow(o,s){
+  const c=s.customers.find(x=>x.id===o.custId)||{name:'—'};
+  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
+  const waMsg=encodeURIComponent(`*Order Confirmed — Cemerlang Endas*\nRef: ${o.ref}\nBin: ${o.bin}\nDeliver: ${o.delDate} · ${o.delTime}\nCollect: ${o.colDate} · ${o.colTime}\nAddress: ${o.addr}\nTotal: ${o.price}\n\nPlease ensure your site is accessible on delivery day. Driver will call 30 min before arrival. TQ`);
+  return `<div class="aRow"><div class="arTop"><div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan} · ${c.name}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="arMeta"><div class="arMI">👤 ${o.contact}</div><div class="arMI">📍 ${o.addr}</div><div class="arMI">🚚 ${o.delDate} · ${o.delTime}</div><div class="arMI">📦 Collect ${o.colDate} · ${o.colTime}</div><div class="arMI">💰 ${o.price}</div>${o.driver?`<div class="arMI">🚛 ${o.driver}</div>`:''}</div><div class="arActs">${o.status==='pending'?`<button class="abtn abtn-g" onclick="adminAccept('${o.id}')">✓ Accept</button><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button><a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`:`<button class="abtn abtn-b" onclick="openAssign('${o.id}')">Change Driver</button><a href="https://wa.me/?text=${encodeURIComponent('Reminder: Order '+o.ref)}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`}<button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','inv')">🧾 Invoice</button><button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','do')">📄 D/O</button></div></div>`;
+}
+function adminODash(o,s){
+  const cur=o.stage||1,nm=s.notifMode,uid=o.id;
+  const stages=STAGES.map(st=>{
+    const done=st.n<cur,active=st.n===cur,dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
+    let acts='';
+    if(active&&st.n===2)acts=`<div class="asActs"><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button>${nm==='B'?`<button class="abtn abtn-ghost" onclick="toast('📱 Auto-notifying both parties…')">Auto-Notify Both</button>`:`<button class="abtn abtn-g" onclick="adminSendConf('${o.id}')">Send Confirmation to Client</button>`}</div>`;
+    if(active&&st.n===4)acts=`<div class="asActs"><span style="color:#5a7a5a;font-size:.72rem;font-weight:700">Awaiting driver to mark delivered</span></div>`;
+    if(active&&st.n===5)acts=`<div class="asActs"><span style="color:#5a7a5a;font-size:.72rem;font-weight:700">Awaiting customer acceptance</span></div>`;
+    return `<div class="aStRow"><div class="asDot ${dc}">${dt}</div><div style="flex:1"><div class="asTitle">${st.title}</div><div class="asSub2">${st.sub}</div>${done?'<div style="color:#4a7a4a;font-size:.68rem;font-weight:700;margin-top:3px">✓ Done</div>':''}${active?'<div style="color:var(--y1);font-size:.68rem;font-weight:700;margin-top:3px">● Active now</div>':''}${acts}</div></div>`;
+  }).join('');
+  const c=s.customers.find(x=>x.id===o.custId)||{name:'—'};
+  return `<div class="aODash"><div class="aODashHdr"><div><div style="color:#5a7a5a;font-size:.68rem;font-weight:700;margin-bottom:2px">${o.ref} · ${o.plan} · ${c.name}</div><h4>${o.ico} ${o.bin}</h4><div style="color:#6a9a6a;font-size:.73rem;font-weight:700;margin-top:3px">${o.delDate} → ${o.colDate} · ${o.price}</div></div><span class="badge ${o.status==='pending'?'b-yellow':o.status==='confirmed'?'b-blue':'b-green'}">${o.status}</span></div>${stages}<div class="aChatBar"><div class="aChatHdr"><span>💬 Order Chat</span><button style="background:none;border:none;color:var(--y1);font-size:.73rem;font-weight:800;cursor:pointer" onclick="adminToggleChat('${uid}',this)">Join Chat</button></div><div class="aChatMsgs" id="acm_${uid}"><div class="acMsg cust"><div class="acSender">Customer</div>Order placed. Awaiting confirmation.</div>${o.driver?`<div class="acMsg drv"><div class="acSender">Driver</div>Job accepted. On my way on delivery day.</div>`:''}</div><div id="acb_${uid}" style="display:none"><div class="aChatInputRow"><input placeholder="Admin message to all parties…" id="aci_${uid}" onkeypress="if(event.key==='Enter')adminChatSend('${uid}')"><button onclick="adminChatSend('${uid}')">Send</button></div></div></div></div>`;
+}
+function custRegCard(c,s){
+  const orders=s.orders.filter(o=>o.custId===c.id);
+  const ini=c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  return `<div class="cRegCard"><div class="cRegTop"><div class="cAva">${ini}</div><div style="flex:1"><div class="cRegName">${c.name}</div><div class="cRegComp">${c.company||'Individual'}</div></div><span class="badge ${c.active?'b-green':'b-gray'}">${c.active?'Active':'Inactive'}</span></div><div class="cRegMeta"><div class="cRegMI">📧 ${c.email}</div><div class="cRegMI">📱 ${c.phone||'—'}</div><div class="cRegMI">📍 ${c.addr||'—'}</div><div class="cRegMI">📦 ${orders.length} orders</div><div class="cRegMI">🔧 ${c.createdBy==='admin'?'Admin registered':'Self registered'}</div></div><div class="cRegActs"><button class="abtn abtn-g" onclick="showCreds('${c.id}')">🔑 View Login Details</button><button class="abtn abtn-ghost" onclick="resetPass('${c.id}')">Reset Password</button><button class="abtn abtn-ghost" onclick="toggleActive('${c.id}')">${c.active?'Deactivate':'Activate'}</button></div></div>`;
+}
+function toggleNotif(on){const s=getStore();s.notifMode=on?'B':'A';saveStore(s);document.getElementById('notifLbl').textContent=on?'Mode B':'Mode A';toast(on?'Mode B: Auto simultaneous notify ON':'Mode A: Manual confirmation ON');}
+function adminAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].status='confirmed';s.orders[i].stage=2;saveStore(s);toast('✅ Order accepted!');renderAdmin('aOrders');}
+function adminSendConf(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=3;saveStore(s);toast('📱 Confirmation sent to customer!');renderAdmin('aODash');}
+function adminShowDoc(id,type){const s=getStore();curODash=s.orders.find(o=>o.id===id);if(!curODash)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(curODash):buildInv(curODash);document.getElementById('docModal').classList.add('show');}
+function adminToggleChat(uid,btn){const bar=document.getElementById('acb_'+uid),show=bar.style.display==='none';bar.style.display=show?'block':'none';btn.textContent=show?'Leave Chat':'Join Chat';if(show)toast('💬 Joined chat as Admin');}
+function adminChatSend(uid){const inp=document.getElementById('aci_'+uid),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('acm_'+uid);const el=document.createElement('div');el.className='acMsg adm';el.textContent='Admin: '+msg;w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;}
+// ═ Admin Assign ═
+function openAssign(id){
+  assignId=id;const s=getStore(),o=s.orders.find(x=>x.id===id);
+  document.getElementById('assignRef').textContent=(o?o.ref:'')+'  ·  Select driver to assign';
+  selDrv=null;
+  document.getElementById('drvListModal').innerHTML=s.drivers.filter(d=>d.active!==false).map(d=>`<div style="background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s" onclick="pickDrv('${d.id}',this)" id="dr_${d.id}"><div style="width:44px;height:44px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;color:#fff;flex-shrink:0">${d.ava||d.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div style="flex:1"><div style="font-size:.88rem;font-weight:800">${d.name}</div><div style="font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px">${d.vtype||'Vehicle'} · ${d.plate||'—'}</div><div style="font-size:.72rem;color:var(--tx3);font-weight:600">📱 ${d.phone||'—'} · ${d.jobs||0} jobs today</div></div><div style="font-size:1.1rem;color:var(--bdr2)" class="drvSel">○</div></div>`).join('');
+  document.getElementById('assignModal').classList.add('show');
+}
+function pickDrv(id,row){document.querySelectorAll('#drvListModal [id^=dr_]').forEach(r=>{r.style.borderColor='var(--bdr)';r.querySelector('.drvSel').textContent='○';});row.style.borderColor='var(--y1)';row.querySelector('.drvSel').textContent='●';const s=getStore();selDrv=s.drivers.find(d=>d.id===id);}
+function confirmAssign(){
+  if(!selDrv){toast('⚠️ Select a driver first');return;}
+  const s=getStore(),i=s.orders.findIndex(o=>o.id===assignId);if(i<0){closeModal('assignModal');return;}
+  s.orders[i].driver=selDrv.name;if(s.orders[i].status==='pending')s.orders[i].status='confirmed';if(s.orders[i].stage<3)s.orders[i].stage=3;saveStore(s);
+  closeModal('assignModal');toast('🚛 '+selDrv.name+' assigned — driver notified!');document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;renderAdmin('aOrders');
+}
+// ═ Admin Customer Reg ═
+function genPass(){const ch='abcdefghijkmnpqrstuvwxyz23456789';let p='';for(let i=0;i<10;i++)p+=ch[Math.floor(Math.random()*ch.length)];document.getElementById('ncPass').value=p;}
+function adminRegCust(){
+  const name=document.getElementById('ncName').value.trim(),em=document.getElementById('ncEmail').value.trim().toLowerCase(),pw=document.getElementById('ncPass').value.trim();
+  if(!name){toast('⚠️ Customer name is required');return;}
+  if(!em||!em.includes('@')){toast('⚠️ Valid email address required');return;}
+  if(!pw||pw.length<8){toast('⚠️ Password must be at least 8 characters');return;}
   const s=getStore();
-  // Set min date
+  if(s.customers.find(c=>c.email.toLowerCase()===em)){toast('❌ This email is already registered');return;}
+  const nc={id:'c'+Date.now(),name,company:document.getElementById('ncComp').value.trim(),email:em,phone:document.getElementById('ncPhone').value.trim(),addr:document.getElementById('ncAddr').value.trim(),password:pw,createdBy:'admin',orders:[],active:true};
+  s.customers.push(nc);saveStore(s);
+  showCreds(nc.id);toast('✅ Customer registered!');renderAdmin('aCustomers');
+}
+function showCreds(custId){
+  const s=getStore(),c=s.customers.find(x=>x.id===custId);if(!c)return;
+  document.getElementById('credSub').textContent='Login details for '+c.name;
+  document.getElementById('credEmail').textContent=c.email;
+  document.getElementById('credPass').textContent=c.password;
+  const msg=`Hi ${c.name},\n\nYour Cemerlang Endas Bin Rental account is ready.\n\nLogin: (open app / link provided)\nEmail: ${c.email}\nPassword: ${c.password}\n\nPlease change your password after first login.\n\nFor enquiries:\n📞 03-6251 3977 (Ms. Wong / Ms. Then)\n\nThank you 🗑`;
+  document.getElementById('waPrev').textContent=msg;
+  document.getElementById('waBtn').onclick=()=>{const num=c.phone?c.phone.replace(/[^0-9]/g,''):'';window.open('https://wa.me/'+(num?'60'+num.replace(/^0/,''): '')+'?text='+encodeURIComponent(msg),'_blank');};
+  document.getElementById('credModal').classList.add('show');
+}
+function copyTxt(elId,label){const txt=document.getElementById(elId).textContent;navigator.clipboard.writeText(txt).then(()=>toast('✅ '+label+' copied!')).catch(()=>{const el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('✅ '+label+' copied!');});}
+function resetPass(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);if(i<0)return;const ch='abcdefghijkmnpqrstuvwxyz23456789';let p='';for(let j=0;j<10;j++)p+=ch[Math.floor(Math.random()*ch.length)];s.customers[i].password=p;saveStore(s);showCreds(id);toast('🔑 Password reset! Share new details with customer.');}
+function toggleActive(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);if(i<0)return;s.customers[i].active=!s.customers[i].active;saveStore(s);toast(s.customers[i].active?'✅ Customer activated':'⛔ Customer deactivated');renderAdmin('aCustomers');}
+
+// ═══ DRIVER ═══
+function drvNavFn(id,tab){document.querySelectorAll('.drvScr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));if(tab)tab.classList.add('on');}
+function drvAccept(btn){const card=btn.closest('.dJob');card.querySelector('.djActs').innerHTML=`<button class="djBtn djDone" onclick="openPhotoModal('delivery')">📸 Mark as Delivered</button>`;card.style.borderColor='#4caf50';card.querySelector('.badge').textContent='Accepted';card.querySelector('.badge').className='badge b-green';toast('✅ Job accepted! Admin & customer notified.');}
+function drvDecline(btn){btn.closest('.dJob').remove();toast('Job declined. Admin notified.');}
+function openPhotoModal(ctx){photoCtx=ctx;photoCnt=0;['ps1','ps2'].forEach(id=>{const el=document.getElementById(id);el.className='photoSlot';el.innerHTML='<span style="font-size:1.4rem">📷</span>'+(id==='ps1'?'Photo 1':'Photo 2')+'<br><span style="font-size:.68rem">Tap to upload</span>';});document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';document.getElementById('photoModal').classList.add('show');}
+function fakePhoto(id){const el=document.getElementById(id);el.className='photoSlot filled';el.innerHTML='<span style="font-size:1.4rem">✅</span>Photo uploaded<br><span style="font-size:.68rem">Tap to replace</span>';photoCnt=document.querySelectorAll('.photoSlot.filled').length;}
+function submitPhotos(){if(photoCnt<2){toast('⚠️ Upload both photos first');return;}closeModal('photoModal');toast(photoCtx==='delivery'?'📸 Delivery confirmed! Customer & company notified.':'📸 Collection confirmed! Closure sent.');}
+function drvChat(chatId,inputId){const inp=document.getElementById(inputId),msg=inp.value.trim();if(!msg)return;const w=document.getElementById(chatId);const el=document.createElement('div');el.className='dCMsg me';el.innerHTML='<div class="cS">You</div>'+msg;w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='dCMsg sys';r.textContent='Sent to customer';w.appendChild(r);w.scrollTop=w.scrollHeight;},600);}
+
+// ═══ DRIVER MANAGEMENT ═══
+function adminAddDriver(){
+  const name=document.getElementById('ndName').value.trim();
+  const phone=document.getElementById('ndPhone').value.trim();
+  const vtype=document.getElementById('ndVType').value;
+  const plate=document.getElementById('ndPlate').value.trim().toUpperCase();
+  if(!name){toast('⚠️ Driver name is required');return;}
+  if(!phone){toast('⚠️ Contact number is required');return;}
+  if(!vtype){toast('⚠️ Select a vehicle type');return;}
+  if(!plate){toast('⚠️ Vehicle plate number is required');return;}
+  const s=getStore();
+  // check duplicate plate
+  if(s.drivers.find(d=>d.plate&&d.plate.toUpperCase()===plate)){toast('⚠️ This plate number is already registered');return;}
+  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const nd={
+    id:'d'+Date.now(),
+    name,
+    ava:initials,
+    phone,
+    emerg:document.getElementById('ndEmerg').value.trim(),
+    vtype,
+    plate,
+    model:document.getElementById('ndModel').value.trim(),
+    licence:document.getElementById('ndLic').value,
+    ic:document.getElementById('ndIC').value.trim(),
+    notes:document.getElementById('ndNotes').value.trim(),
+    status:'Offline',
+    jobs:0,
+    active:true,
+  };
+  s.drivers.push(nd);
+  saveStore(s);
+  toast('✅ '+name+' registered successfully!');
+  clearDriverForm();
+  renderAdmin('aDrivers');
+}
+function clearDriverForm(){
+  ['ndName','ndIC','ndPhone','ndEmerg','ndPlate','ndModel','ndNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ndVType','ndLic'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+}
+function editDriver(id){
+  const s=getStore(),d=s.drivers.find(x=>x.id===id);if(!d)return;
+  // populate form with driver data
+  document.getElementById('ndName').value=d.name||'';
+  document.getElementById('ndIC').value=d.ic||'';
+  document.getElementById('ndPhone').value=d.phone||'';
+  document.getElementById('ndEmerg').value=d.emerg||'';
+  document.getElementById('ndPlate').value=d.plate||'';
+  document.getElementById('ndModel').value=d.model||'';
+  document.getElementById('ndNotes').value=d.notes||'';
+  // set selects
+  const vtEl=document.getElementById('ndVType');
+  if(vtEl){for(let i=0;i<vtEl.options.length;i++){if(vtEl.options[i].value===d.vtype){vtEl.selectedIndex=i;break;}}}
+  const licEl=document.getElementById('ndLic');
+  if(licEl){for(let i=0;i<licEl.options.length;i++){if(licEl.options[i].value===d.licence){licEl.selectedIndex=i;break;}}}
+  // remove old driver, save button will re-add
+  s.drivers=s.drivers.filter(x=>x.id!==id);
+  saveStore(s);
+  toast('📝 Editing '+d.name+' — update details and click Register Driver');
+  window.scrollTo(0,0);
+  document.getElementById('aMain').scrollTo(0,0);
+}
+function toggleDriverActive(id){
+  const s=getStore(),i=s.drivers.findIndex(d=>d.id===id);if(i<0)return;
+  s.drivers[i].active=s.drivers[i].active===false?true:false;
+  saveStore(s);
+  toast(s.drivers[i].active?'✅ Driver activated':'⛔ Driver deactivated');
+  renderAdmin('aDrivers');
+}
+function deleteDriver(id){
+  const s=getStore(),d=s.drivers.find(x=>x.id===id);if(!d)return;
+  if(!confirm('Delete driver '+d.name+'? This cannot be undone.'))return;
+  s.drivers=s.drivers.filter(x=>x.id!==id);
+  saveStore(s);
+  toast('🗑 Driver removed');
+  renderAdmin('aDrivers');
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded',()=>{
+  getStore();renderAdmin('aOrders');
   const d=new Date();d.setDate(d.getDate()+2);
   const mn=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
   const sd=document.getElementById('oDate');if(sd)sd.min=`${d.getFullYear()}-${mn}-${dd}`;
-  // Auto-login if session exists
-  if(s.currentUser){
-    const c=s.customers.find(x=>x.id===s.currentUser&&x.active);
-    if(c){curUser=c;launchApp(c);}
-  }
+  const s=getStore();
+  if(s.currentUser){const c=s.customers.find(x=>x.id===s.currentUser&&x.active);if(c){curUser=c;launchApp(c);}}
 });
 </script>
 </body>
