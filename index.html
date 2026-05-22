@@ -22,11 +22,11 @@
   --fn:'Nunito',sans-serif;
 }
 html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
-#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g1);display:flex;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g1);display:flex;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.2);width:100%}
 .pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
 .pTab.on{color:#fff;border-bottom-color:var(--y1)}
-.panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
-.panel.on{display:flex}
+.panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden;width:100%;min-height:0}
+.panel.on{display:flex!important}
 /* shared */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .b-green{background:var(--g3);color:#0f5a28}.b-yellow{background:var(--y2);color:var(--y3)}.b-red{background:var(--r2);color:var(--r1)}.b-blue{background:var(--b2);color:var(--b3)}.b-gray{background:#eee;color:#555}
@@ -133,7 +133,7 @@ select.fInp{cursor:pointer}
 #oActBar{position:fixed;bottom:62px;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);padding:10px 14px;display:none;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
 #oActBar.show{display:flex;gap:9px}
 /* ===== ADMIN ===== */
-#adminPanel{flex-direction:row;background:#0e1410}
+#adminPanel{flex-direction:row;background:#0e1410;min-height:0}
 .aSide{width:200px;background:#131d14;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #233023;overflow-y:auto}
 .aSide .aLogo{padding:16px;border-bottom:1px solid #233023}
 .aLogo h3{color:#fff;font-size:.88rem;font-weight:900;line-height:1.3}
@@ -144,7 +144,7 @@ select.fInp{cursor:pointer}
 .aMenuItem.on{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--y1)}
 .aMenuItem .ami{font-size:1rem;width:18px;text-align:center}
 .aBadge{margin-left:auto;background:var(--r1);color:#fff;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:99px}
-.aMain{flex:1;overflow-y:auto;padding:18px;background:#0e1410}
+.aMain{flex:1;overflow-y:auto;padding:18px;background:#0e1410;min-width:0;min-height:0}
 .aMain h2{color:#fff;font-size:1.1rem;font-weight:900;margin-bottom:14px}
 .aStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
 .aStat{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:12px}
@@ -217,7 +217,7 @@ select.fInp{cursor:pointer}
 .custTbl tr:hover td{background:#131d14}
 .tdName{color:#fff;font-weight:800;font-size:.85rem}
 /* ===== DRIVER ===== */
-#drvPanel{background:#0d0d0d}
+#drvPanel{background:#0d0d0d;min-height:0}
 .drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none}
 .drvScr.on{display:block}
 .drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50}
@@ -261,21 +261,19 @@ select.fInp{cursor:pointer}
 .photoSlot{aspect-ratio:4/3;border:2px dashed #333;border-radius:var(--rads);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:5px;font-size:.75rem;color:#555;font-weight:700;transition:all .15s;text-align:center;padding:8px}
 .photoSlot:hover{border-color:var(--y1);color:var(--y1)}
 .photoSlot.filled{border-style:solid;border-color:var(--g1);color:var(--g1);background:#0a1a0a}
-@media(max-width:640px){
+@media(max-width:900px){
   #adminPanel{flex-direction:column}
   .aSide{width:100%;height:46px;flex-direction:row;border-right:none;border-bottom:1px solid #233023;overflow-x:auto;overflow-y:hidden;flex-shrink:0}
   .aSide .aLogo{display:none}
   .aMenu{display:flex;flex-direction:row;padding:0;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
   .aMenu::-webkit-scrollbar{display:none}
-  .aMenuItem{flex-direction:column;gap:1px;padding:6px 12px;font-size:.58rem;border-left:none;border-bottom:3px solid transparent;flex-shrink:0}
+  .aMenuItem{flex-direction:column;gap:1px;padding:6px 14px;font-size:.6rem;border-left:none;border-bottom:3px solid transparent;flex-shrink:0}
   .aMenuItem.on{border-left:none;border-bottom-color:var(--y1)}
   .aMenuItem .ami{font-size:1.1rem}
   .aStats{grid-template-columns:repeat(2,1fr)}
 }
 @media(min-width:600px){
-  .panel,.modal{max-width:480px;left:50%;transform:translateX(-50%)}
-  #adminPanel{max-width:900px;left:50%;transform:translateX(-50%)}
-  #pBar{max-width:900px;left:50%;transform:translateX(-50%)}
+  .modal{max-width:500px;left:50%;transform:translateX(-50%)}
 }
 </style>
 </head>
@@ -598,7 +596,24 @@ let oSt={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:
 let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
-function switchPortal(p,tab){['cust','admin','driver'].forEach(x=>document.getElementById(x+'Panel').classList.remove('on'));document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));document.getElementById(p+'Panel').classList.add('on');if(tab)tab.classList.add('on');if(p==='admin')renderAdmin('aOrders');}
+function switchPortal(p,tab){
+  // hide all panels
+  ['cust','admin','driver'].forEach(x=>{
+    const el=document.getElementById(x+'Panel');
+    if(el){el.classList.remove('on');el.style.display='none';}
+  });
+  document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));
+  // show selected panel
+  const target=document.getElementById(p+'Panel');
+  if(target){target.classList.add('on');target.style.display='flex';}
+  if(tab)tab.classList.add('on');
+  if(p==='admin'){renderAdmin('aOrders');}
+  if(p==='driver'){
+    // make sure driver screens are visible
+    document.querySelectorAll('.drvScr').forEach(s=>s.classList.remove('on'));
+    const dj=document.getElementById('dJobs');if(dj)dj.classList.add('on');
+  }
+}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 // ═══ AUTH ═══
