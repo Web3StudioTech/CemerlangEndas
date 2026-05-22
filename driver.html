@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F5A623">
+<title>CE Bin Rental — Driver</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#1B6B3A;--g2:#27924f;
+  --y1:#F5A623;--y2:#fff3e0;--y3:#c47a00;
+  --r1:#D32F2F;--r2:#fdeaea;
+  --b1:#1565C0;--b2:#e8f0fe;
+  --bg:#0d0d0d;--sur:#1a1a1a;--sur2:#111;
+  --bdr:#2a2a2a;--bdr2:#333;
+  --tx:#ffffff;--tx2:#cccccc;--tx3:#888888;
+  --fn:'Nunito',sans-serif;
+}
+html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
+/* Layout */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.b-g{background:#0a2a0a;color:#4caf50;border:1px solid #1a4a1a}
+.b-y{background:#2a1a00;color:var(--y1);border:1px solid #3a2a00}
+.b-r{background:#2a0a0a;color:var(--r1);border:1px solid #4a1a1a}
+.b-gr{background:#222;color:#666;border:1px solid #333}
+.b-done{background:#0a2a0a;color:#4caf50}
+/* Nav */
+.dNav{position:absolute;bottom:0;left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr2);display:flex;height:64px;z-index:50}
+.dNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);transition:color .15s}
+.dNavItem.on{color:var(--y1)}
+.dNavItem .nIco{font-size:1.35rem}
+/* Screens */
+.scr{position:absolute;top:0;left:0;right:0;bottom:64px;overflow-y:auto;padding:16px 16px 24px;display:none}
+.scr.on{display:block}
+/* Header */
+.dHdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dHdr .dName{font-size:1.2rem;font-weight:900;color:#fff}
+.dHdr .dRole{font-size:.75rem;color:var(--tx3);font-weight:700;margin-bottom:2px}
+.onlineChip{display:flex;align-items:center;gap:7px;background:var(--sur);border:1px solid var(--bdr2);border-radius:99px;padding:6px 12px}
+.onlineDot{width:9px;height:9px;border-radius:50%;background:#4caf50}
+.onlineDot.off{background:var(--tx3)}
+.onlineTxt{font-size:.78rem;font-weight:700;color:var(--tx2)}
+/* Alert banner */
+.alertBanner{background:#1a1a00;border:1.5px solid var(--y1);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
+.alertBanner p{font-size:.81rem;font-weight:700;color:#c47a00;line-height:1.55}
+/* Section label */
+.sLbl{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:8px}
+/* Job cards */
+.jobCard{background:var(--sur);border:1.5px solid var(--bdr);border-radius:14px;padding:15px;margin-bottom:12px;transition:border-color .15s}
+.jobCard.urgent{border-color:var(--y1)}
+.jobCard.active{border-color:#1a4a1a}
+.jobCard.done{border-color:#1a2a1a;opacity:.7}
+.jobTop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.jobBin{font-size:.96rem;font-weight:900;color:#fff}
+.jobRef{font-size:.72rem;color:var(--tx3);font-weight:700;margin-top:2px}
+.jobMeta{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.jobMR{display:flex;align-items:flex-start;gap:9px;font-size:.81rem;color:var(--tx2);font-weight:700}
+.jobMR .ic{font-size:.86rem;width:18px;text-align:center;flex-shrink:0;margin-top:1px}
+.jobMR .val{color:var(--tx);flex:1}
+.jobActs{display:flex;gap:8px;flex-wrap:wrap}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:12px 18px;border-radius:10px;font-family:var(--fn);font-size:.88rem;font-weight:900;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-y{background:var(--y1);color:#111;flex:1}
+.btn-g{background:var(--g1);color:#fff;flex:1}
+.btn-dec{background:#2a2a2a;color:var(--tx3);border:1px solid var(--bdr2);padding:12px 16px;border-radius:10px;font-family:var(--fn);font-size:.88rem;font-weight:800;cursor:pointer}
+.btn-sm{padding:8px 14px;font-size:.78rem;flex:none}
+/* Stage line */
+.stageLine{background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.stRow{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-bottom:1px solid var(--bdr)}
+.stRow:last-child{border-bottom:none}
+.stDot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:900;flex-shrink:0;margin-top:2px}
+.stDot.done{background:var(--g1);color:#fff}
+.stDot.active{background:var(--y1);color:#111}
+.stDot.pending{background:var(--bdr2);color:var(--tx3)}
+.stTitle{font-size:.84rem;font-weight:800;color:var(--tx2);margin-bottom:2px}
+.stSub{font-size:.73rem;color:var(--tx3);font-weight:600;line-height:1.4}
+.stActs{margin-top:7px;display:flex;gap:7px}
+/* Chat */
+.chatWrap{background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-top:10px}
+.chatHdr{background:var(--sur);padding:9px 13px;font-size:.77rem;font-weight:800;color:var(--tx3);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr)}
+.chatMsgs{padding:11px;display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto}
+.cMsg{font-size:.8rem;font-weight:600;padding:8px 12px;border-radius:12px;max-width:82%}
+.cMsg.me{background:var(--y1);color:#111;align-self:flex-end;border-bottom-right-radius:3px}
+.cMsg.them{background:var(--sur);color:var(--tx2);border:1px solid var(--bdr2);align-self:flex-start;border-bottom-left-radius:3px}
+.cMsg.sys{background:#1a1500;color:#a08000;align-self:center;border-radius:99px;font-size:.69rem;padding:4px 12px;text-align:center;max-width:90%}
+.cSender{font-size:.63rem;font-weight:800;opacity:.65;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.chatInp{display:flex;gap:7px;padding:9px 11px;background:var(--sur);border-top:1px solid var(--bdr)}
+.chatInp input{flex:1;padding:9px 13px;background:var(--sur2);border:1.5px solid var(--bdr);border-radius:99px;font-family:var(--fn);font-size:.83rem;color:var(--tx);outline:none}
+.chatInp input:focus{border-color:var(--y1)}
+.chatInp button{width:36px;height:36px;border-radius:50%;background:var(--y1);border:none;color:#111;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* History cards */
+.histCard{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:13px;margin-bottom:9px;display:flex;gap:12px;align-items:center}
+.histIco{width:40px;height:40px;border-radius:50%;background:#0a2a0a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.histInfo .hBin{font-size:.88rem;font-weight:800;color:#fff}
+.histInfo .hRef{font-size:.73rem;color:var(--tx3);font-weight:600;margin-top:2px}
+.histInfo .hMeta{font-size:.73rem;color:var(--tx2);font-weight:600;margin-top:3px}
+/* Photo modal */
+.modal{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.mBox{background:#1a1a1a;border-radius:14px 14px 0 0;padding:22px 20px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+.mBox h3{color:#fff;font-size:1.05rem;font-weight:900;margin-bottom:4px}
+.mSub{font-size:.8rem;color:var(--tx3);font-weight:600;margin-bottom:16px}
+.mClose{float:right;font-size:1.4rem;cursor:pointer;color:var(--tx3);line-height:1;margin-top:-3px}
+.photoGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 16px}
+.photoSlot{aspect-ratio:4/3;border:2px dashed var(--bdr2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px;font-size:.76rem;color:var(--tx3);font-weight:700;transition:all .15s;text-align:center;padding:8px}
+.photoSlot:hover{border-color:var(--y1);color:var(--y1);background:#1a1500}
+.photoSlot.filled{border-style:solid;border-color:var(--g1);color:#4caf50;background:#0a1a0a}
+/* Toast */
+#toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);background:#222;color:#fff;border-radius:99px;padding:10px 22px;font-size:.84rem;font-weight:700;z-index:9999;transition:transform .28s;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.5);max-width:88vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+@media(min-width:540px){
+  #app,.modal .mBox{max-width:480px;left:50%;transform:translateX(-50%);right:auto;width:100%}
+  #toast{top:20px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- JOBS SCREEN -->
+  <div id="sJobs" class="scr on">
+    <div class="dHdr">
+      <div>
+        <div class="dRole">Driver App</div>
+        <div class="dName" id="drvName">Roslan bin Mat</div>
+      </div>
+      <div class="onlineChip">
+        <div class="onlineDot" id="onlineDot"></div>
+        <span class="onlineTxt" id="onlineTxt">Online</span>
+      </div>
+    </div>
+
+    <!-- New job alert -->
+    <div class="alertBanner" id="newJobAlert">
+      <span style="font-size:1.1rem;flex-shrink:0">🔔</span>
+      <p>New job assigned! CE-2026-10240 · RoRo Bin Medium, Kepong. Please accept or decline below.</p>
+    </div>
+
+    <!-- NEW JOB CARD -->
+    <div class="sLbl">New Assignment</div>
+    <div class="jobCard urgent" id="newJobCard">
+      <div class="jobTop">
+        <div>
+          <div class="jobBin">🏗 RoRo Bin — Medium</div>
+          <div class="jobRef">CE-2026-10240 · 14-Day Rental</div>
+        </div>
+        <span class="badge b-y">New Job</span>
+      </div>
+      <div class="jobMeta">
+        <div class="jobMR"><span class="ic">📅</span><span>Delivery: <span class="val">Friday, 23 May 2026</span></span></div>
+        <div class="jobMR"><span class="ic">🕙</span><span>Time window: <span class="val">10:00 – 11:00am</span></span></div>
+        <div class="jobMR"><span class="ic">📍</span><span>Address: <span class="val">No. 5, Jalan Kepong, 52100 Kuala Lumpur</span></span></div>
+        <div class="jobMR"><span class="ic">👤</span><span>Contact: <span class="val">Encik Farid · 012-999 8888</span></span></div>
+        <div class="jobMR"><span class="ic">🔄</span><span>Collect on: <span class="val">Thursday, 5 Jun · 2:00–3:00pm</span></span></div>
+        <div class="jobMR"><span class="ic">📝</span><span>Notes: <span class="val">Gate code 1234, please park inside compound</span></span></div>
+        <div class="jobMR"><span class="ic">💰</span><span>Job value: <span class="val">RM 850</span></span></div>
+      </div>
+      <div class="jobActs" id="newJobActs">
+        <button class="btn btn-y" onclick="acceptJob()">✓ Accept Job</button>
+        <button class="btn-dec" onclick="declineJob()">Decline</button>
+      </div>
+    </div>
+
+    <!-- ACTIVE JOB WITH STAGE DASHBOARD -->
+    <div class="sLbl" style="margin-top:4px">Active Job</div>
+    <div class="jobCard active" id="activeJobCard">
+      <div class="jobTop">
+        <div>
+          <div class="jobBin">🗑 Garbage Bin — 240L</div>
+          <div class="jobRef">CE-2026-10230 · Weekly</div>
+        </div>
+        <span class="badge b-g">Active</span>
+      </div>
+      <div class="jobMeta" style="margin-bottom:8px">
+        <div class="jobMR"><span class="ic">📅</span><span>Deliver today · <span class="val">2:00 – 3:00pm</span></span></div>
+        <div class="jobMR"><span class="ic">📍</span><span><span class="val">No. 22, Jalan Sri Damansara, 52200 KL</span></span></div>
+        <div class="jobMR"><span class="ic">👤</span><span><span class="val">Puan Siti · 016-777 1234</span></span></div>
+        <div class="jobMR"><span class="ic">🔄</span><span>Collect: <span class="val">Wed 28 May · 2:00–3:00pm</span></span></div>
+      </div>
+
+      <!-- Stage mini-dashboard -->
+      <div class="stageLine">
+        <div class="stRow">
+          <div class="stDot done">✓</div>
+          <div>
+            <div class="stTitle">Job accepted</div>
+            <div class="stSub">Today, 9:02am — You accepted this job</div>
+          </div>
+        </div>
+        <div class="stRow">
+          <div class="stDot active">●</div>
+          <div style="flex:1">
+            <div class="stTitle">Deliver bin today</div>
+            <div class="stSub">Time window: 2:00–3:00pm · Sri Damansara</div>
+            <div style="color:var(--y1);font-size:.7rem;font-weight:700;margin-top:4px">● Deliver now — then take 2 proof photos</div>
+            <div class="stActs">
+              <button class="btn btn-g btn-sm" onclick="openPhotoModal('delivery')">📸 Mark as Delivered + Photos</button>
+            </div>
+          </div>
+        </div>
+        <div class="stRow">
+          <div class="stDot pending">6</div>
+          <div>
+            <div class="stTitle">Collect bin — Wed 28 May</div>
+            <div class="stSub">Time window: 2:00–3:00pm</div>
+          </div>
+        </div>
+        <div class="stRow">
+          <div class="stDot pending">7</div>
+          <div>
+            <div class="stTitle">Close case</div>
+            <div class="stSub">Submit 2 collection photos + mark case closed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat with customer -->
+      <div class="chatWrap">
+        <div class="chatHdr">
+          <span>💬 Chat — Puan Siti</span>
+          <span style="color:#4caf50;font-size:.7rem;font-weight:800">● Online</span>
+        </div>
+        <div class="chatMsgs" id="chat1">
+          <div class="cMsg sys">CE-2026-10230 assigned to you — Thu 22 May</div>
+          <div class="cMsg them"><div class="cSender">Customer — Puan Siti</div>Hi, saya di rumah sepanjang hari. Terima kasih!</div>
+          <div class="cMsg me"><div class="cSender">You</div>Baik Puan Siti, saya akan sampai dalam masa 2:00–3:00pm. Saya call 30 minit sebelum tiba.</div>
+        </div>
+        <div class="chatInp">
+          <input type="text" id="ci1" placeholder="Message Puan Siti…" onkeypress="if(event.key==='Enter')sendMsg('chat1','ci1')">
+          <button onclick="sendMsg('chat1','ci1')">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div id="sHistory" class="scr">
+    <div style="font-size:1.15rem;font-weight:900;margin-bottom:16px">Job History</div>
+    <div class="sLbl">This Week</div>
+
+    <div class="histCard">
+      <div class="histIco">✅</div>
+      <div class="histInfo" style="flex:1">
+        <div class="hBin">🗑 Garbage Bin — 240L · Delivered</div>
+        <div class="hRef">CE-2026-10228 · Sri Damansara</div>
+        <div class="hMeta">📅 Mon 19 May · Delivered 9:45am · Collected 26 May</div>
+      </div>
+      <span class="badge b-done">Done</span>
+    </div>
+
+    <div class="histCard">
+      <div class="histIco">✅</div>
+      <div class="histInfo" style="flex:1">
+        <div class="hBin">🗂 Leach Bin — 1,500L · Collected</div>
+        <div class="hRef">CE-2026-10215 · Kepong Industrial</div>
+        <div class="hMeta">📅 Wed 14 May · RM 920</div>
+      </div>
+      <span class="badge b-done">Done</span>
+    </div>
+
+    <div class="histCard">
+      <div class="histIco">✅</div>
+      <div class="histInfo" style="flex:1">
+        <div class="hBin">🏗 RoRo Bin — Small · Delivered</div>
+        <div class="hRef">CE-2026-10201 · Rawang</div>
+        <div class="hMeta">📅 Mon 12 May · RM 380</div>
+      </div>
+      <span class="badge b-done">Done</span>
+    </div>
+
+    <div class="sLbl" style="margin-top:8px">Summary</div>
+    <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:15px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center">
+        <div style="padding:10px;border-right:1px solid var(--bdr)">
+          <div style="font-size:1.5rem;font-weight:900;color:var(--y1)">3</div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-top:3px">This Week</div>
+        </div>
+        <div style="padding:10px;border-right:1px solid var(--bdr)">
+          <div style="font-size:1.5rem;font-weight:900;color:var(--y1)">12</div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-top:3px">This Month</div>
+        </div>
+        <div style="padding:10px">
+          <div style="font-size:1.5rem;font-weight:900;color:var(--y1)">47</div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-top:3px">All Time</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="dNav">
+    <div class="dNavItem on" onclick="dNav('sJobs',this)"><span class="nIco">📋</span>Jobs</div>
+    <div class="dNavItem" onclick="dNav('sHistory',this)"><span class="nIco">🕐</span>History</div>
+  </div>
+</div>
+
+<!-- PHOTO PROOF MODAL -->
+<div class="modal" id="photoModal">
+  <div class="mBox">
+    <span class="mClose" onclick="closeModal('photoModal')">✕</span>
+    <h3 id="photoTitle">Submit Proof Photos</h3>
+    <div class="mSub" id="photoSub">Upload 2 photos as proof of delivery</div>
+    <div class="photoGrid">
+      <div class="photoSlot" id="ps1" onclick="fakePhoto('ps1','Photo 1')">
+        <span style="font-size:1.5rem">📷</span>
+        <span>Photo 1</span>
+        <span style="font-size:.68rem;color:var(--tx3)">Tap to upload</span>
+      </div>
+      <div class="photoSlot" id="ps2" onclick="fakePhoto('ps2','Photo 2')">
+        <span style="font-size:1.5rem">📷</span>
+        <span>Photo 2</span>
+        <span style="font-size:.68rem;color:var(--tx3)">Tap to upload</span>
+      </div>
+    </div>
+    <div style="background:#1a1500;border-radius:9px;padding:11px;font-size:.78rem;color:#a08000;font-weight:700;line-height:1.55;margin-bottom:14px">
+      📋 Tips: Take one photo of the bin placement, one photo of the full address/signage. This protects both you and the company.
+    </div>
+    <button class="btn btn-g" style="width:100%;flex:none" id="submitPhotoBtn" onclick="submitPhotos()">Submit Photos & Confirm</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let photoCnt=0,photoCtx='';
+
+function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function dNav(id,tab){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
+  if(tab)tab.classList.add('on');
+}
+
+// ══ JOB ACTIONS ══
+function acceptJob(){
+  const card=document.getElementById('newJobCard');
+  document.getElementById('newJobAlert').style.display='none';
+  document.getElementById('newJobActs').innerHTML=`
+    <div style="width:100%;background:#0a2a0a;border:1px solid #1a4a1a;border-radius:9px;padding:12px 14px;font-size:.82rem;font-weight:700;color:#4caf50">
+      ✅ Job accepted! Admin and customer have been notified. See your active jobs above.
+    </div>`;
+  card.querySelector('.badge').textContent='Accepted';
+  card.querySelector('.badge').className='badge b-g';
+  card.classList.remove('urgent');card.classList.add('active');
+  toast('✅ Job accepted! Admin & customer notified.',3500);
+  // Add to active section
+  const newJob={
+    bin:'🏗 RoRo Bin — Medium',ref:'CE-2026-10240',
+    delDate:'Fri 23 May',delTime:'10:00–11:00am',
+    addr:'No. 5, Jalan Kepong, 52100 KL',
+    contact:'Encik Farid · 012-999 8888',
+    colDate:'Thu 5 Jun',colTime:'2:00–3:00pm',
+    notes:'Gate code 1234',price:'RM 850'
+  };
+  addAcceptedJobCard(newJob);
+}
+function addAcceptedJobCard(j){
+  const el=document.createElement('div');
+  el.className='jobCard active';
+  el.innerHTML=`
+    <div class="jobTop"><div><div class="jobBin">${j.bin}</div><div class="jobRef">${j.ref} · Accepted</div></div><span class="badge b-g">Active</span></div>
+    <div class="jobMeta" style="margin-bottom:8px">
+      <div class="jobMR"><span class="ic">📅</span><span>Deliver: <span class="val">${j.delDate} · ${j.delTime}</span></span></div>
+      <div class="jobMR"><span class="ic">📍</span><span><span class="val">${j.addr}</span></span></div>
+      <div class="jobMR"><span class="ic">👤</span><span><span class="val">${j.contact}</span></span></div>
+      <div class="jobMR"><span class="ic">🔄</span><span>Collect: <span class="val">${j.colDate} · ${j.colTime}</span></span></div>
+    </div>
+    <div class="stageLine">
+      <div class="stRow"><div class="stDot done">✓</div><div><div class="stTitle">Job accepted</div><div class="stSub">Just now</div></div></div>
+      <div class="stRow"><div class="stDot active">●</div><div style="flex:1"><div class="stTitle">Deliver bin</div><div class="stSub">${j.delDate} · ${j.delTime}</div><div class="stActs"><button class="btn btn-g btn-sm" onclick="openPhotoModal('delivery')">📸 Mark Delivered + Photos</button></div></div></div>
+      <div class="stRow"><div class="stDot pending">6</div><div><div class="stTitle">Collect bin</div><div class="stSub">${j.colDate} · ${j.colTime}</div></div></div>
+      <div class="stRow"><div class="stDot pending">7</div><div><div class="stTitle">Close case</div><div class="stSub">Submit 2 photos + confirm</div></div></div>
+    </div>
+    <div class="chatWrap">
+      <div class="chatHdr"><span>💬 Chat — Encik Farid</span></div>
+      <div class="chatMsgs" id="chat_new"><div class="cMsg sys">CE-2026-10240 — You accepted this job</div></div>
+      <div class="chatInp"><input type="text" id="ci_new" placeholder="Message Encik Farid…" onkeypress="if(event.key==='Enter')sendMsg('chat_new','ci_new')"><button onclick="sendMsg('chat_new','ci_new')">➤</button></div>
+    </div>`;
+  const jobs=document.getElementById('sJobs');
+  const sLbl=jobs.querySelectorAll('.sLbl')[1]; // "Active Job" label
+  sLbl.after(el);
+}
+function declineJob(){
+  document.getElementById('newJobCard').style.display='none';
+  document.getElementById('newJobAlert').style.display='none';
+  toast('Job declined. Admin has been notified.',3000);
+}
+
+// ══ PHOTO MODAL ══
+function openPhotoModal(ctx){
+  photoCtx=ctx;photoCnt=0;
+  ['ps1','ps2'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.className='photoSlot';
+    el.innerHTML=`<span style="font-size:1.5rem">📷</span><span>${id==='ps1'?'Photo 1':'Photo 2'}</span><span style="font-size:.68rem;color:var(--tx3)">Tap to upload</span>`;
+  });
+  document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';
+  document.getElementById('photoSub').textContent=ctx==='delivery'?'Upload 2 photos proving bin was delivered':'Upload 2 photos proving bin was collected';
+  document.getElementById('photoModal').classList.add('show');
+}
+function fakePhoto(id,label){
+  const el=document.getElementById(id);
+  el.className='photoSlot filled';
+  el.innerHTML=`<span style="font-size:1.5rem">✅</span><span>${label}</span><span style="font-size:.68rem">Uploaded — tap to replace</span>`;
+  photoCnt=document.querySelectorAll('.photoSlot.filled').length;
+}
+function submitPhotos(){
+  if(photoCnt<2){toast('⚠️ Please upload both photos first');return;}
+  closeModal('photoModal');
+  if(photoCtx==='delivery'){
+    toast('📸 Delivery confirmed! Customer & company notified.',4000);
+    // Update the stage in the active job card
+    setTimeout(()=>{
+      const dots=document.querySelectorAll('#activeJobCard .stDot');
+      if(dots[1]){dots[1].className='stDot done';dots[1].textContent='✓';}
+      if(dots[2]){dots[2].className='stDot active';dots[2].textContent='●';}
+      const actDiv=document.querySelector('#activeJobCard .stActs');
+      if(actDiv)actDiv.innerHTML='<button class="btn btn-g btn-sm" onclick="openPhotoModal(\'collection\')">📸 Mark Collected + Photos</button>';
+      const stSubs=document.querySelectorAll('#activeJobCard .stTitle');
+      if(stSubs[1])stSubs[1].textContent='Bin delivered ✓';
+    },500);
+  } else {
+    toast('📸 Collection confirmed! Case closure sent.',4000);
+  }
+}
+
+// ══ CHAT ══
+function sendMsg(chatId,inputId){
+  const inp=document.getElementById(inputId),msg=inp.value.trim();if(!msg)return;
+  const w=document.getElementById(chatId);
+  const el=document.createElement('div');
+  el.className='cMsg me';
+  el.innerHTML=`<div class="cSender">You</div>${msg}`;
+  w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div');r.className='cMsg sys';r.textContent='Delivered to customer';
+    w.appendChild(r);w.scrollTop=w.scrollHeight;
+  },700);
+}
+
+// Toggle online status
+document.getElementById('onlineChip')?.addEventListener('click',()=>{
+  const dot=document.getElementById('onlineDot'),txt=document.getElementById('onlineTxt');
+  const isOnline=dot.classList.contains('off');
+  dot.classList.toggle('off',!isOnline);
+  txt.textContent=isOnline?'Online':'Offline';
+  toast(isOnline?'✅ You are now Online':'⭕ You are now Offline',2500);
+});
+</script>
+</body>
+</html>
