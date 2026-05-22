@@ -22,7 +22,8 @@
   --fn:'Nunito',sans-serif;
 }
 html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
-#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g1);display:flex;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.2);width:100%}
+#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:#0f4526;display:none;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.3);width:100%}
+#pBar.show{display:flex}
 .pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
 .pTab.on{color:#fff;border-bottom-color:var(--y1)}
 .panel{position:fixed;top:46px;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden;width:100%;min-height:0}
@@ -133,7 +134,7 @@ select.fInp{cursor:pointer}
 #oActBar{position:fixed;bottom:62px;left:0;right:0;background:var(--sur);border-top:1.5px solid var(--bdr);padding:10px 14px;display:none;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
 #oActBar.show{display:flex;gap:9px}
 /* ===== ADMIN ===== */
-#adminPanel{flex-direction:row;background:#0e1410;min-height:0}
+#adminPanel{flex-direction:row;background:#071a0a;min-height:0}
 .aSide{width:200px;background:#131d14;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #233023;overflow-y:auto}
 .aSide .aLogo{padding:16px;border-bottom:1px solid #233023}
 .aLogo h3{color:#fff;font-size:.88rem;font-weight:900;line-height:1.3}
@@ -144,7 +145,7 @@ select.fInp{cursor:pointer}
 .aMenuItem.on{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--y1)}
 .aMenuItem .ami{font-size:1rem;width:18px;text-align:center}
 .aBadge{margin-left:auto;background:var(--r1);color:#fff;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:99px}
-.aMain{flex:1;overflow-y:auto;padding:18px;background:#0e1410;min-width:0;min-height:0}
+.aMain{flex:1;overflow-y:auto;padding:18px;background:#071a0a;min-width:0;min-height:0}
 .aMain h2{color:#fff;font-size:1.1rem;font-weight:900;margin-bottom:14px}
 .aStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
 .aStat{background:#131d14;border:1px solid #233023;border-radius:var(--rads);padding:12px}
@@ -184,7 +185,7 @@ select.fInp{cursor:pointer}
 .cVal{font-size:.82rem;font-weight:800;color:#fff;flex:1;word-break:break-all}
 .cCopy{padding:4px 10px;background:#1a2a1a;border:1px solid #2a3a2a;border-radius:99px;font-family:var(--fn);font-size:.68rem;font-weight:800;cursor:pointer;color:#8aaa8a;flex-shrink:0}
 .cCopy:hover{color:var(--y1);border-color:var(--y1)}
-.aInp{width:100%;padding:10px 12px;background:#0e1410;border:1.5px solid #2a3a2a;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.85rem;font-weight:600;outline:none;transition:border-color .15s;margin-bottom:10px}
+.aInp{width:100%;padding:10px 12px;background:#071a0a;border:1.5px solid #2a3a2a;border-radius:var(--radx);color:#fff;font-family:var(--fn);font-size:.85rem;font-weight:600;outline:none;transition:border-color .15s;margin-bottom:10px}
 .aInp:focus{border-color:var(--g2)}
 .aLab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#5a8a5a;margin-bottom:5px}
 .notifBox{background:#1a2a1a;border:1px solid #2a3a2a;border-radius:var(--rads);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -217,7 +218,7 @@ select.fInp{cursor:pointer}
 .custTbl tr:hover td{background:#131d14}
 .tdName{color:#fff;font-weight:800;font-size:.85rem}
 /* ===== DRIVER ===== */
-#drvPanel{background:#0d0d0d;min-height:0;height:100%;flex-direction:column}
+#drvPanel{background:#081c0c;min-height:0;height:100%;flex-direction:column}
 .drvScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px;display:none;-webkit-overflow-scrolling:touch}
 .drvScr.on{display:block!important}
 .drvNav{position:absolute;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:flex;height:62px;z-index:50;width:100%}
@@ -351,11 +352,60 @@ select.fInp{cursor:pointer}
     <!-- New Order -->
     <div id="cOrder" class="cScr">
       <div class="stepBar"><div class="sStep on" id="sp1">1·Bin</div><div class="sStep" id="sp2">2·Duration</div><div class="sStep" id="sp3">3·Dates</div><div class="sStep" id="sp4">4·Location</div><div class="sStep" id="sp5">5·Confirm</div></div>
-      <div id="oS1"><div class="sLbl">Select Bin Type & Size</div><div id="binList"></div></div>
-      <div id="oS2" style="display:none"><div class="sLbl">Rental Duration</div><div class="durGrid" id="durGrid"></div><div class="infoBox"><p>📋 Price includes delivery & collection. Min. 2 working days advance booking.</p></div></div>
+      <div id="oS1">
+        <div class="sLbl">Select Service Type</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div class="binCard" id="svc-roro" onclick="pickSvc('roro')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
+            <div style="font-size:2rem;margin-bottom:6px">🏗</div>
+            <div class="bName">RoRo Bin</div>
+            <div class="bSub">Solid waste · Weekly/14-Day/Monthly</div>
+            <div class="bChk">✓</div>
+          </div>
+          <div class="binCard" id="svc-leach" onclick="pickSvc('leach')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
+            <div style="font-size:2rem;margin-bottom:6px">🗂</div>
+            <div class="bName">Leach Bin</div>
+            <div class="bSub">Wet & organic waste</div>
+            <div class="bChk">✓</div>
+          </div>
+          <div class="binCard" id="svc-garbage" onclick="pickSvc('garbage')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
+            <div style="font-size:2rem;margin-bottom:6px">🗑</div>
+            <div class="bName">Garbage Bin</div>
+            <div class="bSub">Residential & commercial</div>
+            <div class="bChk">✓</div>
+          </div>
+          <div class="binCard" id="svc-skylift" onclick="pickSvc('skylift')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
+            <div style="font-size:2rem;margin-bottom:6px">🏗</div>
+            <div class="bName">Sky-Lift</div>
+            <div class="bSub">Full Day RM430–450 · Half Day RM380</div>
+            <div class="bChk">✓</div>
+          </div>
+          <div class="binCard" id="svc-crane" onclick="pickSvc('crane')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px;grid-column:1/-1">
+            <div style="font-size:2rem;margin-bottom:6px">🚜</div>
+            <div class="bName">Mobile Crane (20T)</div>
+            <div class="bSub">Full Day RM800 · Half Day RM480 · Operator included</div>
+            <div class="bChk">✓</div>
+          </div>
+        </div>
+      </div>
+      <div id="oS2" style="display:none">
+        <div id="s2BinSection">
+          <div class="sLbl" id="s2Lbl">Select Size</div>
+          <div id="binList"></div>
+          <div id="durSection" style="display:none">
+            <div class="sLbl">Rental Duration</div>
+            <div class="durGrid" id="durGrid"></div>
+          </div>
+        </div>
+        <div id="s2EquipSection" style="display:none">
+          <div class="sLbl" id="s2EquipLbl">Select Duration</div>
+          <div class="infoBox"><p id="s2EquipInfo">Equipment rental — operated by certified crew.</p></div>
+          <div class="durGrid" id="equipDurGrid"></div>
+        </div>
+        <div class="infoBox"><p>📋 Min. 2 working days advance booking. Price includes operator/driver.</p></div>
+      </div>
       <div id="oS3" style="display:none">
         <div class="sLbl">Delivery Start Date</div>
-        <input type="date" class="fInp" id="oDate" onchange="updateDates()">
+        <input type="date" class="fInp" id="oDate" onchange="updateDate()">
         <div id="oDR" style="display:none">
           <div style="display:flex;gap:9px;margin-bottom:13px">
             <div class="card" style="flex:1;padding:12px"><div class="sLbl">📦 Delivery</div><div style="font-size:.9rem;font-weight:800" id="oDD">—</div></div>
@@ -585,44 +635,39 @@ const BINS=[
 ];
 const STAGES=[
   {n:1,title:'Order placed',sub:'Customer submitted order with full details'},
-  {n:2,title:'Company arranging',sub:'Admin received — selecting driver'},
+  {n:2,title:'Company arranging',sub:'Admin received order — selecting driver'},
   {n:3,title:'Driver assigned & confirmed',sub:'Driver accepted — confirmation sent to customer'},
-  {n:4,title:'Bin delivered',sub:'Driver delivered bin on start date'},
-  {n:5,title:'Customer accepted delivery',sub:'Customer confirmed bin received in good condition'},
-  {n:6,title:'Collection day',sub:'Driver collecting bin on end date'},
-  {n:7,title:'Case closed',sub:'Both driver and customer confirmed closure'},
+  {n:4,title:'Bin delivered',sub:'Driver delivered bin on delivery date'},
+  {n:5,title:'Customer accepted delivery',sub:'Customer confirmed bin received'},
+  {n:6,title:'Collection requested',sub:'Customer notified company — bin is full'},
+  {n:7,title:'Case closed',sub:'Bin collected and case complete'},
 ];
-let oSt={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};
+const ADMIN_WA='60362513977';
+let oSt={step:1,svc:null,bin:null,dur:null,startDate:null,delTime:null};
 let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
 function switchPortal(p,tab){
-  // hide all panels
-  ['cust','admin','driver'].forEach(x=>{
-    const el=document.getElementById(x+'Panel');
-    if(el){el.classList.remove('on');el.style.display='none';}
-  });
+  if(!curUser||curUser.role!=='admin')return;
   document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));
-  // show selected panel
-  const target=document.getElementById(p+'Panel');
-  if(target){target.classList.add('on');target.style.display='flex';}
   if(tab)tab.classList.add('on');
+  const panels={cust:'custPanel',admin:'adminPanel',driver:'drvPanel'};
+  ['custPanel','adminPanel','drvPanel'].forEach(x=>{const el=document.getElementById(x);if(el){el.classList.remove('on');el.style.display='none';}});
+  const target=document.getElementById(panels[p]||'custPanel');
+  if(target){target.classList.add('on');target.style.display='flex';}
   if(p==='admin'){renderAdmin('aOrders');}
   if(p==='driver'){
-    // force driver panel content visible
-    const dp=document.getElementById('drvPanel');
-    if(dp){
-      dp.style.display='flex';
-      dp.style.flexDirection='column';
-      dp.style.height='calc(100vh - 46px)';
-      const inner=dp.querySelector('div');
-      if(inner){inner.style.position='relative';inner.style.flex='1';inner.style.height='100%';inner.style.overflow='hidden';}
-    }
+    if(target){target.style.flexDirection='column';}
+    const inner=target?target.querySelector('div'):null;
+    if(inner){inner.style.position='relative';inner.style.flex='1';inner.style.height='100%';inner.style.overflow='hidden';}
     document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
-    const dj=document.getElementById('dJobs');
-    if(dj){dj.classList.add('on');dj.style.display='block';}
-    const dn=document.getElementById('dHistory');
-    if(dn){dn.style.display='none';}
+    const dj=document.getElementById('dJobs');if(dj){dj.classList.add('on');dj.style.display='block';}
+    const s=getStore(),drv=s.users?s.users.find(u=>u.role==='driver'&&u.active):s.drivers?s.drivers[0]:null;
+    if(drv&&document.getElementById('drvName'))document.getElementById('drvName').textContent=drv.name;
+  }
+  if(p==='cust'){
+    const s=getStore(),cu=s.users?s.users.find(u=>u.role==='customer'&&u.active):null;
+    if(cu){if(document.getElementById('custName'))document.getElementById('custName').textContent=cu.name;loadOrders(cu);}
   }
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
@@ -702,6 +747,37 @@ function goNewOrder(){document.querySelectorAll('.cScr').forEach(s=>s.classList.
 function backFromDash(){if(curUser)loadOrders(curUser);document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cOrders').classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');}
 
 // ═══ ORDER FLOW ═══
+function pickSvc(svc){
+  oSt.svc=svc;oSt.bin=null;oSt.dur=null;
+  // Update visual selection
+  ['roro','leach','garbage','skylift','crane'].forEach(s=>{
+    const el=document.getElementById('svc-'+s);
+    if(el)el.classList.toggle('sel',s===svc);
+  });
+}
+function buildStep2(){
+  const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
+  document.getElementById('s2BinSection').style.display=isSvc?'none':'block';
+  document.getElementById('s2EquipSection').style.display=isSvc?'block':'none';
+  if(isSvc){
+    const name=oSt.svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)';
+    const fd=oSt.svc==='skylift'?'RM 450':'RM 800';
+    const hd=oSt.svc==='skylift'?'RM 380':'RM 480';
+    document.getElementById('s2EquipLbl').textContent='Select Duration — '+name;
+    document.getElementById('s2EquipInfo').textContent=name+' — certified operator included. Price excludes fuel surcharge.';
+    document.getElementById('equipDurGrid').innerHTML=`
+      <div class="durCard ${oSt.dur==='full'?'sel':''}" onclick="pickDur('full')">
+        <div class="dLbl">Full Day</div><div class="dDays">8 hours</div>
+        <div class="dPrice">${fd}</div><div class="dDesc">Operator included</div>
+      </div>
+      <div class="durCard ${oSt.dur==='half'?'sel':''}" onclick="pickDur('half')">
+        <div class="dLbl">Half Day</div><div class="dDays">4 hours</div>
+        <div class="dPrice">${hd}</div><div class="dDesc">Operator included</div>
+      </div>`;
+  } else {
+    renderBins();
+  }
+}
 function renderBins(){document.getElementById('binList').innerHTML=BINS.map(b=>`<div class="binCard ${oSt.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')"><div class="bIco">${b.ico}</div><div style="flex:1">${b.pop?'<span class="badge b-green" style="margin-bottom:5px;display:inline-flex">Popular</span><br>':''}<div class="bName">${b.name}</div><div class="bSub">${b.size} · ${b.dims}</div><div class="bSub">${b.best}</div><div class="bPrices"><span class="pPill">Weekly RM${b.w}</span><span class="pPill hl">14-Day RM${b.f}</span><span class="pPill">Monthly RM${b.m}</span></div></div><div class="selChk">✓</div></div>`).join('');}
 function pickBin(id){oSt.bin=BINS.find(b=>b.id===id);renderBins();renderDur();}
 function renderDur(){if(!oSt.bin)return;const b=oSt.bin;document.getElementById('durGrid').innerHTML=[{k:'w',l:'Weekly',d:'7 days',p:b.w},{k:'f',l:'14 Days',d:'2 weeks',p:b.f,sv:'Best value 💚'},{k:'m',l:'Monthly',d:'30 days',p:b.m}].map(x=>`<div class="durCard ${oSt.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${parseInt(x.d)})"><div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div><div class="dPrice">RM${x.p}</div>${x.sv?`<div class="dSave">${x.sv}</div>`:''}</div>`).join('');}
@@ -716,16 +792,44 @@ function updateDates(){
   document.getElementById('oDD').textContent=fmt(sv);document.getElementById('oCD').textContent=fmt(ev);
   document.getElementById('oDR').style.display='block';buildTGrid('dtGrid','delTime');buildTGrid('ctGrid','colTime');
 }
-function buildSumm(){
-  if(!oSt.bin)return;const b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
-  const dL={w:'Weekly (7 days)',f:'14-Day (Fortnight)',m:'Monthly (30 days)'}[oSt.dur];
-  document.getElementById('oSumm').innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${b.ico} ${b.name}</div><div class="oCardRef">${dL}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">RM${price}</div></div><div class="oCardMeta"><div class="mChip">📅 ${document.getElementById('oDD').textContent} → ${document.getElementById('oCD').textContent}</div><div class="mChip">🚚 ${oSt.delTime||'TBC'}</div><div class="mChip">📦 ${oSt.colTime||'TBC'}</div><div class="mChip">📍 ${document.getElementById('oStreet').value||'—'}, ${document.getElementById('oCity').value||'—'}</div><div class="mChip">👤 ${document.getElementById('oContact').value||'—'} · ${document.getElementById('oPhone').value||'—'}</div></div>`;
+function getPrice(){
+  if(!oSt.svc) return '—';
+  if(oSt.svc==='skylift') return oSt.dur==='full'?'RM 450':'RM 380';
+  if(oSt.svc==='crane') return oSt.dur==='full'?'RM 800':'RM 480';
+  if(!oSt.bin||!oSt.dur) return '—';
+  const pMap={w:oSt.bin.w,f:oSt.bin.f,m:oSt.bin.m};
+  return 'RM '+(pMap[oSt.dur]||'—');
 }
+function getDurLabel(){
+  if(oSt.svc==='skylift'||oSt.svc==='crane') return oSt.dur==='full'?'Full Day (8 hours)':'Half Day (4 hours)';
+  return {w:'Weekly (7 days)',f:'14-Day (Fortnight)',m:'Monthly (30 days)'}[oSt.dur]||'—';
+}
+function buildSumm(){
+  const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
+  const binName=oSt.bin?oSt.bin.name:(oSt.svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)');
+  const ico=oSt.bin?oSt.bin.ico:(oSt.svc==='skylift'?'🏗':'🚜');
+  const durLbl=getDurLabel?getDurLabel():'—';
+  const price=getPrice?getPrice():'—';
+  const svcLbl={roro:'RoRo Bin Rental',leach:'Leach Bin Rental',garbage:'Garbage Bin Rental',skylift:'Sky-Lift Rental',crane:'Mobile Crane Rental'}[oSt.svc]||'—';
+  const ddEl=document.getElementById('oDD');
+  const delDate=ddEl?ddEl.textContent:'—';
+  const street=document.getElementById('oStreet')?document.getElementById('oStreet').value:'—';
+  const city=document.getElementById('oCity')?document.getElementById('oCity').value:'—';
+  const contact=document.getElementById('oContact')?document.getElementById('oContact').value:'—';
+  const phone=document.getElementById('oPhone')?document.getElementById('oPhone').value:'—';
+  const summEl=document.getElementById('oSumm');
+  if(summEl)summEl.innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${ico} ${binName}</div><div class="oCardRef">${svcLbl} · ${durLbl}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">${price}</div></div><div class="oCardMeta"><div class="mChip">📅 Deliver ${delDate}</div><div class="mChip">🕙 ${oSt.delTime||'TBC'}</div><div class="mChip">📍 ${street}, ${city}</div><div class="mChip">👤 ${contact} · ${phone}</div>${!isSvc?'<div class="mChip" style="color:var(--g1);font-weight:800">📦 Collection: on-demand request</div>':''}</div>`;
+}
+
 function orderNext(){
   const s=oSt.step;
-  if(s===1&&!oSt.bin){toast('⚠️ Select a bin first');return;}
-  if(s===2&&!oSt.dur){toast('⚠️ Choose a duration');return;}
-  if(s===3){if(!oSt.startDate){toast('⚠️ Pick a start date');return;}if(!oSt.delTime){toast('⚠️ Choose delivery time');return;}if(!oSt.colTime){toast('⚠️ Choose collection time');return;}}
+  if(s===1&&!oSt.svc){toast('⚠️ Select a service type');return;}
+  if(s===2){
+    const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
+    if(!isSvc&&!oSt.bin){toast('⚠️ Select a bin size');return;}
+    if(!oSt.dur){toast('⚠️ Choose a duration');return;}
+  }
+  if(s===3){if(!oSt.startDate){toast('⚠️ Pick a delivery date');return;}if(!oSt.delTime){toast('⚠️ Choose delivery time window');return;}}
   if(s===4){if(!document.getElementById('oContact').value||!document.getElementById('oStreet').value){toast('⚠️ Fill in contact & address');return;}buildSumm();}
   if(s===5)return;oSt.step++;updateStep();
 }
@@ -761,6 +865,10 @@ function showODash(id){
     const dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
     let acts='';
     if(active&&st.n===5)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custAccept('${o.id}')">✓ Accept Delivery</button></div>`;
+    if(active&&st.n===6)acts=`<div class="stageActs">
+      <button class="btn btn-g btn-sm" onclick="custRequestCollection('${o.id}')">📦 Request Collection</button>
+      <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Hi, I would like to request bin collection for order '+o.ref+'. Bin is full. Please arrange pickup. Thank you.')}" target="_blank" style="text-decoration:none"><button class="btn btn-wa btn-sm">📱 WhatsApp Admin</button></a>
+    </div>`;
     if(active&&st.n===7)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custClose('${o.id}')">🔒 Close My Case</button></div>`;
     return `<div class="stageRow"><div class="sDot ${dc}">${dt}</div><div class="stageContent"><div class="stageTitle">${st.title}</div><div class="stageSub">${st.sub}</div>${done?'<div class="stageTime" style="color:var(--g2)">✓ Completed</div>':''}${active?'<div class="stageTime" style="color:var(--y3)">● In progress</div>':''}${acts}</div></div>`;
   }).join('');
@@ -776,6 +884,7 @@ function custClose(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(
 function sendChat(){const inp=document.getElementById('chatInp'),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('dashChat');const el=document.createElement('div');el.className='chatMsg me';el.innerHTML=msg+'<div class="cmTime">Now</div>';w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='chatMsg sys';r.textContent='Message delivered to driver';w.appendChild(r);w.scrollTop=w.scrollHeight;},700);}
 
 // ═══ DOCUMENTS ═══
+function custRequestCollection(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=6;saveStore(s);toast('📦 Collection requested! Admin notified.');showODash(id);}
 function showDoc(type){const o=curODash;if(!o)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(o):buildInv(o);document.getElementById('docModal').classList.add('show');}
 function buildDO(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">DELIVERY ORDER</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 / 6251 6933 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem"><div><div class="sLbl">D/O Number</div><div style="font-weight:900">DO-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Deliver To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div><div style="color:var(--tx2);font-weight:600">${o.contact}</div></div><div class="divider"></div><div style="font-size:.82rem"><div class="sLbl">Items</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-weight:700"><span>${o.ico} ${o.bin}</span><span>1 unit</span></div><div style="color:var(--tx2);font-size:.76rem;padding:6px 0 2px">Rental: ${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="color:var(--tx2);font-size:.76rem;padding-bottom:2px">Delivery window: ${o.delTime}</div><div style="color:var(--tx2);font-size:.76rem">Driver: ${o.driver||'TBC'}</div></div><div class="divider"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:.76rem"><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Customer Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Driver Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div></div><button class="btn btn-ghost btn-full btn-sm" style="margin-top:12px" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
 function buildInv(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">TAX INVOICE</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.82rem"><div><div class="sLbl">Invoice No.</div><div style="font-weight:900">INV-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div><div style="color:var(--r1);font-weight:800;font-size:.72rem;margin-top:2px">Due 3 working days</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Bill To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div></div><div class="divider"></div><div style="font-size:.82rem;margin-bottom:10px"><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;font-size:.66rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr)"><span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Amount</span></div><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div><div style="font-weight:800">${o.bin}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">Incl. delivery & collection</div></div><div style="text-align:right;font-weight:700">1</div><div style="text-align:right;font-weight:900">${o.price}</div></div></div><div style="font-size:.82rem"><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>${o.price}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div><div style="display:flex;justify-content:space-between;padding:9px 0;border-top:2px solid var(--g1);margin-top:4px;font-weight:900;font-size:.95rem"><span>Total</span><span style="color:var(--g1)">${o.price}</span></div></div><div class="divider"></div><div style="background:var(--b2);border-radius:var(--rads);padding:12px;font-size:.8rem;margin-bottom:12px"><div style="font-weight:900;color:var(--b3);margin-bottom:7px">💳 Payment Details</div><div style="color:var(--b3);font-weight:700;line-height:1.9">Bank: <b>Maybank Berhad</b><br>Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>Account No.: <b>1234-5678-9012</b><br>Reference: <b>INV-${o.ref.split('-').pop()}</b></div></div><div style="font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">Payment due within 3 working days. WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).</div><button class="btn btn-ghost btn-full btn-sm" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
