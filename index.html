@@ -349,53 +349,7 @@ select.fInp{cursor:pointer}
 
 <!-- ██████ CUSTOMER ██████ -->
 <div id="custPanel" class="panel" style="display:none">
-  <!-- Login -->
-  <div id="authLogin" class="authWrap">
-    <div class="authLogo"><div class="lMark">🗑</div><h1>Cemerlang Endas</h1><p>Bin Rental — Customer Portal</p></div>
-    <div class="authCard">
-      <h2>Welcome Back 👋</h2>
-      <div class="authSub">Sign in with your registered email address</div>
-      <div class="fLbl">Email Address</div><input class="fInp" type="email" id="lEmail" placeholder="you@email.com">
-      <div class="fLbl">Password</div><input class="fInp" type="password" id="lPass" placeholder="••••••••">
-      <div class="forgotLink" onclick="showAuth('forgot')">Forgot password?</div>
-      <button class="btn btn-g btn-full" onclick="doLogin()">Sign In</button>
-      <div class="authSwitch">New customer? <a onclick="showAuth('reg')">Register here</a></div>
-      <div style="margin-top:14px;padding:11px 13px;background:var(--b2);border-radius:var(--rads)">
-        <div style="font-size:.68rem;font-weight:800;color:var(--b3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em">Demo Login</div>
-        <div style="font-size:.78rem;font-weight:600;color:var(--b3)">Email: <b>ahmad@test.com</b> &nbsp;·&nbsp; Password: <b>test1234</b></div>
-        <button class="btn btn-b btn-sm btn-full" style="margin-top:8px" onclick="quickLogin()">Use Demo Account</button>
-      </div>
-    </div>
-  </div>
-  <!-- Register -->
-  <div id="authReg" class="authWrap" style="display:none">
-    <div class="authLogo"><div class="lMark">✍️</div><h1>Create Account</h1><p>Register as a new customer</p></div>
-    <div class="authCard">
-      <h2>New Customer</h2>
-      <div class="authSub">Your account will be reviewed by Cemerlang Endas before first order</div>
-      <div class="fLbl">Full Name *</div><input class="fInp" type="text" id="rName" placeholder="Your full name">
-      <div class="fLbl">Company (optional)</div><input class="fInp" type="text" id="rComp" placeholder="ABC Sdn. Bhd.">
-      <div class="fLbl">Email Address *</div><input class="fInp" type="email" id="rEmail" placeholder="you@email.com">
-      <div class="fLbl">Phone Number</div><input class="fInp" type="tel" id="rPhone" placeholder="01x-xxxx xxxx">
-      <div class="fLbl">Default Delivery Address</div><input class="fInp" type="text" id="rAddr" placeholder="No., Jalan, Postcode, City">
-      <div class="fLbl">Password (min 8 characters) *</div><input class="fInp" type="password" id="rPass" placeholder="Create password">
-      <button class="btn btn-g btn-full" onclick="doSelfReg()">Create Account</button>
-      <div class="authSwitch">Already registered? <a onclick="showAuth('login')">Sign in</a></div>
-    </div>
-  </div>
-  <!-- Forgot password -->
-  <div id="authForgot" class="authWrap" style="display:none">
-    <div class="authLogo"><div class="lMark">🔑</div><h1>Reset Password</h1><p>We'll send instructions to your email</p></div>
-    <div class="authCard">
-      <h2>Forgot Password?</h2>
-      <div class="authSub">Enter your registered email address</div>
-      <div class="fLbl">Email Address</div><input class="fInp" type="email" id="forgotEmail" placeholder="you@email.com">
-      <button class="btn btn-g btn-full" onclick="doForgot()">Send Reset Link</button>
-      <div class="authSwitch"><a onclick="showAuth('login')">← Back to Login</a></div>
-    </div>
-  </div>
-  <!-- Main App -->
-  <div id="custApp" style="display:none;position:relative;flex:1;overflow:hidden">
+<div id="custApp" style="position:relative;flex:1;overflow:hidden;display:flex;flex-direction:column">
     <!-- Home -->
     <div id="cHome" class="cScr on">
       <div class="cHdr"><div><div class="greet" id="custGreet">Good morning 👋</div><h2 id="custName">—</h2></div><div style="font-size:1.6rem">🗑</div></div>
@@ -1078,6 +1032,8 @@ function launchApp(u){
   });
   if(u.role==='customer'){
     showPanel('custPanel');
+    const ca=document.getElementById('custApp');
+    if(ca){ca.style.display='flex';ca.style.flexDirection='column';}
     const h=new Date().getHours();
     document.getElementById('custGreet').textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
     document.getElementById('custName').textContent=u.name;
