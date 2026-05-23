@@ -276,6 +276,8 @@ select.fInp{cursor:pointer}
 @media(min-width:600px){
   .modal{max-width:500px;left:50%;transform:translateX(-50%)}
 }
+.btnLogin{width:100%;padding:14px;background:var(--g1);color:#fff;border:none;border-radius:var(--rads);font-family:var(--fn);font-size:1rem;font-weight:800;cursor:pointer;transition:background .15s;margin-top:4px}
+.btnLogin:hover{background:var(--g2)}
 </style>
 </head>
 <body>
@@ -289,7 +291,57 @@ select.fInp{cursor:pointer}
 <style>
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
-<div id="pBar">
+<!-- LOGIN PANEL -->
+<div id="loginPanel" style="position:fixed;inset:0;background:var(--g1);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto">
+  <div style="background:#fff;border-radius:var(--rad);padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shl)">
+    <div style="text-align:center;margin-bottom:22px">
+      <div style="width:64px;height:64px;border-radius:18px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px">🗑</div>
+      <div style="font-size:1.4rem;font-weight:900;color:var(--tx)">Cemerlang Endas</div>
+      <div style="font-size:.82rem;color:var(--tx2);font-weight:600;margin-top:3px">Bin Rental & Equipment</div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="authLogin">
+      <div style="font-size:1.1rem;font-weight:900;color:var(--tx);margin-bottom:4px">Welcome Back 👋</div>
+      <div style="font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:16px">Sign in with your registered email</div>
+      <div class="fLbl">Email Address</div>
+      <input class="fInp" type="email" id="lEmail" placeholder="you@email.com" autocomplete="email">
+      <div class="fLbl">Password</div>
+      <input class="fInp" type="password" id="lPass" placeholder="••••••••" autocomplete="current-password">
+      <div style="text-align:right;margin-top:-8px;margin-bottom:12px;font-size:.8rem;color:var(--g1);font-weight:700;cursor:pointer" onclick="showAuth('forgot')">Forgot password?</div>
+      <button class="btnLogin" onclick="doLogin()">Sign In</button>
+      <div style="text-align:center;margin-top:14px;font-size:.86rem;color:var(--tx2);font-weight:600">New customer? <a style="color:var(--g1);font-weight:800;cursor:pointer" onclick="showAuth('reg')">Register here</a></div>
+      <div style="margin-top:14px;padding:11px 13px;background:var(--g3);border-radius:var(--rads);border:1px solid var(--g4)">
+        <div style="font-size:.68rem;font-weight:800;color:var(--g1);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em">First Time?</div>
+        <div style="font-size:.78rem;font-weight:600;color:var(--tx2)">Register a new account or contact admin for your login details.</div>
+      </div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="authReg" style="display:none">
+      <div style="font-size:1.1rem;font-weight:900;color:var(--tx);margin-bottom:4px">Create Account</div>
+      <div style="font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:16px">Register as a new customer</div>
+      <div class="fLbl">Full Name *</div><input class="fInp" type="text" id="rName" placeholder="Your full name">
+      <div class="fLbl">Company (optional)</div><input class="fInp" type="text" id="rComp" placeholder="ABC Sdn. Bhd.">
+      <div class="fLbl">Email Address *</div><input class="fInp" type="email" id="rEmail" placeholder="you@email.com">
+      <div class="fLbl">Phone Number</div><input class="fInp" type="tel" id="rPhone" placeholder="01x-xxxx xxxx">
+      <div class="fLbl">Password (min 8 chars) *</div><input class="fInp" type="password" id="rPass" placeholder="Create password">
+      <button class="btnLogin" onclick="doSelfReg()">Create Account</button>
+      <div style="text-align:center;margin-top:14px;font-size:.86rem;color:var(--tx2);font-weight:600">Already registered? <a style="color:var(--g1);font-weight:800;cursor:pointer" onclick="showAuth('login')">Sign in</a></div>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <div id="authForgot" style="display:none">
+      <div style="font-size:1.1rem;font-weight:900;color:var(--tx);margin-bottom:4px">Reset Password</div>
+      <div style="font-size:.82rem;color:var(--tx2);font-weight:600;margin-bottom:16px">Enter your registered email address</div>
+      <div class="fLbl">Email Address</div><input class="fInp" type="email" id="forgotEmail" placeholder="you@email.com">
+      <button class="btnLogin" onclick="doForgot()">Send Reset Link</button>
+      <div style="text-align:center;margin-top:14px;font-size:.86rem;color:var(--tx2);font-weight:600"><a style="color:var(--g1);font-weight:800;cursor:pointer" onclick="showAuth('login')">← Back to Login</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="pBar" style="display:none">
   <div class="pTab on" onclick="switchPortal('cust',this)">👤 Customer</div>
   <div class="pTab" onclick="switchPortal('admin',this)">🏢 Admin</div>
   <div class="pTab" onclick="switchPortal('driver',this)">🚛 Driver</div>
@@ -671,11 +723,11 @@ select.fInp{cursor:pointer}
 
 
 <!-- Firebase SDKs -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-
+<!-- Firebase Compat SDKs (no module issues, works everywhere) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyBUwC86JTwCK1mKfcyqgNv5Z7XElOHwjw8",
   authDomain: "cemerlang-endas.firebaseapp.com",
@@ -684,70 +736,71 @@ const firebaseConfig = {
   messagingSenderId: "1054344569160",
   appId: "1:1054344569160:web:ed292b2bab2f9169fa937d"
 };
+firebase.initializeApp(firebaseConfig);
+const _auth = firebase.auth();
+const _db = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Make available globally
+window._auth = _auth;
+window._db = _db;
 
-// ══ Make Firebase available globally ══
-window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, doc, setDoc, getDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, serverTimestamp };
-
-// ══ Auth state listener ══
-// Wait for DOM to be ready before acting on auth state
-function handleAuthState(user) {
-  if (user) {
-    getDoc(doc(db, 'users', user.uid)).then(userDoc => {
-      if (userDoc.exists()) {
-        const userData = { id: user.uid, ...userDoc.data() };
-        window.curUser = userData;
-        const lp = document.getElementById('loginPanel');
-        if (lp) lp.style.display = 'none';
-        if (typeof launchApp === 'function') launchApp(userData);
-      } else {
-        // User exists in Auth but not Firestore - show login
-        const lp = document.getElementById('loginPanel');
-        if (lp) lp.style.display = 'flex';
-      }
-    }).catch(e => {
-      console.error('Error getting user profile:', e);
-      const lp = document.getElementById('loginPanel');
-      if (lp) lp.style.display = 'flex';
-    });
-  } else {
-    window.curUser = null;
-    const lp = document.getElementById('loginPanel');
-    if (lp) lp.style.display = 'flex';
-    ['custPanel','adminPanel','drvPanel'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.classList.remove('on'); el.style.display = 'none'; }
-    });
-    const pb = document.getElementById('pBar');
-    if (pb) pb.classList.remove('show');
+// Hide loading screen helper
+function hideLoading(){
+  const ls = document.getElementById('loadingScreen');
+  if(ls){
+    ls.style.transition='opacity 0.3s';
+    ls.style.opacity='0';
+    setTimeout(function(){ls.style.display='none';}, 350);
   }
 }
 
-// Wait for DOM ready before setting up auth listener
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, handleAuthState);
-  });
-} else {
-  onAuthStateChanged(auth, handleAuthState);
-}
+// Auth state listener - runs when Firebase auth is ready
+_auth.onAuthStateChanged(function(user){
+  if(user){
+    _db.collection('users').doc(user.uid).get().then(function(doc){
+      if(doc.exists){
+        const userData = {id: user.uid, ...doc.data()};
+        window.curUser = userData;
+        hideLoading();
+        if(typeof launchApp === 'function') launchApp(userData);
+      } else {
+        // Auth user exists but no Firestore profile - show login
+        hideLoading();
+        const lp = document.getElementById('loginPanel');
+        if(lp) lp.style.display='flex';
+      }
+    }).catch(function(e){
+      console.error('Firestore error:',e);
+      hideLoading();
+      const lp = document.getElementById('loginPanel');
+      if(lp) lp.style.display='flex';
+    });
+  } else {
+    // Not logged in
+    hideLoading();
+    const lp = document.getElementById('loginPanel');
+    if(lp) lp.style.display='flex';
+    ['custPanel','adminPanel','drvPanel'].forEach(function(id){
+      const el=document.getElementById(id);
+      if(el){el.classList.remove('on');el.style.display='none';}
+    });
+    const pb=document.getElementById('pBar');
+    if(pb) pb.classList.remove('show');
+  }
+});
 
-window.fbReady = true;
-window._fbAuth = auth;
-window._fbDb = db;
-// Hide loading screen once Firebase is ready
-const loadScreen = document.getElementById('loadingScreen');
-if (loadScreen) {
-  setTimeout(() => {
-    loadScreen.style.transition = 'opacity 0.4s';
-    loadScreen.style.opacity = '0';
-    setTimeout(() => loadScreen.style.display = 'none', 400);
-  }, 800); // Small delay to ensure auth state has been checked
-}
-console.log('Firebase initialized successfully');
+// Failsafe: if Firebase never responds in 6 seconds, show login
+setTimeout(function(){
+  const ls=document.getElementById('loadingScreen');
+  if(ls && ls.style.display !== 'none' && ls.style.opacity !== '0'){
+    console.warn('Firebase timeout - showing login');
+    hideLoading();
+    const lp=document.getElementById('loginPanel');
+    if(lp) lp.style.display='flex';
+  }
+}, 6000);
+
+console.log('Firebase compat initialized');
 </script>
 
 <script>
@@ -884,9 +937,6 @@ function toast(msg){
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);
 }
 
-// ══ FIREBASE HELPERS ══
-function fb(){return window._fb;}
-
 // ══ AUTH ══
 function showAuth(s){
   ['authLogin','authReg','authForgot'].forEach(id=>{
@@ -900,13 +950,11 @@ async function doLogin(){
   const em=document.getElementById('lEmail')?.value.trim().toLowerCase();
   const pw=document.getElementById('lPass')?.value;
   if(!em||!pw){toast('⚠️ Enter email and password');return;}
-  try{
-    const btn=document.querySelector('#authLogin button.btnLogin')||document.querySelector('#authLogin .btnLogin');
-    if(btn){btn.textContent='Signing in…';btn.disabled=true;}
-    await fb().signInWithEmailAndPassword(fb().auth,em,pw);
-    // onAuthStateChanged will handle the rest
-  } catch(e){
-    const btn=document.querySelector('#authLogin button.btnLogin')||document.querySelector('#authLogin .btnLogin');
+  const btn=document.querySelector('#authLogin button')||document.querySelector('#authLogin .btnLogin');
+  if(btn){btn.textContent='Signing in…';btn.disabled=true;}
+  _auth.signInWithEmailAndPassword(em,pw).then(function(){
+    // onAuthStateChanged handles the rest
+  }).catch(function(e){
     if(btn){btn.textContent='Sign In';btn.disabled=false;}
     if(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
       toast('❌ Email or password incorrect');
@@ -915,7 +963,7 @@ async function doLogin(){
     } else {
       toast('❌ Login failed: '+e.message);
     }
-  }
+  });
 }
 
 async function doSelfReg(){
@@ -926,47 +974,43 @@ async function doSelfReg(){
   const comp=document.getElementById('rComp')?.value.trim();
   if(!name||!em||!pw){toast('⚠️ Name, email and password required');return;}
   if(pw.length<8){toast('⚠️ Password must be 8+ characters');return;}
-  try{
-    const btn=document.querySelector('#authReg button')||document.querySelector('#authReg .btnLogin');
-    if(btn){btn.textContent='Creating account…';btn.disabled=true;}
-    const cred=await fb().createUserWithEmailAndPassword(fb().auth,em,pw);
+  const btn=document.querySelector('#authReg button')||document.querySelector('#authReg .btnLogin');
+  if(btn){btn.textContent='Creating account…';btn.disabled=true;}
+  _auth.createUserWithEmailAndPassword(em,pw).then(function(cred){
     const uid=cred.user.uid;
-    await fb().setDoc(fb().doc(fb().db,'users',uid),{
-      id:uid,role:'customer',name,company:comp||'',email:em,phone:phone||'',
-      addr:'',password:'',orders:[],active:true,createdBy:'self',
-      createdAt:fb().serverTimestamp()
+    return _db.collection('users').doc(uid).set({
+      id:uid,role:'customer',name:name,company:comp||'',email:em,
+      phone:phone||'',addr:'',password:'',orders:[],active:true,
+      createdBy:'self',createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
+  }).then(function(){
     toast('✅ Account created! Welcome.');
-    // onAuthStateChanged handles the rest
-  } catch(e){
-    const btn=document.querySelector('#authReg button')||document.querySelector('#authReg .btnLogin');
+  }).catch(function(e){
     if(btn){btn.textContent='Create Account';btn.disabled=false;}
     if(e.code==='auth/email-already-in-use'){
       toast('⚠️ Email already registered. Please login instead.');
     } else {
       toast('❌ Registration failed: '+e.message);
     }
-  }
+  });
 }
 
 async function doForgot(){
   const em=document.getElementById('forgotEmail')?.value.trim();
   if(!em){toast('⚠️ Enter your email');return;}
-  try{
-    const {sendPasswordResetEmail}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-    await sendPasswordResetEmail(fb().auth,em);
+  _auth.sendPasswordResetEmail(em).then(function(){
     toast('📧 Password reset email sent! Check your inbox.');
-    setTimeout(()=>showAuth('login'),2000);
-  } catch(e){
-    if(e.code==='auth/user-not-found'){toast('❌ Email not found in system');}
+    setTimeout(function(){showAuth('login');},2000);
+  }).catch(function(e){
+    if(e.code==='auth/user-not-found'){toast('❌ Email not found');}
     else toast('❌ Error: '+e.message);
-  }
+  });
 }
 
 async function doLogout(){
   if(unsubOrders){unsubOrders();unsubOrders=null;}
   if(unsubDrivers){unsubDrivers();unsubDrivers=null;}
-  await fb().signOut(fb().auth);
+  _auth.signOut();
   curUser=null;
   document.getElementById('oActBar')?.classList.remove('show');
   toast('✅ Logged out successfully');
@@ -1017,30 +1061,30 @@ async function saveProfile(){
   const newComp=document.getElementById('pfComp').value;
   const newAddr=document.getElementById('pfAddr').value;
   const newPass=document.getElementById('pfNewPass')?.value;
-  try{
-    await fb().updateDoc(fb().doc(fb().db,'users',curUser.id),{
-      name:newName,phone:newPhone,company:newComp,addr:newAddr
-    });
+  if(newPass&&newPass.length>0&&newPass.length<8){toast('⚠️ Password must be 8+ characters');return;}
+  _db.collection('users').doc(curUser.id).update({
+    name:newName,phone:newPhone,company:newComp,addr:newAddr
+  }).then(function(){
     if(newPass&&newPass.length>=8){
-      await fb().updatePassword(fb().auth.currentUser,newPass);
-      document.getElementById('pfNewPass').value='';
-    } else if(newPass&&newPass.length>0){
-      toast('⚠️ Password must be 8+ characters');return;
+      return _auth.currentUser.updatePassword(newPass).then(function(){
+        document.getElementById('pfNewPass').value='';
+        toast('✅ Profile and password updated!');
+      });
     }
-    curUser.name=newName;curUser.phone=newPhone;curUser.company=newComp;curUser.addr=newAddr;
-    document.getElementById('custName').textContent=newName;
     toast('✅ Profile updated!');
-  } catch(e){toast('❌ Error: '+e.message);}
+  }).catch(function(e){toast('❌ Error: '+e.message);});
+  curUser.name=newName;curUser.phone=newPhone;
+  curUser.company=newComp;curUser.addr=newAddr;
+  document.getElementById('custName').textContent=newName;
 }
 
-// ══ REAL-TIME ORDER LISTENER (Customer) ══
 function loadOrdersRealtime(u){
   if(unsubOrders){unsubOrders();}
-  const q=fb().query(fb().collection(fb().db,'orders'),fb().where('custId','==',u.id));
-  unsubOrders=fb().onSnapshot(q,(snap)=>{
+  const q=_db.collection('orders').where('custId','==',u.id);
+  unsubOrders=q.onSnapshot(function(snap){
     const orders=[];
-    snap.forEach(d=>orders.push({id:d.id,...d.data()}));
-    orders.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    snap.forEach(function(d){orders.push({id:d.id,...d.data()});});
+    orders.sort(function(a,b){return (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0);});
     renderCustomerOrders(orders,u);
   });
 }
@@ -1058,10 +1102,9 @@ function renderCustomerOrders(orders,u){
 // ══ REAL-TIME ORDER LISTENER (Admin) ══
 function loadAdminOrdersRealtime(){
   if(unsubOrders){unsubOrders();}
-  const q=fb().query(fb().collection(fb().db,'orders'),fb().orderBy('createdAt','desc'));
-  unsubOrders=fb().onSnapshot(q,(snap)=>{
+  unsubOrders=_db.collection('orders').orderBy('createdAt','desc').onSnapshot(function(snap){
     window._adminOrders=[];
-    snap.forEach(d=>window._adminOrders.push({id:d.id,...d.data()}));
+    snap.forEach(function(d){window._adminOrders.push({id:d.id,...d.data()});});
     const pending=(window._adminOrders||[]).filter(o=>o.status==='pending').length;
     document.getElementById('aBadge').textContent=pending;
     // Refresh current admin view
@@ -1077,10 +1120,9 @@ function loadAdminOrdersRealtime(){
 // ══ REAL-TIME DRIVER JOBS ══
 function loadDriverJobsRealtime(u){
   if(unsubOrders){unsubOrders();}
-  const q=fb().query(fb().collection(fb().db,'orders'),fb().where('driverId','==',u.id));
-  unsubOrders=fb().onSnapshot(q,(snap)=>{
+  unsubOrders=_db.collection('orders').where('driverId','==',u.id).onSnapshot(function(snap){
     const jobs=[];
-    snap.forEach(d=>jobs.push({id:d.id,...d.data()}));
+    snap.forEach(function(d){jobs.push({id:d.id,...d.data()});});
     renderDriverJobs(jobs,u);
   });
 }
@@ -1396,9 +1438,9 @@ async function submitOrder(){
       placement:document.getElementById('oPlacement')?.value||'',
       selectedTown:oSt.selectedTown||'',
       selectedSize:oSt.bin?.sizeName||'',
-      createdAt:fb().serverTimestamp(),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
     };
-    await fb().addDoc(fb().collection(fb().db,'orders'),orderData);
+    await _db.collection('orders').add(orderData);
     toast('🎉 Order placed! Admin has been notified. We will WhatsApp you shortly.');
     btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
     document.getElementById('oActBar')?.classList.remove('show');
@@ -1412,8 +1454,8 @@ async function submitOrder(){
 // ══ ORDER DASHBOARD ══
 async function showODash(id){
   try{
-    const snap=await fb().getDoc(fb().doc(fb().db,'orders',id));
-    if(!snap.exists())return;
+    const snap=await _db.collection('orders').doc(id).get();
+    if(!snap.exists)return;
     const o={id:snap.id,...snap.data()};
     curODash=o;
     document.getElementById('dashRef').textContent=o.ref;
@@ -1459,15 +1501,15 @@ async function showODash(id){
 }
 
 async function custAccept(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:5});
+  await _db.collection('orders').doc(id).update({stage:5});
   toast('✅ Delivery accepted! Company has been notified.');showODash(id);
 }
 async function custRequestCollection(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:6,status:'active'});
+  await _db.collection('orders').doc(id).update({stage:6,status:'active'});
   toast('📦 Collection requested! Admin notified. WhatsApp them for urgent pickup.');showODash(id);
 }
 async function custClose(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:7,status:'completed'});
+  await _db.collection('orders').doc(id).update({stage:7,status:'completed'});
   toast('🔒 Case closed. Thank you for using Cemerlang Endas!');showODash(id);
 }
 
@@ -1639,8 +1681,8 @@ function renderAdmin(sc){
 
 async function loadCustomersList(){
   try{
-    const snap=await fb().getDocs(fb().query(fb().collection(fb().db,'users'),fb().where('role','==','customer')));
-    const customers=[];snap.forEach(d=>customers.push({id:d.id,...d.data()}));
+    const snap=await _db.collection('users').where('role','==','customer').get();
+    const customers=[];snap.forEach(function(d){customers.push({id:d.id,...d.data()});});
     const el=document.getElementById('custListAdmin');
     if(!el)return;
     if(customers.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:#4a9a5a">No customers registered yet</div>';return;}
@@ -1721,11 +1763,11 @@ function adminODash(o){
 }
 
 async function adminAccept(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{status:'confirmed',stage:2});
+  await _db.collection('orders').doc(id).update({status:'confirmed',stage:2});
   toast('✅ Order accepted! Customer notified — arranging driver.');
 }
 async function adminSendConf(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:3});
+  await _db.collection('orders').doc(id).update({stage:3});
   toast('📱 Confirmation sent to customer!');renderAdmin('aODash');
 }
 function adminShowDoc(id,type){
@@ -1767,16 +1809,13 @@ async function adminRegCust(){
   if(!pw||pw.length<8){toast('⚠️ Password min 8 chars');return;}
   try{
     // Create Firebase Auth account
-    const {createUserWithEmailAndPassword:createUser}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-    const secondAuth=fb().auth;
-    const cred=await createUser(secondAuth,em,pw);
+    const cred=await _auth.createUserWithEmailAndPassword(em,pw);
     const uid=cred.user.uid;
-    // Save to Firestore
-    await fb().setDoc(fb().doc(fb().db,'users',uid),{
-      id:uid,role:'customer',name,company:comp||'',email:em,
+    await _db.collection('users').doc(uid).set({
+      id:uid,role:'customer',name:name,company:comp||'',email:em,
       phone:phone||'',addr:addr||'',password:pw,
       orders:[],active:true,createdBy:'admin',
-      createdAt:fb().serverTimestamp()
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     showCreds(uid,em,name,phone||'',pw);
     toast('✅ Customer registered! Share login details below.');
@@ -1819,7 +1858,7 @@ function copyTxt(elId,label){
 }
 
 async function toggleCustActive(uid,newState){
-  await fb().updateDoc(fb().doc(fb().db,'users',uid),{active:newState});
+  await _db.collection('users').doc(uid).update({active:newState});
   toast(newState?'✅ Customer activated':'⛔ Customer deactivated');
   loadCustomersList();
 }
@@ -1831,8 +1870,8 @@ async function renderDriversAdmin(){
   // Load drivers from Firestore
   let drivers=[];
   try{
-    const snap=await fb().getDocs(fb().collection(fb().db,'drivers'));
-    snap.forEach(d=>drivers.push({id:d.id,...d.data()}));
+    const snap=await _db.collection('drivers').get();
+    snap.forEach(function(d){drivers.push({id:d.id,...d.data()});});
   }catch(e){console.error(e);}
 
   el.innerHTML=`<h2>🚛 Driver & Vehicle Management</h2>
@@ -1899,27 +1938,25 @@ async function adminAddDriver(){
   if(!pw||pw.length<8){toast('⚠️ Password min 8 characters');return;}
   try{
     // Create Firebase Auth for driver
-    const {createUserWithEmailAndPassword:createUser}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-    const cred=await createUser(fb().auth,em,pw);
+    const cred=await _auth.createUserWithEmailAndPassword(em,pw);
     const uid=cred.user.uid;
     const driverData={
-      id:uid,name,email:em,phone,
+      id:uid,name:name,email:em,phone:phone,
       ic:document.getElementById('ndIC')?.value.trim()||'',
       emerg:document.getElementById('ndEmerg')?.value.trim()||'',
-      vtype,plate,
+      vtype:vtype,plate:plate,
       model:document.getElementById('ndModel')?.value.trim()||'',
       licence:document.getElementById('ndLic')?.value||'',
       notes:document.getElementById('ndNotes')?.value.trim()||'',
       active:true,jobs:0,status:'Offline',
-      createdAt:fb().serverTimestamp()
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     };
-    // Save to drivers collection
-    await fb().setDoc(fb().doc(fb().db,'drivers',uid),driverData);
-    // Save to users collection for login
-    await fb().setDoc(fb().doc(fb().db,'users',uid),{
-      id:uid,role:'driver',name,email:em,phone,company:'',addr:'',
-      password:pw,orders:[],active:true,createdBy:'admin',
-      vtype,plate,createdAt:fb().serverTimestamp()
+    await _db.collection('drivers').doc(uid).set(driverData);
+    await _db.collection('users').doc(uid).set({
+      id:uid,role:'driver',name:name,email:em,phone:phone,
+      company:'',addr:'',password:pw,orders:[],active:true,
+      createdBy:'admin',vtype:vtype,plate:plate,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     toast('✅ '+name+' registered! They can now login with '+em);
     clearDrvForm();
@@ -1934,14 +1971,14 @@ function clearDrvForm(){
   ['ndVType','ndLic'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
 }
 async function toggleDrvActive(id,newState){
-  await fb().updateDoc(fb().doc(fb().db,'drivers',id),{active:newState});
-  await fb().updateDoc(fb().doc(fb().db,'users',id),{active:newState});
+  await _db.collection('drivers').doc(id).update({active:newState});
+  await _db.collection('users').doc(id).update({active:newState});
   toast(newState?'✅ Driver activated':'⛔ Driver deactivated');
   renderDriversAdmin();
 }
 async function deleteDriver(id,name){
   if(!confirm('Delete driver '+name+'? This cannot be undone.'))return;
-  await fb().updateDoc(fb().doc(fb().db,'drivers',id),{active:false});
+  await _db.collection('drivers').doc(id).update({active:false});
   toast('🗑 Driver deactivated');renderDriversAdmin();
 }
 
@@ -1954,8 +1991,8 @@ async function openAssign(id){
   // Load drivers from Firestore
   let drivers=[];
   try{
-    const snap=await fb().getDocs(fb().query(fb().collection(fb().db,'drivers'),fb().where('active','==',true)));
-    snap.forEach(d=>drivers.push({id:d.id,...d.data()}));
+    const snap=await _db.collection('drivers').where('active','==',true).get();
+    snap.forEach(function(d){drivers.push({id:d.id,...d.data()});});
   }catch(e){console.error(e);}
   document.getElementById('drvListModal').innerHTML=drivers.map(d=>`
     <div style="background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer" onclick="pickDrv('${d.id}','${d.name}',this)">
@@ -1977,7 +2014,7 @@ function pickDrv(id,name,row){
 async function confirmAssign(){
   if(!selDrv){toast('⚠️ Select a driver');return;}
   try{
-    await fb().updateDoc(fb().doc(fb().db,'orders',assignId),{
+    await _db.collection('orders').doc(assignId).update({
       driverId:selDrv.id,driverName:selDrv.name,
       status:'confirmed',stage:3
     });
@@ -2034,15 +2071,15 @@ function drvJobCard(o){
 
 let curPhotoOrderId='';
 async function drvAccept(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:4});
+  await _db.collection('orders').doc(id).update({stage:4});
   toast('✅ Job accepted! Admin & customer have been notified.');
 }
 async function drvDecline(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{driverId:null,driverName:null,stage:2,status:'pending'});
+  await _db.collection('orders').doc(id).update({driverId:null,driverName:null,stage:2,status:'pending'});
   toast('Job declined. Admin notified.');
 }
 async function drvCloseCase(id){
-  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:7,status:'completed'});
+  await _db.collection('orders').doc(id).update({stage:7,status:'completed'});
   toast('🔒 Case closed! Company notified.');
 }
 
@@ -2067,7 +2104,7 @@ async function submitPhotos(){
     const newStage=photoCtx==='delivery'?5:7;
     const updates={stage:newStage};
     if(photoCtx==='collection'){updates.status='completed';}
-    await fb().updateDoc(fb().doc(fb().db,'orders',curPhotoOrderId),updates);
+    await _db.collection('orders').doc(curPhotoOrderId).update(updates);
     toast(photoCtx==='delivery'?'📸 Delivery confirmed! Customer & company notified.':'📸 Collection done! Case closed.');
   }catch(e){toast('❌ Error: '+e.message);}
 }
