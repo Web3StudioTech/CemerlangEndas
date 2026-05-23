@@ -279,6 +279,16 @@ select.fInp{cursor:pointer}
 </style>
 </head>
 <body>
+<!-- Loading screen while Firebase initializes -->
+<div id="loadingScreen" style="position:fixed;inset:0;background:var(--g1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999">
+  <div style="font-size:3rem;margin-bottom:16px">🗑</div>
+  <div style="color:#fff;font-size:1.2rem;font-weight:900;margin-bottom:8px">Cemerlang Endas</div>
+  <div style="color:rgba(255,255,255,.7);font-size:.85rem;font-weight:600;margin-bottom:24px">Bin Rental & Equipment</div>
+  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+</div>
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 <div id="pBar">
   <div class="pTab on" onclick="switchPortal('cust',this)">👤 Customer</div>
   <div class="pTab" onclick="switchPortal('admin',this)">🏢 Admin</div>
@@ -286,7 +296,7 @@ select.fInp{cursor:pointer}
 </div>
 
 <!-- ██████ CUSTOMER ██████ -->
-<div id="custPanel" class="panel on">
+<div id="custPanel" class="panel" style="display:none">
   <!-- Login -->
   <div id="authLogin" class="authWrap">
     <div class="authLogo"><div class="lMark">🗑</div><h1>Cemerlang Endas</h1><p>Bin Rental — Customer Portal</p></div>
@@ -556,7 +566,7 @@ select.fInp{cursor:pointer}
 </div>
 
 <!-- ██████ ADMIN ██████ -->
-<div id="adminPanel" class="panel">
+<div id="adminPanel" class="panel" style="display:none">
   <div class="aSide">
     <div class="aLogo"><h3>Cemerlang Endas</h3><p>Admin Dashboard</p></div>
     <div class="aMenu">
@@ -571,7 +581,7 @@ select.fInp{cursor:pointer}
 </div>
 
 <!-- ██████ DRIVER ██████ -->
-<div id="drvPanel" class="panel">
+<div id="drvPanel" class="panel" style="display:none">
   <div style="position:relative;flex:1;overflow:hidden;width:100%;height:100%">
     <div id="dJobs" class="drvScr on">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -683,25 +693,27 @@ const db = getFirestore(app);
 window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, doc, setDoc, getDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, serverTimestamp };
 
 // ══ Auth state listener ══
-onAuthStateChanged(auth, async (user) => {
+// Wait for DOM to be ready before acting on auth state
+function handleAuthState(user) {
   if (user) {
-    // User is signed in - get their profile from Firestore
-    try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+    getDoc(doc(db, 'users', user.uid)).then(userDoc => {
       if (userDoc.exists()) {
         const userData = { id: user.uid, ...userDoc.data() };
         window.curUser = userData;
-        // Hide login panel
         const lp = document.getElementById('loginPanel');
         if (lp) lp.style.display = 'none';
-        // Launch app based on role
         if (typeof launchApp === 'function') launchApp(userData);
+      } else {
+        // User exists in Auth but not Firestore - show login
+        const lp = document.getElementById('loginPanel');
+        if (lp) lp.style.display = 'flex';
       }
-    } catch(e) {
+    }).catch(e => {
       console.error('Error getting user profile:', e);
-    }
+      const lp = document.getElementById('loginPanel');
+      if (lp) lp.style.display = 'flex';
+    });
   } else {
-    // Not signed in - show login
     window.curUser = null;
     const lp = document.getElementById('loginPanel');
     if (lp) lp.style.display = 'flex';
@@ -712,9 +724,29 @@ onAuthStateChanged(auth, async (user) => {
     const pb = document.getElementById('pBar');
     if (pb) pb.classList.remove('show');
   }
-});
+}
+
+// Wait for DOM ready before setting up auth listener
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    onAuthStateChanged(auth, handleAuthState);
+  });
+} else {
+  onAuthStateChanged(auth, handleAuthState);
+}
 
 window.fbReady = true;
+window._fbAuth = auth;
+window._fbDb = db;
+// Hide loading screen once Firebase is ready
+const loadScreen = document.getElementById('loadingScreen');
+if (loadScreen) {
+  setTimeout(() => {
+    loadScreen.style.transition = 'opacity 0.4s';
+    loadScreen.style.opacity = '0';
+    setTimeout(() => loadScreen.style.display = 'none', 400);
+  }, 800); // Small delay to ensure auth state has been checked
+}
 console.log('Firebase initialized successfully');
 </script>
 
@@ -869,12 +901,12 @@ async function doLogin(){
   const pw=document.getElementById('lPass')?.value;
   if(!em||!pw){toast('⚠️ Enter email and password');return;}
   try{
-    const btn=document.querySelector('#authLogin .btnLogin');
+    const btn=document.querySelector('#authLogin button.btnLogin')||document.querySelector('#authLogin .btnLogin');
     if(btn){btn.textContent='Signing in…';btn.disabled=true;}
     await fb().signInWithEmailAndPassword(fb().auth,em,pw);
     // onAuthStateChanged will handle the rest
   } catch(e){
-    const btn=document.querySelector('#authLogin .btnLogin');
+    const btn=document.querySelector('#authLogin button.btnLogin')||document.querySelector('#authLogin .btnLogin');
     if(btn){btn.textContent='Sign In';btn.disabled=false;}
     if(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
       toast('❌ Email or password incorrect');
@@ -895,7 +927,7 @@ async function doSelfReg(){
   if(!name||!em||!pw){toast('⚠️ Name, email and password required');return;}
   if(pw.length<8){toast('⚠️ Password must be 8+ characters');return;}
   try{
-    const btn=document.querySelector('#authReg .btnLogin');
+    const btn=document.querySelector('#authReg button')||document.querySelector('#authReg .btnLogin');
     if(btn){btn.textContent='Creating account…';btn.disabled=true;}
     const cred=await fb().createUserWithEmailAndPassword(fb().auth,em,pw);
     const uid=cred.user.uid;
@@ -907,7 +939,7 @@ async function doSelfReg(){
     toast('✅ Account created! Welcome.');
     // onAuthStateChanged handles the rest
   } catch(e){
-    const btn=document.querySelector('#authReg .btnLogin');
+    const btn=document.querySelector('#authReg button')||document.querySelector('#authReg .btnLogin');
     if(btn){btn.textContent='Create Account';btn.disabled=false;}
     if(e.code==='auth/email-already-in-use'){
       toast('⚠️ Email already registered. Please login instead.');
@@ -2052,6 +2084,15 @@ function drvNavFn(id,tab){
   const target=document.getElementById(id);if(target){target.classList.add('on');target.style.display='block';}
   document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
   if(tab)tab.classList.add('on');
+}
+
+// ══ QUICK LOGIN (demo) ══
+function quickLogin(){
+  const emailEl=document.getElementById('lEmail');
+  const passEl=document.getElementById('lPass');
+  if(emailEl)emailEl.value='admin@cemerlang.com';
+  if(passEl)passEl.value='admin123';
+  doLogin();
 }
 
 // ══ INIT ══
