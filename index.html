@@ -659,28 +659,68 @@ select.fInp{cursor:pointer}
 </div>
 <div id="toast"></div>
 
-<script>
-// ═══ DATA STORE (localStorage) ═══
-const SK='CE_v3';
-function getStore(){try{return JSON.parse(localStorage.getItem(SK))||init();}catch(e){return init();}}
-function saveStore(s){localStorage.setItem(SK,JSON.stringify(s));}
-function init(){
-  const s={
-    customers:[{id:'c001',name:'Ahmad Hairul',company:'AH Holdings Sdn. Bhd.',email:'ahmad@test.com',phone:'012-345 6789',addr:'No. 12, Jalan Kepong, 52100 KL',password:'test1234',createdBy:'admin',orders:['o001'],active:true}],
-    orders:[{id:'o001',ref:'CE-2026-10234',custId:'c001',ico:'🏗',bin:'RoRo Bin — Medium',plan:'14-Day',delDate:'Fri 23 May',delTime:'10:00–11:00',colDate:'Thu 5 Jun',colTime:'4:00–5:00',price:'RM 850',status:'confirmed',driver:'Roslan bin Mat',stage:3,addr:'No. 12, Jalan Kepong, 52100 KL',contact:'Ahmad · 012-345 6789',notes:''}],
-    drivers:[
-      {id:'d1',name:'Roslan bin Mat',ava:'RM',phone:'012-345 1122',emerg:'',vtype:'🚛 Lorry (RoRo)',plate:'VDD 3312',model:'Hino 500',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Online · Available',jobs:2,active:true},
-      {id:'d2',name:'Hairul bin Ahmad',ava:'HA',phone:'013-456 2233',emerg:'',vtype:'🚜 Crane (20T)',plate:'WQK 8821',model:'KATO NK-200',licence:'CDL (Crane/Heavy)',ic:'',notes:'KATO crane operator certified',status:'Online · On Route',jobs:3,active:true},
-      {id:'d3',name:'Chong Wei Keat',ava:'CW',phone:'016-789 3344',emerg:'',vtype:'🏗 Sky-Lift',plate:'BJB 4490',model:'Hino Sky-Lift',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Online · Available',jobs:1,active:true},
-      {id:'d4',name:'Muthu Selvam',ava:'MS',phone:'011-234 4455',emerg:'',vtype:'🚛 Lorry (RoRo)',plate:'PGY 2201',model:'Isuzu NPR',licence:'GDL (Goods Driving Licence)',ic:'',notes:'',status:'Offline',jobs:0,active:true},
-    ],
-    notifMode:'A',currentUser:null
-  };
-  saveStore(s);return s;
-}
 
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBUwC86JTwCK1mKfcyqgNv5Z7XElOHwjw8",
+  authDomain: "cemerlang-endas.firebaseapp.com",
+  projectId: "cemerlang-endas",
+  storageBucket: "cemerlang-endas.firebasestorage.app",
+  messagingSenderId: "1054344569160",
+  appId: "1:1054344569160:web:ed292b2bab2f9169fa937d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ══ Make Firebase available globally ══
+window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, doc, setDoc, getDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, serverTimestamp };
+
+// ══ Auth state listener ══
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // User is signed in - get their profile from Firestore
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = { id: user.uid, ...userDoc.data() };
+        window.curUser = userData;
+        // Hide login panel
+        const lp = document.getElementById('loginPanel');
+        if (lp) lp.style.display = 'none';
+        // Launch app based on role
+        if (typeof launchApp === 'function') launchApp(userData);
+      }
+    } catch(e) {
+      console.error('Error getting user profile:', e);
+    }
+  } else {
+    // Not signed in - show login
+    window.curUser = null;
+    const lp = document.getElementById('loginPanel');
+    if (lp) lp.style.display = 'flex';
+    ['custPanel','adminPanel','drvPanel'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('on'); el.style.display = 'none'; }
+    });
+    const pb = document.getElementById('pBar');
+    if (pb) pb.classList.remove('show');
+  }
+});
+
+window.fbReady = true;
+console.log('Firebase initialized successfully');
+</script>
+
+<script>
+// ══ RATE CARD DATA ══
 const RATE_COLS = ['8½" (No Cover)','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
-const RATE_COLS_SHORT = ['8½"\nNo Cover','8½"\nCover','10"\nBatu','12"\nKayu','16"\nBatu','16"\nKayu'];
 const RATE_DATA = {
   "Kepong": [
     {name:"Sri Sinar / Sri Damansara", p:[270,200,280,330,380,400]},
@@ -714,29 +754,29 @@ const RATE_DATA = {
     {name:"Setawangsa / Melawati", p:[290,300,300,370,450,420]},
   ],
   "Setiapak": [
-    {name:"Jln Kerang / Sri Ukay",    p:[290,300,300,370,400,420]},
-    {name:"Sri Gombak / Desa Keramat",p:[290,300,300,370,450,420]},
+    {name:"Jln Kerang / Sri Ukay",     p:[290,300,300,370,400,420]},
+    {name:"Sri Gombak / Desa Keramat", p:[290,300,300,370,450,420]},
   ],
   "Petaling Jaya / Damansara": [
-    {name:"Bdr Utama / Tmn Tun",           p:[290,300,300,370,450,420]},
-    {name:"Kelana Jaya / Seapark",         p:[290,300,300,370,450,420]},
-    {name:"Tropicana / Lembah Klara",      p:[290,300,300,370,450,420]},
-    {name:"Damansara Perdana",             p:[290,300,300,370,450,420]},
-    {name:"Bkt Kiara / Mutiara Damansara", p:[290,300,300,370,400,420]},
-    {name:"Bkt Tunku / Bangsar / Jln Duta",p:[290,300,300,370,400,420]},
-    {name:"Sri Hartamas / Mont Kiara / D'sara Heights",p:[290,300,300,370,400,420]},
+    {name:"Bdr Utama / Tmn Tun",            p:[290,300,300,370,450,420]},
+    {name:"Kelana Jaya / Seapark",          p:[290,300,300,370,450,420]},
+    {name:"Tropicana / Lembah Klara",       p:[290,300,300,370,450,420]},
+    {name:"Damansara Perdana",              p:[290,300,300,370,450,420]},
+    {name:"Bkt Kiara / Mutiara Damansara",  p:[290,300,300,370,400,420]},
+    {name:"Bkt Tunku / Bangsar / Jln Duta", p:[290,300,300,370,400,420]},
+    {name:"Sri Hartamas / Mont Kiara / D'sara Heights", p:[290,300,300,370,400,420]},
   ],
   "Kuala Lumpur (City)": [
-    {name:"Lake Yew / Semarak / Chow Kit / PUDU",p:[300,320,310,380,420,440]},
-    {name:"Tmn Desa / Desa Makmur / USJ",        p:[300,320,310,380,420,440]},
-    {name:"Klang Lama / OUG / Desa Petaling",    p:[300,320,310,380,420,440]},
-    {name:"Pandah Indah / Perdana (Cheras)",      p:[300,320,310,380,380,440]},
-    {name:"Taman Midah / Sg Long / Bdr Mahkota",  p:[300,320,310,380,380,440]},
-    {name:"Rawang — Buaya / Country Home",        p:[300,320,310,400,430,450]},
-    {name:"Desa Tun Razak",                       p:[300,320,320,400,430,450]},
+    {name:"Lake Yew / Semarak / Chow Kit / PUDU", p:[300,320,310,380,420,440]},
+    {name:"Tmn Desa / Desa Makmur / USJ",         p:[300,320,310,380,420,440]},
+    {name:"Klang Lama / OUG / Desa Petaling",     p:[300,320,310,380,420,440]},
+    {name:"Pandah Indah / Perdana (Cheras)",       p:[300,320,310,380,380,440]},
+    {name:"Taman Midah / Sg Long / Bdr Mahkota",   p:[300,320,310,380,380,440]},
+    {name:"Rawang — Buaya / Country Home",         p:[300,320,310,400,430,450]},
+    {name:"Desa Tun Razak",                        p:[300,320,320,400,430,450]},
   ],
   "Ampang": [
-    {name:"Kg Pandan / Tasik Permei / Ampang Jaya",p:[320,330,330,380,430,450]},
+    {name:"Kg Pandan / Tasik Permei / Ampang Jaya", p:[320,330,330,380,430,450]},
   ],
   "Puchong": [
     {name:"Puchong", p:[320,330,330,400,430,450]},
@@ -775,17 +815,18 @@ const RATE_DATA = {
 };
 
 const BINS=[
-  {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³ · 7.6 m³',dims:"14'×7'×4'H",best:'Light construction, furniture, renovation debris',w:380,f:620,m:950},
-  {id:'roro-m',ico:'🏗',name:'RoRo Bin — Medium',size:'20 yd³ · 15 m³',dims:"20'×8'×5'H",best:'Commercial, factories, canteen waste',w:520,f:850,m:1350,pop:true},
-  {id:'roro-l',ico:'🏗',name:'RoRo Bin — Large',size:'30 yd³ · 23 m³',dims:"24'×8'×6'H",best:'Large construction, industrial waste',w:720,f:1150,m:1800},
-  {id:'roro-xl',ico:'🏗',name:'RoRo Bin — XL Giant',size:'40 yd³ · 30 m³',dims:"30'×8'×7'H",best:'Heavy demolition, max 7–8 tonne',w:950,f:1500,m:2400},
-  {id:'leach-1100',ico:'🗂',name:'Leach Bin — 1,100L',size:'1,100 Litres',dims:'1700×1330×1170mm',best:'Canteen, kitchen, organic wet waste',w:280,f:460,m:720},
-  {id:'leach-1500',ico:'🗂',name:'Leach Bin — 1,500L',size:'1,500 Litres',dims:'2100×1315×1190mm',best:'Large food processing, industrial wet waste',w:360,f:590,m:920,pop:true},
-  {id:'gb-120',ico:'🗑',name:'Garbage Bin — 120L',size:'120L · 2-wheel',dims:'460×550×940mm',best:'Residential, small offices',w:45,f:75,m:120},
-  {id:'gb-240',ico:'🗑',name:'Garbage Bin — 240L',size:'240L · 2-wheel',dims:'590×730×1007mm',best:'Households, small businesses',w:65,f:105,m:170,pop:true},
-  {id:'gb-660',ico:'🗑',name:'Garbage Bin — 660L',size:'660L · 4-wheel',dims:'1340×805×1260mm',best:'Commercial, condominiums, retail',w:130,f:210,m:340},
-  {id:'gb-1100',ico:'🗑',name:'Garbage Bin — 1,100L',size:'1,100L · 4-wheel',dims:'1340×1030×1330mm',best:'Factories, condo blocks, high volume',w:190,f:310,m:490},
+  {id:'roro-s',ico:'🏗',name:'RoRo Bin — Small',size:'10 yd³',dims:"14'×7'×4'H",best:'Light construction, furniture',w:380,f:620,m:950,cat:'roro'},
+  {id:'roro-m',ico:'🏗',name:'RoRo Bin — Medium',size:'20 yd³',dims:"20'×8'×5'H",best:'Commercial, factories, canteen',w:520,f:850,m:1350,pop:true,cat:'roro'},
+  {id:'roro-l',ico:'🏗',name:'RoRo Bin — Large',size:'30 yd³',dims:"24'×8'×6'H",best:'Large construction, industrial',w:720,f:1150,m:1800,cat:'roro'},
+  {id:'roro-xl',ico:'🏗',name:'RoRo Bin — XL Giant',size:'40 yd³',dims:"30'×8'×7'H",best:'Heavy demolition, max 7-8T',w:950,f:1500,m:2400,cat:'roro'},
+  {id:'leach-1100',ico:'🗂',name:'Leach Bin — 1,100L',size:'1,100 Litres',dims:'1700×1330×1170mm',best:'Canteen, kitchen, organic waste',w:280,f:460,m:720,cat:'leach'},
+  {id:'leach-1500',ico:'🗂',name:'Leach Bin — 1,500L',size:'1,500 Litres',dims:'2100×1315×1190mm',best:'Large food processing, wet waste',w:360,f:590,m:920,pop:true,cat:'leach'},
+  {id:'gb-120',ico:'🗑',name:'Garbage Bin — 120L',size:'120L · 2-wheel',dims:'460×550×940mm',best:'Residential, small offices',w:45,f:75,m:120,cat:'garbage'},
+  {id:'gb-240',ico:'🗑',name:'Garbage Bin — 240L',size:'240L · 2-wheel',dims:'590×730×1007mm',best:'Households, small businesses',w:65,f:105,m:170,pop:true,cat:'garbage'},
+  {id:'gb-660',ico:'🗑',name:'Garbage Bin — 660L',size:'660L · 4-wheel',dims:'1340×805×1260mm',best:'Commercial, condominiums',w:130,f:210,m:340,cat:'garbage'},
+  {id:'gb-1100',ico:'🗑',name:'Garbage Bin — 1,100L',size:'1,100L · 4-wheel',dims:'1340×1030×1330mm',best:'Factories, condo blocks',w:190,f:310,m:490,cat:'garbage'},
 ];
+
 const STAGES=[
   {n:1,title:'Order placed',sub:'Customer submitted order with full details'},
   {n:2,title:'Company arranging',sub:'Admin received order — selecting driver'},
@@ -795,140 +836,317 @@ const STAGES=[
   {n:6,title:'Collection requested',sub:'Customer notified company — bin is full'},
   {n:7,title:'Case closed',sub:'Bin collected and case complete'},
 ];
-const ADMIN_WA='60362513977';
-let oSt={step:1,svc:null,bin:null,dur:null,startDate:null,delTime:null};
-let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
+const ADMIN_WA='60362513977';
+
+// ══ STATE ══
+let oSt={step:1,svc:null,bin:null,dur:null,startDate:null,delTime:null,selectedTown:null,selectedSub:null,selectedSize:null,price:0};
+let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
+let unsubOrders=null, unsubDrivers=null;
+
+// ══ TOAST ══
+function toast(msg){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ══ FIREBASE HELPERS ══
+function fb(){return window._fb;}
+
+// ══ AUTH ══
+function showAuth(s){
+  ['authLogin','authReg','authForgot'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  const target=s==='login'?'authLogin':s==='reg'?'authReg':'authForgot';
+  const el=document.getElementById(target);if(el)el.style.display='block';
+}
+
+async function doLogin(){
+  const em=document.getElementById('lEmail')?.value.trim().toLowerCase();
+  const pw=document.getElementById('lPass')?.value;
+  if(!em||!pw){toast('⚠️ Enter email and password');return;}
+  try{
+    const btn=document.querySelector('#authLogin .btnLogin');
+    if(btn){btn.textContent='Signing in…';btn.disabled=true;}
+    await fb().signInWithEmailAndPassword(fb().auth,em,pw);
+    // onAuthStateChanged will handle the rest
+  } catch(e){
+    const btn=document.querySelector('#authLogin .btnLogin');
+    if(btn){btn.textContent='Sign In';btn.disabled=false;}
+    if(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
+      toast('❌ Email or password incorrect');
+    } else if(e.code==='auth/too-many-requests'){
+      toast('⚠️ Too many attempts. Try again later.');
+    } else {
+      toast('❌ Login failed: '+e.message);
+    }
+  }
+}
+
+async function doSelfReg(){
+  const name=document.getElementById('rName')?.value.trim();
+  const em=document.getElementById('rEmail')?.value.trim().toLowerCase();
+  const pw=document.getElementById('rPass')?.value;
+  const phone=document.getElementById('rPhone')?.value.trim();
+  const comp=document.getElementById('rComp')?.value.trim();
+  if(!name||!em||!pw){toast('⚠️ Name, email and password required');return;}
+  if(pw.length<8){toast('⚠️ Password must be 8+ characters');return;}
+  try{
+    const btn=document.querySelector('#authReg .btnLogin');
+    if(btn){btn.textContent='Creating account…';btn.disabled=true;}
+    const cred=await fb().createUserWithEmailAndPassword(fb().auth,em,pw);
+    const uid=cred.user.uid;
+    await fb().setDoc(fb().doc(fb().db,'users',uid),{
+      id:uid,role:'customer',name,company:comp||'',email:em,phone:phone||'',
+      addr:'',password:'',orders:[],active:true,createdBy:'self',
+      createdAt:fb().serverTimestamp()
+    });
+    toast('✅ Account created! Welcome.');
+    // onAuthStateChanged handles the rest
+  } catch(e){
+    const btn=document.querySelector('#authReg .btnLogin');
+    if(btn){btn.textContent='Create Account';btn.disabled=false;}
+    if(e.code==='auth/email-already-in-use'){
+      toast('⚠️ Email already registered. Please login instead.');
+    } else {
+      toast('❌ Registration failed: '+e.message);
+    }
+  }
+}
+
+async function doForgot(){
+  const em=document.getElementById('forgotEmail')?.value.trim();
+  if(!em){toast('⚠️ Enter your email');return;}
+  try{
+    const {sendPasswordResetEmail}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+    await sendPasswordResetEmail(fb().auth,em);
+    toast('📧 Password reset email sent! Check your inbox.');
+    setTimeout(()=>showAuth('login'),2000);
+  } catch(e){
+    if(e.code==='auth/user-not-found'){toast('❌ Email not found in system');}
+    else toast('❌ Error: '+e.message);
+  }
+}
+
+async function doLogout(){
+  if(unsubOrders){unsubOrders();unsubOrders=null;}
+  if(unsubDrivers){unsubDrivers();unsubDrivers=null;}
+  await fb().signOut(fb().auth);
+  curUser=null;
+  document.getElementById('oActBar')?.classList.remove('show');
+  toast('✅ Logged out successfully');
+}
+
+function launchApp(u){
+  document.getElementById('loginPanel').style.display='none';
+  const pBar=document.getElementById('pBar');
+  if(u.role==='admin'){pBar?.classList.add('show');}
+  else{pBar?.classList.remove('show');}
+  ['custPanel','adminPanel','drvPanel'].forEach(x=>{
+    const el=document.getElementById(x);
+    if(el){el.classList.remove('on');el.style.display='none';}
+  });
+  if(u.role==='customer'){
+    showPanel('custPanel');
+    const h=new Date().getHours();
+    document.getElementById('custGreet').textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
+    document.getElementById('custName').textContent=u.name;
+    const ini=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('profAva').textContent=ini;
+    document.getElementById('profNameD').textContent=u.name;
+    document.getElementById('profEmailD').textContent=u.email;
+    document.getElementById('pfName').value=u.name;
+    document.getElementById('pfComp').value=u.company||'';
+    document.getElementById('pfEmail').value=u.email;
+    document.getElementById('pfPhone').value=u.phone||'';
+    document.getElementById('pfAddr').value=u.addr||'';
+    loadOrdersRealtime(u);
+    cNav('cHome',document.querySelector('.cNavItem'));
+  } else if(u.role==='admin'){
+    showPanel('adminPanel');
+    document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.pTab')[1]?.classList.add('on');
+    renderAdmin('aOrders');
+    loadAdminOrdersRealtime();
+  } else if(u.role==='driver'){
+    showPanel('drvPanel');
+    document.getElementById('drvName').textContent=u.name;
+    loadDriverJobsRealtime(u);
+  }
+}
+
+async function saveProfile(){
+  if(!curUser)return;
+  const newName=document.getElementById('pfName').value;
+  const newPhone=document.getElementById('pfPhone').value;
+  const newComp=document.getElementById('pfComp').value;
+  const newAddr=document.getElementById('pfAddr').value;
+  const newPass=document.getElementById('pfNewPass')?.value;
+  try{
+    await fb().updateDoc(fb().doc(fb().db,'users',curUser.id),{
+      name:newName,phone:newPhone,company:newComp,addr:newAddr
+    });
+    if(newPass&&newPass.length>=8){
+      await fb().updatePassword(fb().auth.currentUser,newPass);
+      document.getElementById('pfNewPass').value='';
+    } else if(newPass&&newPass.length>0){
+      toast('⚠️ Password must be 8+ characters');return;
+    }
+    curUser.name=newName;curUser.phone=newPhone;curUser.company=newComp;curUser.addr=newAddr;
+    document.getElementById('custName').textContent=newName;
+    toast('✅ Profile updated!');
+  } catch(e){toast('❌ Error: '+e.message);}
+}
+
+// ══ REAL-TIME ORDER LISTENER (Customer) ══
+function loadOrdersRealtime(u){
+  if(unsubOrders){unsubOrders();}
+  const q=fb().query(fb().collection(fb().db,'orders'),fb().where('custId','==',u.id));
+  unsubOrders=fb().onSnapshot(q,(snap)=>{
+    const orders=[];
+    snap.forEach(d=>orders.push({id:d.id,...d.data()}));
+    orders.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    renderCustomerOrders(orders,u);
+  });
+}
+
+function renderCustomerOrders(orders,u){
+  const active=orders.filter(o=>o.status!=='completed');
+  const recent=orders.slice(0,3);
+  document.getElementById('homeActive').innerHTML=active.length?active.map(oCardHTML).join(''):'<div style="font-size:.84rem;color:var(--tx3);font-weight:600;margin-bottom:10px">No active rentals</div>';
+  document.getElementById('homeRecent').innerHTML=recent.length?recent.map(oCardHTML).join(''):'<div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div>';
+  document.getElementById('ordersList').innerHTML=orders.length?orders.map(oCardHTML).join(''):'<div style="text-align:center;padding:32px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div>';
+  const up=active[0];
+  document.getElementById('homeReminder').innerHTML=up?`<b>Reminder:</b> ${up.bin} delivery on ${up.delDate} · ${up.delTime}. Ensure site is accessible.`:'No upcoming deliveries.';
+}
+
+// ══ REAL-TIME ORDER LISTENER (Admin) ══
+function loadAdminOrdersRealtime(){
+  if(unsubOrders){unsubOrders();}
+  const q=fb().query(fb().collection(fb().db,'orders'),fb().orderBy('createdAt','desc'));
+  unsubOrders=fb().onSnapshot(q,(snap)=>{
+    window._adminOrders=[];
+    snap.forEach(d=>window._adminOrders.push({id:d.id,...d.data()}));
+    const pending=(window._adminOrders||[]).filter(o=>o.status==='pending').length;
+    document.getElementById('aBadge').textContent=pending;
+    // Refresh current admin view
+    const activeMenu=document.querySelector('.aMenuItem.on');
+    if(activeMenu){
+      const txt=activeMenu.textContent.trim().replace(/\d+$/,'').trim();
+      if(txt.includes('Order'))renderAdmin('aOrders');
+      else if(txt.includes('Dashboard'))renderAdmin('aODash');
+    }
+  });
+}
+
+// ══ REAL-TIME DRIVER JOBS ══
+function loadDriverJobsRealtime(u){
+  if(unsubOrders){unsubOrders();}
+  const q=fb().query(fb().collection(fb().db,'orders'),fb().where('driverId','==',u.id));
+  unsubOrders=fb().onSnapshot(q,(snap)=>{
+    const jobs=[];
+    snap.forEach(d=>jobs.push({id:d.id,...d.data()}));
+    renderDriverJobs(jobs,u);
+  });
+}
+
+// ══ PANEL SWITCHING ══
+function showPanel(id){
+  ['custPanel','adminPanel','drvPanel'].forEach(x=>{
+    const el=document.getElementById(x);
+    if(el){el.classList.remove('on');el.style.display='none';}
+  });
+  const target=document.getElementById(id);
+  if(target){
+    target.classList.add('on');target.style.display='flex';
+    if(id==='drvPanel'){
+      target.style.flexDirection='column';
+      const inner=target.querySelector('div');
+      if(inner){inner.style.position='relative';inner.style.flex='1';inner.style.height='100%';inner.style.overflow='hidden';}
+      document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
+      const dj=document.getElementById('dJobs');if(dj){dj.classList.add('on');dj.style.display='block';}
+    }
+    if(id==='adminPanel'){target.style.flexDirection='row';}
+  }
+}
+
 function switchPortal(p,tab){
   if(!curUser||curUser.role!=='admin')return;
   document.querySelectorAll('.pTab').forEach(t=>t.classList.remove('on'));
   if(tab)tab.classList.add('on');
   const panels={cust:'custPanel',admin:'adminPanel',driver:'drvPanel'};
-  ['custPanel','adminPanel','drvPanel'].forEach(x=>{const el=document.getElementById(x);if(el){el.classList.remove('on');el.style.display='none';}});
-  const target=document.getElementById(panels[p]||'custPanel');
-  if(target){target.classList.add('on');target.style.display='flex';}
+  showPanel(panels[p]||'custPanel');
   if(p==='admin'){renderAdmin('aOrders');}
   if(p==='driver'){
-    if(target){target.style.flexDirection='column';}
-    const inner=target?target.querySelector('div'):null;
-    if(inner){inner.style.position='relative';inner.style.flex='1';inner.style.height='100%';inner.style.overflow='hidden';}
-    document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
-    const dj=document.getElementById('dJobs');if(dj){dj.classList.add('on');dj.style.display='block';}
-    const s=getStore(),drv=s.users?s.users.find(u=>u.role==='driver'&&u.active):s.drivers?s.drivers[0]:null;
-    if(drv&&document.getElementById('drvName'))document.getElementById('drvName').textContent=drv.name;
-  }
-  if(p==='cust'){
-    const s=getStore(),cu=s.users?s.users.find(u=>u.role==='customer'&&u.active):null;
-    if(cu){if(document.getElementById('custName'))document.getElementById('custName').textContent=cu.name;loadOrders(cu);}
+    // Show first driver's jobs for preview
+    if(window._adminOrders){
+      const firstDriver={id:'preview',name:'Driver Preview'};
+      document.getElementById('drvName').textContent='Driver Preview (Admin View)';
+    }
   }
 }
-function closeModal(id){document.getElementById(id).classList.remove('show');}
 
-// ═══ AUTH ═══
-function showAuth(s){['authLogin','authReg','authForgot'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById(s==='login'?'authLogin':s==='reg'?'authReg':'authForgot').style.display='flex';}
-function quickLogin(){document.getElementById('lEmail').value='ahmad@test.com';document.getElementById('lPass').value='test1234';doLogin();}
-function doLogin(){
-  const em=document.getElementById('lEmail').value.trim().toLowerCase(),pw=document.getElementById('lPass').value;
-  if(!em||!pw){toast('⚠️ Enter email and password');return;}
-  const s=getStore(),c=s.customers.find(x=>x.email.toLowerCase()===em&&x.password===pw&&x.active);
-  if(!c){toast('❌ Email or password incorrect');return;}
-  curUser=c;s.currentUser=c.id;saveStore(s);launchApp(c);
+// ══ CUSTOMER NAV ══
+function cNav(id,tab){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id)?.classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  if(tab)tab.classList.add('on');
+  document.getElementById('oActBar')?.classList.remove('show');
 }
-function doSelfReg(){
-  const name=document.getElementById('rName').value.trim(),em=document.getElementById('rEmail').value.trim().toLowerCase(),pw=document.getElementById('rPass').value;
-  if(!name||!em||!pw){toast('⚠️ Name, email and password required');return;}
-  if(pw.length<8){toast('⚠️ Password must be at least 8 characters');return;}
-  const s=getStore();
-  if(s.customers.find(c=>c.email.toLowerCase()===em)){toast('⚠️ Email already registered');return;}
-  const nc={id:'c'+Date.now(),name,company:document.getElementById('rComp').value.trim(),email:em,phone:document.getElementById('rPhone').value.trim(),addr:document.getElementById('rAddr').value.trim(),password:pw,createdBy:'self',orders:[],active:true};
-  s.customers.push(nc);saveStore(s);curUser=nc;launchApp(nc);toast('✅ Account created! Welcome.');
+function goNewOrder(){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('cOrder')?.classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.cNavItem')[1]?.classList.add('on');
+  oSt={step:1,svc:null,bin:null,dur:null,startDate:null,delTime:null,selectedTown:null,selectedSub:null,selectedSize:null,price:0};
+  document.querySelectorAll('.svcCard').forEach(c=>c.classList.remove('sel'));
+  updateStep();
 }
-function doForgot(){
-  const em=document.getElementById('forgotEmail').value.trim();
-  if(!em){toast('⚠️ Enter your email');return;}
-  const s=getStore();
-  if(!s.customers.find(c=>c.email.toLowerCase()===em.toLowerCase())){toast('❌ Email not found in system');return;}
-  toast('📧 Reset link sent (simulated). Check your email.');
-  setTimeout(()=>showAuth('login'),1600);
+function backFromDash(){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('cOrders')?.classList.add('on');
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.cNavItem')[2]?.classList.add('on');
 }
-function doLogout(){curUser=null;const s=getStore();s.currentUser=null;saveStore(s);document.getElementById('custApp').style.display='none';showAuth('login');document.getElementById('authLogin').style.display='flex';document.getElementById('oActBar').classList.remove('show');}
-function launchApp(c){
-  ['authLogin','authReg','authForgot'].forEach(id=>document.getElementById(id).style.display='none');
-  const app=document.getElementById('custApp');app.style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative';
-  const h=new Date().getHours();
-  document.getElementById('custGreet').textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
-  document.getElementById('custName').textContent=c.name;
-  const ini=c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('profAva').textContent=ini;
-  document.getElementById('profName2').textContent=c.name;
-  document.getElementById('profEmail2').textContent=c.email;
-  document.getElementById('pfName').value=c.name;
-  document.getElementById('pfComp').value=c.company||'';
-  document.getElementById('pfEmail').value=c.email;
-  document.getElementById('pfPhone').value=c.phone||'';
-  document.getElementById('pfAddr').value=c.addr||'';
-  loadOrders(c);cNav('cHome',document.querySelector('.cNavItem'));
-}
-function saveProfile(){
-  if(!curUser)return;
-  const s=getStore(),i=s.customers.findIndex(c=>c.id===curUser.id);if(i<0)return;
-  s.customers[i].name=document.getElementById('pfName').value;
-  s.customers[i].company=document.getElementById('pfComp').value;
-  s.customers[i].phone=document.getElementById('pfPhone').value;
-  s.customers[i].addr=document.getElementById('pfAddr').value;
-  const np=document.getElementById('pfNewPass').value;
-  if(np&&np.length>=8){s.customers[i].password=np;document.getElementById('pfNewPass').value='';}
-  else if(np){toast('⚠️ Password must be 8+ characters');return;}
-  curUser=s.customers[i];saveStore(s);document.getElementById('custName').textContent=curUser.name;toast('✅ Profile updated!');
-}
-function loadOrders(c){
-  const s=getStore(),orders=s.orders.filter(o=>o.custId===c.id);
-  const active=orders.filter(o=>o.status!=='completed'),recent=orders.slice().reverse().slice(0,3);
-  document.getElementById('homeActive').innerHTML=active.length?active.map(oCardHTML).join(''):'<div style="font-size:.84rem;color:var(--tx3);font-weight:600;margin-bottom:10px">No active rentals</div>';
-  document.getElementById('homeRecent').innerHTML=recent.length?recent.map(oCardHTML).join(''):'<div style="text-align:center;padding:24px;color:var(--tx3);font-size:.85rem;font-weight:700">No orders yet</div>';
-  document.getElementById('ordersList').innerHTML=orders.length?orders.slice().reverse().map(oCardHTML).join(''):'<div style="text-align:center;padding:32px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div>';
-  const up=active[0];
-  document.getElementById('homeReminder').innerHTML=up?`<b>Reminder:</b> ${up.bin} delivery on ${up.delDate} · ${up.delTime}. Ensure site is accessible.`:'No upcoming deliveries. Place a new order anytime.';
-  document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;
-}
-function oCardHTML(o){const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';return `<div class="oCard" onclick="showODash('${o.id}')"><div class="oCardTop"><div><div class="oCardBin">${o.ico} ${o.bin}</div><div class="oCardRef">${o.ref} · ${o.plan}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="oCardMeta"><div class="mChip">📅 ${o.delDate} – ${o.colDate}</div><div class="mChip">💰 ${o.price}</div></div></div>`;}
 
-// ═══ CUSTOMER NAV ═══
-function cNav(id,tab){document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));if(tab)tab.classList.add('on');document.getElementById('oActBar').classList.remove('show');}
-function goNewOrder(){document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cOrder').classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[1].classList.add('on');oSt={step:1,bin:null,dur:null,durDays:0,startDate:null,endDate:null,delTime:null,colTime:null};renderBins();updateStep();}
-function backFromDash(){if(curUser)loadOrders(curUser);document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cOrders').classList.add('on');document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');}
+// ══ ORDER CARD HTML ══
+function oCardHTML(o){
+  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
+  return `<div class="oCard" onclick="showODash('${o.id}')">
+    <div class="oCardTop"><div><div class="oCardBin">${o.ico||'🏗'} ${o.bin}</div><div class="oCardRef">${o.ref} · ${o.plan}</div></div>
+    <span class="badge ${bc}">${o.status}</span></div>
+    <div class="oCardMeta"><div class="mChip">📅 ${o.delDate}</div><div class="mChip">💰 ${o.price}</div></div>
+  </div>`;
+}
 
-// ═══ ORDER FLOW ═══
+// ══ ORDER FLOW ══
 function pickSvc(svc){
   oSt.svc=svc;oSt.bin=null;oSt.dur=null;oSt.selectedTown=null;oSt.selectedSub=null;oSt.selectedSize=null;oSt.price=0;
-  // Update visual selection
   ['roro','leach','garbage','skylift','crane'].forEach(s=>{
-    const el=document.getElementById('svc-'+s);
-    if(el)el.classList.toggle('sel',s===svc);
+    document.getElementById('svc-'+s)?.classList.toggle('sel',s===svc);
   });
 }
+
 function buildStep2(){
-  const svc = oSt.svc;
-  // Hide all sections
+  const svc=oSt.svc;
   ['s2Roro','s2Placeholder','s2Equip'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='none';
   });
-  
   if(svc==='roro'){
-    const el=document.getElementById('s2Roro');
-    if(el) el.style.display='block';
-    // Populate town dropdown
+    const el=document.getElementById('s2Roro');if(el)el.style.display='block';
     const ts=document.getElementById('townSelect');
     if(ts&&ts.options.length<=1){
       Object.keys(RATE_DATA).forEach(town=>{
         const opt=document.createElement('option');opt.value=town;opt.textContent=town;ts.appendChild(opt);
       });
     }
-    // Show empty state
-    const re=document.getElementById('s2RoroEmpty');if(re)re.style.display='block';
-    const rt=document.getElementById('rateTable');if(rt)rt.style.display='none';
-    const sw=document.getElementById('subAreaWrap');if(sw)sw.style.display='none';
+    document.getElementById('s2RoroEmpty')?.style.setProperty('display','block');
+    document.getElementById('rateTable')?.style.setProperty('display','none');
+    document.getElementById('subAreaWrap')?.style.setProperty('display','none');
   } else if(svc==='leach'||svc==='garbage'){
     const el=document.getElementById('s2Placeholder');
     if(el){
@@ -936,32 +1154,23 @@ function buildStep2(){
       const t=document.getElementById('s2PlaceholderTitle');
       if(t)t.textContent=(svc==='leach'?'Leach Bin':'Garbage Bin')+' — Pricing Coming Soon';
     }
-    // Allow next without bin selection for these
-    oSt.bin={name:svc==='leach'?'Leach Bin':'Garbage Bin',ico:svc==='leach'?'🗂':'🗑',w:0,f:0,m:0};
-    oSt.selectedSize=null;oSt.price=0;
+    oSt.bin={name:svc==='leach'?'Leach Bin':'Garbage Bin',ico:svc==='leach'?'🗂':'🗑',price:0};
+    oSt.price=0;
   } else if(svc==='skylift'||svc==='crane'){
-    const el=document.getElementById('s2Equip');
-    if(el) el.style.display='block';
+    const el=document.getElementById('s2Equip');if(el)el.style.display='block';
     const name=svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)';
-    const fd=svc==='skylift'?450:800;
-    const hd=svc==='skylift'?380:480;
-    const lbl=document.getElementById('s2EquipLbl');
-    if(lbl)lbl.textContent='Select Duration — '+name;
-    const info=document.getElementById('s2EquipInfo');
-    if(info)info.textContent=name+' with certified operator. Min. 2 days advance booking.';
+    const fd=svc==='skylift'?450:800,hd=svc==='skylift'?380:480;
+    const lbl=document.getElementById('s2EquipLbl');if(lbl)lbl.textContent='Select Duration — '+name;
+    const info=document.getElementById('s2EquipInfo');if(info)info.textContent=name+' with certified operator. Min. 2 days advance booking.';
     const grid=document.getElementById('equipDurGrid');
     if(grid)grid.innerHTML=`
       <div class="durCard ${oSt.dur==='full'?'sel':''}" onclick="pickEquipDur('full',${fd},'${name}','${svc==='skylift'?'🏗':'🚜'}')">
-        <div class="dLbl">Full Day</div>
-        <div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">8 hours</div>
-        <div class="dPrice">RM ${fd}</div>
-        <div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
+        <div class="dLbl">Full Day</div><div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">8 hours</div>
+        <div class="dPrice">RM ${fd}</div><div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
       </div>
       <div class="durCard ${oSt.dur==='half'?'sel':''}" onclick="pickEquipDur('half',${hd},'${name}','${svc==='skylift'?'🏗':'🚜'}')">
-        <div class="dLbl">Half Day</div>
-        <div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">4 hours</div>
-        <div class="dPrice">RM ${hd}</div>
-        <div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
+        <div class="dLbl">Half Day</div><div style="font-size:.72rem;color:var(--tx2);font-weight:600;margin:3px 0 8px">4 hours</div>
+        <div class="dPrice">RM ${hd}</div><div style="font-size:.7rem;color:var(--tx2);font-weight:600;margin-top:3px">Operator included</div>
       </div>`;
   }
 }
@@ -971,11 +1180,9 @@ function onTownChange(town){
   const sw=document.getElementById('subAreaWrap');
   const rt=document.getElementById('rateTable');
   const re=document.getElementById('s2RoroEmpty');
-  const bd=document.getElementById('selectedBinDisplay');
-  if(bd)bd.style.display='none';
+  document.getElementById('selectedBinDisplay')?.style.setProperty('display','none');
   if(!town){if(sw)sw.style.display='none';if(rt)rt.style.display='none';if(re)re.style.display='block';return;}
-  const subs=RATE_DATA[town];
-  if(!subs){return;}
+  const subs=RATE_DATA[town];if(!subs)return;
   const ss=document.getElementById('subSelect');
   if(ss){
     ss.innerHTML='<option value="">Select sub-area…</option>';
@@ -984,125 +1191,107 @@ function onTownChange(town){
   if(sw)sw.style.display='block';
   if(rt)rt.style.display='none';
   if(re)re.style.display='block';
-  // If only one sub-area, auto-select it
-  if(subs.length===1){
-    if(ss)ss.value='0';
-    onSubChange('0');
-  }
+  if(subs.length===1){if(ss)ss.value='0';onSubChange('0');}
 }
 
 function onSubChange(idx){
-  if(idx===''){return;}
+  if(idx==='')return;
   oSt.selectedSub=parseInt(idx);oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
-  const town=oSt.selectedTown;
-  const subs=RATE_DATA[town];if(!subs)return;
+  const subs=RATE_DATA[oSt.selectedTown];if(!subs)return;
   const sub=subs[parseInt(idx)];if(!sub)return;
-  const rt=document.getElementById('rateTable');
-  const re=document.getElementById('s2RoroEmpty');
-  const bd=document.getElementById('selectedBinDisplay');
-  if(rt)rt.style.display='block';
-  if(re)re.style.display='none';
-  if(bd)bd.style.display='none';
-  // Build price row
+  document.getElementById('rateTable')?.style.setProperty('display','block');
+  document.getElementById('s2RoroEmpty')?.style.setProperty('display','none');
+  document.getElementById('selectedBinDisplay')?.style.setProperty('display','none');
   const pr=document.getElementById('ratePriceRow');
   if(pr){
     const sizes=['8½" No Cover','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
     pr.innerHTML=`<div style="padding:10px;display:flex;align-items:center"><span style="font-size:.78rem;font-weight:700;color:var(--tx2)">${sub.name}</span></div>`+
     sub.p.map((price,i)=>{
-      if(price===null) return `<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3);cursor:default">—</div>`;
-      const isSelected=oSt.selectedSize===i;
-      return `<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSelected?'var(--g1)':'transparent'};color:${isSelected?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s">RM ${price}</div>`;
+      if(price===null)return`<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3)">—</div>`;
+      const isSel=oSt.selectedSize===i;
+      return`<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSel?'var(--g1)':'transparent'};color:${isSel?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s">RM ${price}</div>`;
     }).join('');
   }
 }
 
-function pickRoroSize(sizeIdx, price, sizeName){
+function pickRoroSize(sizeIdx,price,sizeName){
   oSt.selectedSize=sizeIdx;oSt.price=price;
-  const town=oSt.selectedTown;
-  const subIdx=oSt.selectedSub;
-  const subs=RATE_DATA[town];
-  const sub=subs?subs[subIdx]:null;
-  const subName=sub?sub.name:'';
-  oSt.bin={
-    name:'RoRo Bin — '+sizeName,
-    ico:'🏗',
-    location:town+' › '+subName,
-    sizeName,price,
-    w:price,f:price,m:price
-  };
-  oSt.dur='unit'; // price is per delivery for RoRo
-  // Re-render price row to show selection
-  onSubChange(String(subIdx));
-  // Show selected bin
+  const subs=RATE_DATA[oSt.selectedTown];
+  const sub=subs?subs[oSt.selectedSub]:null;
+  oSt.bin={name:'RoRo Bin — '+sizeName,ico:'🏗',location:(oSt.selectedTown||'')+(sub?' › '+sub.name:''),sizeName,price,w:price,f:price,m:price};
+  oSt.dur='unit';
+  onSubChange(String(oSt.selectedSub));
   const bd=document.getElementById('selectedBinDisplay');
-  const bn=document.getElementById('selectedBinName');
-  const bp=document.getElementById('selectedBinPrice');
   if(bd)bd.style.display='block';
-  if(bn)bn.textContent='🏗 RoRo Bin — '+sizeName+' ('+town+' › '+subName+')';
-  if(bp)bp.textContent='RM '+price+' per delivery';
+  document.getElementById('selectedBinName').textContent='🏗 RoRo Bin — '+sizeName+' ('+oSt.selectedTown+(sub?' › '+sub.name:'')+')';
+  document.getElementById('selectedBinPrice').textContent='RM '+price+' per delivery';
 }
 
-function pickEquipDur(dur, price, name, ico){
+function pickEquipDur(dur,price,name,ico){
   oSt.dur=dur;oSt.price=price;
   oSt.bin={name,ico,price,w:price,f:price,m:price};
-  buildStep2(); // re-render to show selection
+  buildStep2();
 }
 
+function buildTGrid(gid,sk){
+  const el=document.getElementById(gid);if(!el)return;el.innerHTML='';
+  for(let h=8;h<20;h++){
+    const lbl=`${h}:00–${h+1}:00`,d=document.createElement('div');
+    d.className='tSlot'+(oSt[sk]===lbl?' sel':'');d.textContent=lbl;
+    d.onclick=()=>{el.querySelectorAll('.tSlot').forEach(s=>s.classList.remove('sel'));d.classList.add('sel');oSt[sk]=lbl;};
+    el.appendChild(d);
+  }
+}
 
-function renderBins(){document.getElementById('binList').innerHTML=BINS.map(b=>`<div class="binCard ${oSt.bin?.id===b.id?'sel':''}" onclick="pickBin('${b.id}')"><div class="bIco">${b.ico}</div><div style="flex:1">${b.pop?'<span class="badge b-green" style="margin-bottom:5px;display:inline-flex">Popular</span><br>':''}<div class="bName">${b.name}</div><div class="bSub">${b.size} · ${b.dims}</div><div class="bSub">${b.best}</div><div class="bPrices"><span class="pPill">Weekly RM${b.w}</span><span class="pPill hl">14-Day RM${b.f}</span><span class="pPill">Monthly RM${b.m}</span></div></div><div class="selChk">✓</div></div>`).join('');}
-function pickBin(id){oSt.bin=BINS.find(b=>b.id===id);renderBins();renderDur();}
-function renderDur(){if(!oSt.bin)return;const b=oSt.bin;document.getElementById('durGrid').innerHTML=[{k:'w',l:'Weekly',d:'7 days',p:b.w},{k:'f',l:'14 Days',d:'2 weeks',p:b.f,sv:'Best value 💚'},{k:'m',l:'Monthly',d:'30 days',p:b.m}].map(x=>`<div class="durCard ${oSt.dur===x.k?'sel':''}" onclick="pickDur('${x.k}',${parseInt(x.d)})"><div class="dLbl">${x.l}</div><div class="dDays">${x.d}</div><div class="dPrice">RM${x.p}</div>${x.sv?`<div class="dSave">${x.sv}</div>`:''}</div>`).join('');}
-function pickDur(k,days){oSt.dur=k;oSt.durDays=days;renderDur();}
-function buildTGrid(gid,sk){const el=document.getElementById(gid);el.innerHTML='';for(let h=8;h<20;h++){const lbl=`${h}:00–${h+1}:00`,d=document.createElement('div');d.className='tSlot'+(oSt[sk]===lbl?' sel':'');d.textContent=lbl;d.onclick=()=>{el.querySelectorAll('.tSlot').forEach(s=>s.classList.remove('sel'));d.classList.add('sel');oSt[sk]=lbl;};el.appendChild(d);}}
-function updateDates(){
-  const v=document.getElementById('oDate').value;if(!v||!oSt.dur)return;
-  const days={w:7,f:14,m:30}[oSt.dur]||7,sv=new Date(v+'T00:00:00'),ev=new Date(sv);ev.setDate(ev.getDate()+days-1);
-  oSt.startDate=sv;oSt.endDate=ev;
+function updateDate(){
+  const v=document.getElementById('oDate')?.value;if(!v)return;
+  const sv=new Date(v+'T00:00:00');oSt.startDate=sv;
   const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const fmt=d=>D[d.getDay()]+', '+d.getDate()+' '+M[d.getMonth()];
-  document.getElementById('oDD').textContent=fmt(sv);document.getElementById('oCD').textContent=fmt(ev);
-  document.getElementById('oDR').style.display='block';buildTGrid('dtGrid','delTime');buildTGrid('ctGrid','colTime');
+  const ddEl=document.getElementById('oDD');
+  if(ddEl)ddEl.textContent=D[sv.getDay()]+', '+sv.getDate()+' '+M[sv.getMonth()]+' '+sv.getFullYear();
+  document.getElementById('oDR')?.style.setProperty('display','block');
+  buildTGrid('dtGrid','delTime');
 }
+
 function getPrice(){
-  if(!oSt.svc) return '—';
-  if(oSt.price) return 'RM '+oSt.price;
-  if(oSt.svc==='skylift') return oSt.dur==='full'?'RM 450':'RM 380';
-  if(oSt.svc==='crane') return oSt.dur==='full'?'RM 800':'RM 480';
-  if(oSt.svc==='leach'||oSt.svc==='garbage') return 'Quote on request';
-  return '—';
+  if(oSt.price)return'RM '+oSt.price;
+  if(oSt.svc==='leach'||oSt.svc==='garbage')return'Quote on request';
+  return'—';
 }
 function getDurLabel(){
-  if(oSt.svc==='skylift'||oSt.svc==='crane') return oSt.dur==='full'?'Full Day (8 hours)':'Half Day (4 hours)';
-  if(oSt.svc==='roro'&&oSt.selectedTown) return 'Location: '+(oSt.selectedTown||'—');
-  if(oSt.svc==='leach'||oSt.svc==='garbage') return 'Quote on request';
-  return '—';
+  if(oSt.svc==='skylift'||oSt.svc==='crane')return oSt.dur==='full'?'Full Day (8 hours)':'Half Day (4 hours)';
+  if(oSt.svc==='roro'&&oSt.selectedTown)return'Area: '+oSt.selectedTown;
+  if(oSt.svc==='leach'||oSt.svc==='garbage')return'Quote on request';
+  return'—';
 }
+
 function buildSumm(){
   const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
-  const binName=oSt.bin?oSt.bin.name:(oSt.svc==='skylift'?'Sky-Lift':'Mobile Crane (20T KATO)');
-  const ico=oSt.bin?oSt.bin.ico:(oSt.svc==='skylift'?'🏗':'🚜');
-  const durLbl=getDurLabel?getDurLabel():'—';
-  const price=getPrice?getPrice():'—';
+  const binName=oSt.bin?oSt.bin.name:(isSvc?'Equipment':'—');
+  const ico=oSt.bin?oSt.bin.ico:'🏗';
   const svcLbl={roro:'RoRo Bin Rental',leach:'Leach Bin Rental',garbage:'Garbage Bin Rental',skylift:'Sky-Lift Rental',crane:'Mobile Crane Rental'}[oSt.svc]||'—';
   const ddEl=document.getElementById('oDD');
   const delDate=ddEl?ddEl.textContent:'—';
-  const street=document.getElementById('oStreet')?document.getElementById('oStreet').value:'—';
-  const unit=document.getElementById('oUnit')?document.getElementById('oUnit').value:'';
-  const area=document.getElementById('oArea')?document.getElementById('oArea').value:'';
-  const emergPhone=document.getElementById('oEmergPhone')?document.getElementById('oEmergPhone').value:'';
-  const city=document.getElementById('oCity')?document.getElementById('oCity').value:'—';
-  const contact=document.getElementById('oContact')?document.getElementById('oContact').value:'—';
-  const phone=document.getElementById('oPhone')?document.getElementById('oPhone').value:'—';
+  const street=document.getElementById('oStreet')?.value||'—';
+  const city=document.getElementById('oCity')?.value||'—';
+  const contact=document.getElementById('oContact')?.value||'—';
+  const phone=document.getElementById('oPhone')?.value||'—';
+  const emergPhone=document.getElementById('oEmergPhone')?.value||'';
+  const unit=document.getElementById('oUnit')?.value||'';
+  const area=document.getElementById('oArea')?.value||'';
   const summEl=document.getElementById('oSumm');
-  if(summEl)summEl.innerHTML=`<div class="oCardTop"><div><div class="oCardBin">${ico} ${binName}</div><div class="oCardRef">${svcLbl} · ${durLbl}</div></div><div style="font-size:1.05rem;font-weight:900;color:var(--g1)">${price}</div></div><div class="oCardMeta">
-    <div class="mChip">📅 Deliver ${delDate}</div>
-    <div class="mChip">🕙 ${oSt.delTime||'TBC'}</div>
-    <div class="mChip">📍 ${unit?unit+', ':''}${street}${area?', '+area:''}, ${city}</div>
-    <div class="mChip">👤 ${contact} · ${phone}</div>
-    ${emergPhone?`<div class="mChip">🆘 Emergency: ${emergPhone}</div>`:''}
-    ${!isSvc?'<div class="mChip" style="color:var(--g1);font-weight:800">📦 Collection: on-demand request</div>':''}
-    ${oSt.selectedTown?`<div class="mChip">📍 Area: ${oSt.selectedTown||''}</div>`:''}
-  </div>`;
+  if(summEl)summEl.innerHTML=`
+    <div class="oCardTop"><div><div class="oCardBin">${ico} ${binName}</div>
+    <div class="oCardRef">${svcLbl} · ${getDurLabel()}</div></div>
+    <div style="font-size:1.05rem;font-weight:900;color:var(--g1)">${getPrice()}</div></div>
+    <div class="oCardMeta">
+      <div class="mChip">📅 ${delDate}</div>
+      <div class="mChip">🕙 ${oSt.delTime||'TBC'}</div>
+      <div class="mChip">📍 ${[unit,street,area,city].filter(Boolean).join(', ')}</div>
+      <div class="mChip">👤 ${contact} · ${phone}</div>
+      ${emergPhone?`<div class="mChip">🆘 Emergency: ${emergPhone}</div>`:''}
+      ${!isSvc?'<div class="mChip" style="color:var(--g1);font-weight:800">📦 Collection: on-demand</div>':''}
+    </div>`;
 }
 
 function orderNext(){
@@ -1112,305 +1301,764 @@ function orderNext(){
     const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
     const isPlaceholder=oSt.svc==='leach'||oSt.svc==='garbage';
     if(!isPlaceholder&&!isSvc&&!oSt.bin){toast('⚠️ Select your area and bin size');return;}
-    if(isSvc&&!oSt.dur){toast('⚠️ Choose Full Day or Half Day');return;}
     if(isSvc&&!oSt.bin){toast('⚠️ Choose Full Day or Half Day');return;}
   }
-  if(s===3){if(!oSt.startDate){toast('⚠️ Pick a delivery date');return;}if(!oSt.delTime){toast('⚠️ Choose delivery time window');return;}}
+  if(s===3){
+    if(!oSt.startDate){toast('⚠️ Pick a delivery date');return;}
+    if(!oSt.delTime){toast('⚠️ Choose delivery time window');return;}
+  }
   if(s===4){
-    const c=document.getElementById('oContact');
-    const ph=document.getElementById('oPhone');
-    const ep=document.getElementById('oEmergPhone');
-    const st=document.getElementById('oStreet');
-    if(!c||!c.value.trim()){toast('⚠️ Enter contact person name');return;}
-    if(!ph||!ph.value.trim()){toast('⚠️ Enter contact phone number');return;}
-    if(!ep||!ep.value.trim()){toast('⚠️ Enter emergency contact mobile number');return;}
-    if(!st||!st.value.trim()){toast('⚠️ Enter delivery street address');return;}
+    if(!document.getElementById('oContact')?.value.trim()){toast('⚠️ Enter contact person name');return;}
+    if(!document.getElementById('oPhone')?.value.trim()){toast('⚠️ Enter contact phone');return;}
+    if(!document.getElementById('oEmergPhone')?.value.trim()){toast('⚠️ Enter emergency contact mobile');return;}
+    if(!document.getElementById('oStreet')?.value.trim()){toast('⚠️ Enter delivery address');return;}
     buildSumm();
   }
-  if(s===5)return;oSt.step++;updateStep();
+  if(s===5)return;
+  oSt.step++;updateStep();
 }
 function orderBack(){if(oSt.step>1){oSt.step--;updateStep();}}
 function updateStep(){
-  for(let i=1;i<=5;i++){document.getElementById('oS'+i).style.display='none';const si=document.getElementById('sp'+i);si.classList.remove('on','done');if(i<oSt.step)si.classList.add('done');}
-  document.getElementById('oS'+oSt.step).style.display='block';document.getElementById('sp'+oSt.step).classList.add('on');
-  document.getElementById('oActBar').classList.toggle('show',oSt.step<5);
+  for(let i=1;i<=5;i++){
+    document.getElementById('oS'+i)?.style.setProperty('display','none');
+    const si=document.getElementById('sp'+i);if(si){si.classList.remove('on','done');if(i<oSt.step)si.classList.add('done');}
+  }
+  document.getElementById('oS'+oSt.step)?.style.setProperty('display','block');
+  document.getElementById('sp'+oSt.step)?.classList.add('on');
+  document.getElementById('oActBar')?.classList.toggle('show',oSt.step<5);
   document.getElementById('oBack').style.display=oSt.step>1?'block':'none';
   document.getElementById('oNext').textContent=oSt.step===4?'Review →':'Next →';
-  if(oSt.step===2)renderDur();document.getElementById('cOrder').scrollTop=0;
+  if(oSt.step===2)buildStep2();
+  document.getElementById('cOrder')?.scrollTo(0,0);
 }
-function submitOrder(){
+
+async function submitOrder(){
   if(!curUser){toast('⚠️ Please log in first');return;}
-  const btn=document.getElementById('submitBtn');btn.textContent='Placing order…';btn.disabled=true;
-  const s=getStore(),b=oSt.bin,price={w:b.w,f:b.f,m:b.m}[oSt.dur];
-  const dL={w:'Weekly',f:'14-Day',m:'Monthly'}[oSt.dur];
-  const no={id:'o'+Date.now(),ref:'CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000),custId:curUser.id,ico:b.ico,bin:b.name,plan:dL,delDate:document.getElementById('oDD').textContent,delTime:oSt.delTime,colDate:document.getElementById('oCD').textContent,colTime:oSt.colTime,price:'RM '+price,status:'pending',driver:null,stage:1,addr:[
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='Placing order…';btn.disabled=true;
+  try{
+    const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
+    const binName=oSt.bin?oSt.bin.name:(isSvc?'Equipment':'—');
+    const ico=oSt.bin?oSt.bin.ico:'🏗';
+    const addr=[
       document.getElementById('oUnit')?.value,
       document.getElementById('oStreet')?.value,
       document.getElementById('oArea')?.value,
       document.getElementById('oPost')?.value,
       document.getElementById('oCity')?.value,
       document.getElementById('oState')?.value,
-    ].filter(Boolean).join(', '),
-    emergContact:(document.getElementById('oEmergName')?.value||'')+(document.getElementById('oEmergPhone')?.value?' · '+document.getElementById('oEmergPhone').value:''),contact:document.getElementById('oContact').value+' · '+document.getElementById('oPhone').value,notes:document.getElementById('oNotes').value};
-  s.orders.push(no);const ci=s.customers.findIndex(c=>c.id===curUser.id);if(ci>=0)s.customers[ci].orders.push(no.id);saveStore(s);
-  setTimeout(()=>{btn.textContent='✓ Confirm & Place Order';btn.disabled=false;toast('🎉 Order placed! We\'ll WhatsApp you shortly.');loadOrders(curUser);cNav('cOrders',document.querySelectorAll('.cNavItem')[2]);document.getElementById('oActBar').classList.remove('show');document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;},1200);
+    ].filter(Boolean).join(', ');
+    const ref='CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000);
+    const orderData={
+      ref,custId:curUser.id,custName:curUser.name,
+      ico,svc:oSt.svc,bin:binName,
+      plan:getDurLabel(),
+      delDate:document.getElementById('oDD')?.textContent||'—',
+      delTime:oSt.delTime||'TBC',
+      price:getPrice(),
+      status:'pending',driverId:null,driverName:null,stage:1,
+      addr,
+      contact:document.getElementById('oContact')?.value+' · '+document.getElementById('oPhone')?.value,
+      emergContact:(document.getElementById('oEmergName')?.value||'')+' · '+(document.getElementById('oEmergPhone')?.value||''),
+      notes:document.getElementById('oNotes')?.value||'',
+      placement:document.getElementById('oPlacement')?.value||'',
+      selectedTown:oSt.selectedTown||'',
+      selectedSize:oSt.bin?.sizeName||'',
+      createdAt:fb().serverTimestamp(),
+    };
+    await fb().addDoc(fb().collection(fb().db,'orders'),orderData);
+    toast('🎉 Order placed! Admin has been notified. We will WhatsApp you shortly.');
+    btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
+    document.getElementById('oActBar')?.classList.remove('show');
+    cNav('cOrders',document.querySelectorAll('.cNavItem')[2]);
+  } catch(e){
+    toast('❌ Error placing order: '+e.message);
+    btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
+  }
 }
 
-// ═══ ORDER DASHBOARD ═══
-function showODash(id){
-  const s=getStore(),o=s.orders.find(x=>x.id===id);if(!o)return;curODash=o;
-  document.getElementById('dashRef').textContent=o.ref;document.getElementById('dashBin').textContent=o.ico+' '+o.bin;
-  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
-  document.getElementById('dashBadge').innerHTML=`<span class="badge ${bc}">${o.status}</span>`;
-  document.getElementById('dashMeta').innerHTML=[
-    '📅 Deliver '+o.delDate+' · '+o.delTime,
-    '💰 '+o.price,
-    '🚛 '+(drv?drv.name:'Arranging…'),
-    '📦 On-demand collection',
-    o.emergContact?'🆘 '+o.emergContact:'',
-    o.addr?'📍 '+o.addr.substring(0,40):'',
-  ].filter(Boolean).map(t=>'<span>'+t+'</span>').join('');
-  const cur=o.stage||1;
-  document.getElementById('dashStages').innerHTML=STAGES.map(st=>{
-    const done=st.n<cur,active=st.n===cur;
-    const dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
-    let acts='';
-    if(active&&st.n===5)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custAccept('${o.id}')">✓ Accept Delivery</button></div>`;
-    if(active&&st.n===6)acts=`<div class="stageActs">
-      <button class="btn btn-g btn-sm" onclick="custRequestCollection('${o.id}')">📦 Request Collection</button>
-      <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Hi, I would like to request bin collection for order '+o.ref+'. Bin is full. Please arrange pickup. Thank you.')}" target="_blank" style="text-decoration:none"><button class="btn btn-wa btn-sm">📱 WhatsApp Admin</button></a>
-    </div>`;
-    if(active&&st.n===7)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custClose('${o.id}')">🔒 Close My Case</button></div>`;
-    return `<div class="stageRow"><div class="sDot ${dc}">${dt}</div><div class="stageContent"><div class="stageTitle">${st.title}</div><div class="stageSub">${st.sub}</div>${done?'<div class="stageTime" style="color:var(--g2)">✓ Completed</div>':''}${active?'<div class="stageTime" style="color:var(--y3)">● In progress</div>':''}${acts}</div></div>`;
-  }).join('');
-  const chat=document.getElementById('dashChat');
-  chat.innerHTML=`<div class="chatMsg sys">Order ${o.ref} created</div>`;
-  if(o.driver)chat.innerHTML+=`<div class="chatMsg them"><div class="cmSender">Driver — ${o.driver}</div>Hello, I am your driver. I will contact you 30 minutes before arrival.<div class="cmTime">Today</div></div>`;
-  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));document.getElementById('cODash').classList.add('on');
-  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.cNavItem')[2].classList.add('on');
-  document.getElementById('oActBar').classList.remove('show');
+// ══ ORDER DASHBOARD ══
+async function showODash(id){
+  try{
+    const snap=await fb().getDoc(fb().doc(fb().db,'orders',id));
+    if(!snap.exists())return;
+    const o={id:snap.id,...snap.data()};
+    curODash=o;
+    document.getElementById('dashRef').textContent=o.ref;
+    document.getElementById('dashBin').textContent=(o.ico||'🏗')+' '+o.bin;
+    const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
+    document.getElementById('dashBadge').innerHTML=`<span class="badge ${bc}">${o.status}</span>`;
+    document.getElementById('dashMeta').innerHTML=[
+      '📅 '+o.delDate+' · '+o.delTime,
+      '💰 '+o.price,
+      '🚛 '+(o.driverName||'Arranging…'),
+      '📦 On-demand collection',
+      o.emergContact?'🆘 '+o.emergContact:'',
+      o.addr?'📍 '+(o.addr.substring(0,50)):'',
+    ].filter(Boolean).map(t=>`<span>${t}</span>`).join('');
+    const cur=o.stage||1;
+    document.getElementById('dashStages').innerHTML=STAGES.map(st=>{
+      const done=st.n<cur,active=st.n===cur;
+      const dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
+      let acts='';
+      if(active&&st.n===5)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custAccept('${o.id}')">✓ Accept Delivery</button></div>`;
+      if(active&&st.n===6)acts=`<div class="stageActs">
+        <button class="btn btn-g btn-sm" onclick="custRequestCollection('${o.id}')">📦 Request Collection</button>
+        <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Hi, please arrange bin collection for order '+o.ref+'. Bin is full. Thank you.')}" target="_blank"><button class="btn btn-wa btn-sm">📱 WhatsApp Admin</button></a>
+      </div>`;
+      if(active&&st.n===7)acts=`<div class="stageActs"><button class="btn btn-g btn-sm" onclick="custClose('${o.id}')">🔒 Close My Case</button></div>`;
+      return`<div class="stageRow"><div class="sDot ${dc}">${dt}</div><div class="stageContent">
+        <div class="stageTitle">${st.title}</div><div class="stageSub">${st.sub}</div>
+        ${done?'<div class="stageTime" style="color:var(--g2)">✓ Completed</div>':''}
+        ${active?'<div class="stageTime" style="color:var(--y3)">● In progress</div>':''}
+        ${acts}</div></div>`;
+    }).join('');
+    const chat=document.getElementById('dashChat');
+    if(chat){
+      chat.innerHTML=`<div class="chatMsg sys">Order ${o.ref} created</div>`;
+      if(o.driverName)chat.innerHTML+=`<div class="chatMsg them"><div class="cmSender">Driver — ${o.driverName}</div>Hello, I am your driver. I will contact you 30 min before arrival.<div class="cmTime">Today</div></div>`;
+    }
+    document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+    document.getElementById('cODash')?.classList.add('on');
+    document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.cNavItem')[2]?.classList.add('on');
+    document.getElementById('oActBar')?.classList.remove('show');
+  }catch(e){toast('❌ Error loading order: '+e.message);}
 }
-function custAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=5;saveStore(s);toast('✅ Delivery accepted! Company has been notified. Thank you.');showODash(id);}
-function custClose(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=7;s.orders[i].status='completed';saveStore(s);toast('🔒 Case closed. Thank you!');showODash(id);}
-function sendChat(){const inp=document.getElementById('chatInp'),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('dashChat');const el=document.createElement('div');el.className='chatMsg me';el.innerHTML=msg+'<div class="cmTime">Now</div>';w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='chatMsg sys';r.textContent='Message delivered to driver';w.appendChild(r);w.scrollTop=w.scrollHeight;},700);}
 
-// ═══ DOCUMENTS ═══
-function custRequestCollection(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=6;saveStore(s);toast('📦 Collection requested! Admin notified.');showODash(id);}
+async function custAccept(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:5});
+  toast('✅ Delivery accepted! Company has been notified.');showODash(id);
+}
+async function custRequestCollection(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:6,status:'active'});
+  toast('📦 Collection requested! Admin notified. WhatsApp them for urgent pickup.');showODash(id);
+}
+async function custClose(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:7,status:'completed'});
+  toast('🔒 Case closed. Thank you for using Cemerlang Endas!');showODash(id);
+}
+
+function sendChat(){
+  const inp=document.getElementById('chatInp');const msg=inp?.value.trim();if(!msg)return;
+  const w=document.getElementById('dashChat');
+  const el=document.createElement('div');el.className='chatMsg me';
+  el.innerHTML=msg+'<div class="cmTime">Now</div>';
+  w?.appendChild(el);if(inp)inp.value='';if(w)w.scrollTop=w.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div');r.className='chatMsg sys';r.textContent='Message delivered to driver';
+    w?.appendChild(r);if(w)w.scrollTop=w.scrollHeight;
+  },700);
+}
+
+// ══ DOCUMENTS ══
 function showDoc(type){const o=curODash;if(!o)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(o):buildInv(o);document.getElementById('docModal').classList.add('show');}
-function buildDO(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">DELIVERY ORDER</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 / 6251 6933 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem"><div><div class="sLbl">D/O Number</div><div style="font-weight:900">DO-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Deliver To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div><div style="color:var(--tx2);font-weight:600">${o.contact}</div></div><div class="divider"></div><div style="font-size:.82rem"><div class="sLbl">Items</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-weight:700"><span>${o.ico} ${o.bin}</span><span>1 unit</span></div><div style="color:var(--tx2);font-size:.76rem;padding:6px 0 2px">Rental: ${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="color:var(--tx2);font-size:.76rem;padding-bottom:2px">Delivery window: ${o.delTime}</div><div style="color:var(--tx2);font-size:.76rem">Driver: ${o.driver||'TBC'}</div></div><div class="divider"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:.76rem"><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Customer Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div><div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Driver Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div></div><button class="btn btn-ghost btn-full btn-sm" style="margin-top:12px" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
-function buildInv(o){return `<div><div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px"><div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">TAX INVOICE</div><div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div><div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div><div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 · Fax: 03-6252 0977</div></div><div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.82rem"><div><div class="sLbl">Invoice No.</div><div style="font-weight:900">INV-${o.ref.split('-').pop()}</div></div><div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div><div style="color:var(--r1);font-weight:800;font-size:.72rem;margin-top:2px">Due 3 working days</div></div></div><div class="divider"></div><div style="margin-bottom:12px;font-size:.82rem"><div class="sLbl">Bill To</div><div style="font-weight:800">${o.contact.split('·')[0].trim()}</div><div style="color:var(--tx2);font-weight:600">${o.addr}</div></div><div class="divider"></div><div style="font-size:.82rem;margin-bottom:10px"><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;font-size:.66rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr)"><span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Amount</span></div><div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div><div style="font-weight:800">${o.bin}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">${o.plan} · ${o.delDate} – ${o.colDate}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">Incl. delivery & collection</div></div><div style="text-align:right;font-weight:700">1</div><div style="text-align:right;font-weight:900">${o.price}</div></div></div><div style="font-size:.82rem"><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>${o.price}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div><div style="display:flex;justify-content:space-between;padding:9px 0;border-top:2px solid var(--g1);margin-top:4px;font-weight:900;font-size:.95rem"><span>Total</span><span style="color:var(--g1)">${o.price}</span></div></div><div class="divider"></div><div style="background:var(--b2);border-radius:var(--rads);padding:12px;font-size:.8rem;margin-bottom:12px"><div style="font-weight:900;color:var(--b3);margin-bottom:7px">💳 Payment Details</div><div style="color:var(--b3);font-weight:700;line-height:1.9">Bank: <b>Maybank Berhad</b><br>Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>Account No.: <b>1234-5678-9012</b><br>Reference: <b>INV-${o.ref.split('-').pop()}</b></div></div><div style="font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">Payment due within 3 working days. WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).</div><button class="btn btn-ghost btn-full btn-sm" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button></div>`;}
+function closeModal(id){document.getElementById(id)?.classList.remove('show');}
 
-// ═══ ADMIN ═══
-function adminNav(s,item){document.querySelectorAll('.aMenuItem').forEach(m=>m.classList.remove('on'));if(item)item.classList.add('on');renderAdmin(s);}
+function buildDO(o){return`<div>
+  <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
+    <div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">DELIVERY ORDER</div>
+    <div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div>
+    <div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
+    <div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 / 6251 6933 · Fax: 03-6252 0977</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem">
+    <div><div class="sLbl">D/O Number</div><div style="font-weight:900">DO-${o.ref?.split('-').pop()}</div></div>
+    <div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div></div>
+  </div>
+  <div class="divider"></div>
+  <div style="margin-bottom:12px;font-size:.82rem">
+    <div class="sLbl">Deliver To</div>
+    <div style="font-weight:800">${o.contact?.split('·')[0].trim()}</div>
+    <div style="color:var(--tx2);font-weight:600">${o.addr}</div>
+    <div style="color:var(--tx2);font-weight:600">${o.contact}</div>
+    ${o.emergContact?`<div style="color:var(--r1);font-weight:700;font-size:.78rem">🆘 Emergency: ${o.emergContact}</div>`:''}
+  </div>
+  <div class="divider"></div>
+  <div style="font-size:.82rem">
+    <div class="sLbl">Items</div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-weight:700"><span>${o.ico||'🏗'} ${o.bin}</span><span>1 unit</span></div>
+    <div style="color:var(--tx2);font-size:.76rem;padding:6px 0 2px">Plan: ${o.plan}</div>
+    <div style="color:var(--tx2);font-size:.76rem;padding-bottom:2px">Delivery: ${o.delDate} · ${o.delTime}</div>
+    <div style="color:var(--tx2);font-size:.76rem">Driver: ${o.driverName||'TBC'}</div>
+    <div style="color:var(--tx2);font-size:.76rem">Collection: On-demand (customer request)</div>
+  </div>
+  <div class="divider"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+    <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Customer Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div>
+    <div style="border:1.5px solid var(--bdr);border-radius:var(--rads);padding:11px;text-align:center"><div style="color:var(--tx3);font-size:.63rem;font-weight:800;text-transform:uppercase;margin-bottom:20px">Driver Signature</div><div style="border-top:1px solid var(--bdr);padding-top:5px;color:var(--tx3);font-weight:700">Name & Date</div></div>
+  </div>
+  <button class="btn btn-ghost btn-full btn-sm" style="margin-top:12px" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button>
+</div>`;}
+
+function buildInv(o){return`<div>
+  <div style="background:var(--g1);color:#fff;padding:16px;border-radius:var(--rads);margin-bottom:14px">
+    <div style="font-size:.68rem;font-weight:700;opacity:.7;margin-bottom:3px">TAX INVOICE</div>
+    <div style="font-size:1.05rem;font-weight:900;margin-bottom:2px">Cemerlang Endas Sdn. Bhd.</div>
+    <div style="font-size:.74rem;opacity:.8">No. 5, Jalan 12/34A, Kepong Entrepreneurs Park, 52100 KL</div>
+    <div style="font-size:.74rem;opacity:.8">Tel: 03-6251 3977 · Fax: 03-6252 0977</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:.82rem">
+    <div><div class="sLbl">Invoice No.</div><div style="font-weight:900">INV-${o.ref?.split('-').pop()}</div></div>
+    <div style="text-align:right"><div class="sLbl">Date</div><div style="font-weight:800">${o.delDate}</div><div style="color:var(--r1);font-weight:800;font-size:.72rem;margin-top:2px">Due 3 working days</div></div>
+  </div>
+  <div class="divider"></div>
+  <div style="margin-bottom:12px;font-size:.82rem">
+    <div class="sLbl">Bill To</div>
+    <div style="font-weight:800">${o.custName||o.contact?.split('·')[0].trim()}</div>
+    <div style="color:var(--tx2);font-weight:600">${o.addr}</div>
+  </div>
+  <div class="divider"></div>
+  <div style="font-size:.82rem;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;font-size:.66rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr)"><span>Description</span><span>Qty</span><span>Amount</span></div>
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <div><div style="font-weight:800">${o.bin}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">${o.plan} · Delivery ${o.delDate}</div><div style="font-size:.73rem;color:var(--tx2);font-weight:600">Collection on-demand</div></div>
+      <div style="font-weight:700">1</div><div style="font-weight:900">${o.price}</div>
+    </div>
+  </div>
+  <div style="font-size:.82rem">
+    <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>Subtotal</span><span>${o.price}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--tx2);font-weight:700"><span>SST (0%)</span><span>RM 0.00</span></div>
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:2px solid var(--g1);margin-top:4px;font-weight:900;font-size:.95rem"><span>Total</span><span style="color:var(--g1)">${o.price}</span></div>
+  </div>
+  <div class="divider"></div>
+  <div style="background:var(--g3);border:1px solid var(--g4);border-radius:var(--rads);padding:12px;font-size:.8rem;margin-bottom:12px">
+    <div style="font-weight:900;color:var(--g5);margin-bottom:7px">💳 Payment Details</div>
+    <div style="color:var(--tx2);font-weight:700;line-height:1.9">Bank: <b>Maybank Berhad</b><br>Account Name: <b>Cemerlang Endas Sdn. Bhd.</b><br>Account No.: <b>1234-5678-9012</b><br>Reference: <b>INV-${o.ref?.split('-').pop()}</b></div>
+  </div>
+  <div style="font-size:.72rem;color:var(--tx2);font-weight:600;line-height:1.6;margin-bottom:12px">Payment due within 3 working days. WhatsApp proof of payment to 03-6251 3977 (Ms. Wong / Ms. Then).</div>
+  <button class="btn btn-ghost btn-full btn-sm" onclick="toast('🖨 Use browser Print / Save as PDF')">🖨 Print / Save PDF</button>
+</div>`;}
+
+// ══ ADMIN ══
+function adminNav(s,item){
+  document.querySelectorAll('.aMenuItem').forEach(m=>m.classList.remove('on'));
+  if(item)item.classList.add('on');renderAdmin(s);
+}
+
 function renderAdmin(sc){
-  const s=getStore(),el=document.getElementById('aMain');
-  const pending=s.orders.filter(o=>o.status==='pending');
+  const orders=window._adminOrders||[];
+  const el=document.getElementById('aMain');if(!el)return;
+  const pending=orders.filter(o=>o.status==='pending');
+
   if(sc==='aOrders'){
     el.innerHTML=`<h2>📦 Orders <span style="color:var(--r1);font-size:.75rem;font-weight:700">${pending.length} pending</span></h2>
-    <div class="aStats"><div class="aStat"><div class="asNum">${s.orders.length}</div><div class="asLbl">Total Orders</div></div><div class="aStat"><div class="asNum">${pending.length}</div><div class="asLbl">Pending</div><div class="asSub">Need action</div></div><div class="aStat"><div class="asNum">${s.orders.filter(o=>o.status==='confirmed'||o.status==='active').length}</div><div class="asLbl">Active</div></div><div class="aStat"><div class="asNum">${s.customers.length}</div><div class="asLbl">Customers</div></div></div>
-    <div class="notifBox"><p><b style="color:#fff">Confirmation Mode</b><br>A = Admin sends manually · B = Auto-notify customer &amp; company simultaneously</p><label class="toggle"><input type="checkbox" id="notifTog" ${s.notifMode==='B'?'checked':''} onchange="toggleNotif(this.checked)"><div class="trkOuter"><div class="trkThumb"></div></div><span id="notifLbl">${s.notifMode==='B'?'Mode B':'Mode A'}</span></label></div>
-    ${pending.length?pending.map(o=>adminORow(o,s)).join(''):'<div style="text-align:center;padding:24px;color:#4a7a4a;font-size:.85rem;font-weight:700">No pending orders 🎉</div>'}
-    <div style="color:#4a7a4a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 9px">All Orders</div>
-    ${s.orders.filter(o=>o.status!=='pending').map(o=>adminORow(o,s)).join('')}`;
+    <div class="aStats">
+      <div class="aStat"><div class="asNum">${orders.length}</div><div class="asLbl">Total Orders</div></div>
+      <div class="aStat"><div class="asNum">${pending.length}</div><div class="asLbl">Pending</div><div class="asSub">Need action</div></div>
+      <div class="aStat"><div class="asNum">${orders.filter(o=>o.status==='confirmed'||o.status==='active').length}</div><div class="asLbl">Active</div></div>
+      <div class="aStat"><div class="asNum">—</div><div class="asLbl">Customers</div></div>
+    </div>
+    <div class="notifBox">
+      <p><b style="color:#fff">Confirmation Mode</b><br>A = Admin sends manually · B = Auto-notify simultaneously</p>
+      <label class="toggle"><input type="checkbox" id="notifTog" onchange="toggleNotif(this.checked)">
+      <div class="trkOuter"><div class="trkThumb"></div></div><span id="notifLbl">Mode A</span></label>
+    </div>
+    ${pending.length?pending.map(o=>adminORow(o)).join(''):'<div style="text-align:center;padding:20px;color:#4a9a5a;font-size:.85rem;font-weight:700">No pending orders 🎉</div>'}
+    <div style="color:#4a9a5a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 9px">All Orders</div>
+    ${orders.filter(o=>o.status!=='pending').map(o=>adminORow(o)).join('')}`;
   } else if(sc==='aODash'){
-    el.innerHTML=`<h2>🪟 Order Dashboards</h2><p style="font-size:.8rem;color:#5a8a5a;font-weight:700;margin-bottom:14px">Live tracking for every order. Act, view chat, and join as admin.</p>${s.orders.map(o=>adminODash(o,s)).join('')}`;
+    el.innerHTML=`<h2>🪟 Order Dashboards</h2>
+    <p style="font-size:.8rem;color:#5aaa6a;font-weight:700;margin-bottom:14px">Live tracking per order. Act, view chat, and join as admin.</p>
+    ${orders.map(o=>adminODash(o)).join('')}`;
   } else if(sc==='aCustomers'){
     el.innerHTML=`<h2>👥 Customers</h2>
-    <div style="background:#131d14;border:1px solid #233023;border-radius:var(--rad);padding:16px;margin-bottom:14px">
+    <div style="background:#0f2a15;border:1px solid #1a4020;border-radius:var(--rad);padding:16px;margin-bottom:14px">
       <div style="color:#fff;font-size:.92rem;font-weight:900;margin-bottom:14px">➕ Register New Customer</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
         <div><div class="aLab">Full Name *</div><input class="aInp" type="text" id="ncName" placeholder="Customer full name"></div>
-        <div><div class="aLab">Company</div><input class="aInp" type="text" id="ncComp" placeholder="Sdn. Bhd. / Individual"></div>
+        <div><div class="aLab">Company</div><input class="aInp" type="text" id="ncComp" placeholder="Sdn. Bhd."></div>
         <div><div class="aLab">Email Address *</div><input class="aInp" type="email" id="ncEmail" placeholder="customer@email.com"></div>
         <div><div class="aLab">Phone Number</div><input class="aInp" type="tel" id="ncPhone" placeholder="01x-xxxx xxxx"></div>
       </div>
       <div style="margin-top:4px"><div class="aLab">Default Delivery Address</div><input class="aInp" type="text" id="ncAddr" placeholder="No., Jalan, Postcode, City"></div>
       <div style="margin-top:4px"><div class="aLab">Temporary Password *</div>
-        <div style="display:flex;gap:8px;align-items:center"><input class="aInp" type="text" id="ncPass" placeholder="Min 8 chars — customer changes later" style="flex:1;margin-bottom:0"><button class="abtn abtn-ghost" onclick="genPass()" style="white-space:nowrap;flex-shrink:0">Generate</button></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="aInp" type="text" id="ncPass" placeholder="Min 8 chars" style="flex:1;margin-bottom:0">
+          <button class="abtn abtn-ghost" onclick="genPass()" style="white-space:nowrap;flex-shrink:0;border-radius:var(--radx)">Generate</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px"><button class="abtn abtn-g" style="flex:1;padding:11px;font-size:.84rem;border-radius:var(--rads)" onclick="adminRegCust()">✓ Register &amp; Get Login Details</button></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="abtn abtn-g" style="flex:1;padding:11px;font-size:.84rem;border-radius:var(--rads)" onclick="adminRegCust()">✓ Register & Get Login Details</button>
+      </div>
     </div>
-    <div style="color:#4a7a4a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">Registered Customers (${s.customers.length})</div>
-    ${s.customers.map(c=>custRegCard(c,s)).join('')}`;
+    <div style="color:#4a9a5a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">Registered Customers</div>
+    <div id="custListAdmin"><div style="text-align:center;padding:20px;color:#4a9a5a">Loading customers…</div></div>`;
+    loadCustomersList();
   } else if(sc==='aDrivers'){
-    el.innerHTML=`<h2>🚛 Drivers</h2><div class="aStats"><div class="aStat"><div class="asNum">${s.drivers.filter(d=>d.status.startsWith('Online')).length}</div><div class="asLbl">Online</div></div><div class="aStat"><div class="asNum">${s.drivers.filter(d=>d.status.includes('Available')).length}</div><div class="asLbl">Available</div></div><div class="aStat"><div class="asNum">${s.drivers.reduce((a,d)=>a+d.jobs,0)}</div><div class="asLbl">Jobs Today</div></div><div class="aStat"><div class="asNum">${s.drivers.length}</div><div class="asLbl">Total</div></div></div>${s.drivers.map(d=>`<div class="aRow"><div class="arTop"><div style="display:flex;gap:11px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:900;color:#fff;flex-shrink:0">${d.ava}</div><div><div class="arBin">${d.name}</div><div class="arRef">${d.plate} · ${d.jobs} jobs today</div></div></div><span class="badge ${d.status.startsWith('Online')?'b-green':'b-gray'}">${d.status.split('·')[0].trim()}</span></div><div class="arMeta"><div class="arMI">🔄 ${d.status}</div></div></div>`).join('')}<button class="abtn abtn-g" style="margin-top:6px;padding:10px 16px;border-radius:var(--rads)" onclick="toast('+ Add Driver — coming in full version')">+ Add Driver</button>`;
+    renderDriversAdmin();
   } else if(sc==='aReports'){
-    el.innerHTML=`<h2>📊 Reports</h2><div class="aStats"><div class="aStat"><div class="asNum">RM 12,480</div><div class="asLbl">May Revenue</div><div class="asSub">↑14% vs Apr</div></div><div class="aStat"><div class="asNum">${s.orders.length}</div><div class="asLbl">Orders</div></div><div class="aStat"><div class="asNum">${s.customers.length}</div><div class="asLbl">Customers</div></div><div class="aStat"><div class="asNum">${s.drivers.length}</div><div class="asLbl">Drivers</div></div></div><div class="aRow"><div style="color:#ccc;font-size:.8rem;font-weight:800;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Revenue by Bin Type</div>${[['RoRo Bins','RM 7,200','58%','#27924f'],['Leach Bins','RM 3,040','24%','#F5A623'],['Garbage Bins','RM 2,240','18%','#1565C0']].map(([n,v,p,c])=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="color:#ccc;font-size:.8rem;font-weight:700">${n}</span><span style="color:#fff;font-size:.8rem;font-weight:900">${v} <span style="color:#4a7a4a">${p}</span></span></div><div style="height:7px;background:#1e2a1e;border-radius:99px;overflow:hidden"><div style="height:100%;width:${p};background:${c};border-radius:99px"></div></div></div>`).join('')}</div><div class="aRow"><div style="color:#ccc;font-size:.8rem;font-weight:800;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Customers</div>${s.customers.map(c=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2a1e"><div><div style="color:#fff;font-size:.84rem;font-weight:800">${c.name}</div><div style="color:#5a7a5a;font-size:.72rem">${c.email}</div></div><span class="badge b-green">${c.orders.length} orders</span></div>`).join('')}</div>`;
+    el.innerHTML=`<h2>📊 Reports</h2>
+    <div class="aStats">
+      <div class="aStat"><div class="asNum">RM —</div><div class="asLbl">Revenue</div></div>
+      <div class="aStat"><div class="asNum">${orders.length}</div><div class="asLbl">Orders</div></div>
+      <div class="aStat"><div class="asNum">${orders.filter(o=>o.status==='completed').length}</div><div class="asLbl">Completed</div></div>
+      <div class="aStat"><div class="asNum">${orders.filter(o=>o.status==='pending').length}</div><div class="asLbl">Pending</div></div>
+    </div>
+    <div class="aRow"><div style="color:#ccc;font-size:.8rem;font-weight:800;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Orders by Service</div>
+    ${['roro','leach','garbage','skylift','crane'].map(svc=>{
+      const count=orders.filter(o=>o.svc===svc).length;
+      const label={roro:'RoRo Bin',leach:'Leach Bin',garbage:'Garbage Bin',skylift:'Sky-Lift',crane:'Mobile Crane'}[svc];
+      const pct=orders.length?Math.round(count/orders.length*100):0;
+      return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="color:#ccc;font-size:.8rem;font-weight:700">${label}</span><span style="color:#fff;font-size:.8rem;font-weight:900">${count} orders <span style="color:#4a9a5a">${pct}%</span></span></div><div style="height:7px;background:#1a4020;border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--g1);border-radius:99px"></div></div></div>`;
+    }).join('')}</div>`;
   }
 }
-function adminORow(o,s){
-  const c=s.customers.find(x=>x.id===o.custId)||{name:'—'};
-  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
-  const waMsg=encodeURIComponent(`*Order Confirmed — Cemerlang Endas*\nRef: ${o.ref}\nBin: ${o.bin}\nDeliver: ${o.delDate} · ${o.delTime}\nCollect: ${o.colDate} · ${o.colTime}\nAddress: ${o.addr}\nTotal: ${o.price}\n\nPlease ensure your site is accessible on delivery day. Driver will call 30 min before arrival. TQ`);
-  return `<div class="aRow"><div class="arTop"><div><div class="arBin">${o.ico} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan} · ${c.name}</div></div><span class="badge ${bc}">${o.status}</span></div><div class="arMeta"><div class="arMI">👤 ${o.contact}</div><div class="arMI">📍 ${o.addr}</div>${o.emergContact?`<div class="arMI">🆘 ${o.emergContact}</div>`:''}<div class="arMI">🚚 ${o.delDate} · ${o.delTime}</div><div class="arMI">📦 Collect ${o.colDate} · ${o.colTime}</div><div class="arMI">💰 ${o.price}</div>${o.driver?`<div class="arMI">🚛 ${o.driver}</div>`:''}</div><div class="arActs">${o.status==='pending'?`<button class="abtn abtn-g" onclick="adminAccept('${o.id}')">✓ Accept</button><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button><a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`:`<button class="abtn abtn-b" onclick="openAssign('${o.id}')">Change Driver</button><a href="https://wa.me/?text=${encodeURIComponent('Reminder: Order '+o.ref)}" target="_blank"><button class="abtn abtn-wa">WhatsApp</button></a>`}<button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','inv')">🧾 Invoice</button><button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','do')">📄 D/O</button></div></div>`;
+
+async function loadCustomersList(){
+  try{
+    const snap=await fb().getDocs(fb().query(fb().collection(fb().db,'users'),fb().where('role','==','customer')));
+    const customers=[];snap.forEach(d=>customers.push({id:d.id,...d.data()}));
+    const el=document.getElementById('custListAdmin');
+    if(!el)return;
+    if(customers.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:#4a9a5a">No customers registered yet</div>';return;}
+    el.innerHTML=customers.map(c=>`<div class="cRegCard">
+      <div class="cRegTop">
+        <div class="cAva">${c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+        <div style="flex:1"><div class="cRegName">${c.name}</div><div class="cRegComp">${c.company||'Individual'}</div></div>
+        <span class="badge ${c.active?'b-green':'b-gray'}">${c.active?'Active':'Inactive'}</span>
+      </div>
+      <div class="cRegMeta">
+        <div class="cRegMI">📧 ${c.email}</div>
+        <div class="cRegMI">📱 ${c.phone||'—'}</div>
+        <div class="cRegMI">📦 ${(c.orders||[]).length} orders</div>
+        <div class="cRegMI">🔧 ${c.createdBy==='self'?'Self registered':'Admin registered'}</div>
+      </div>
+      <div class="cRegActs">
+        <button class="abtn abtn-g" onclick="showCreds('${c.id}','${c.email}','${c.name}','${c.phone||''}')">🔑 Login Details</button>
+        <button class="abtn abtn-ghost" onclick="toggleCustActive('${c.id}',${!c.active})">${c.active?'Deactivate':'Activate'}</button>
+      </div>
+    </div>`).join('');
+  }catch(e){toast('❌ Error loading customers: '+e.message);}
 }
-function adminODash(o,s){
-  const cur=o.stage||1,nm=s.notifMode,uid=o.id;
+
+function adminORow(o){
+  const bc={pending:'b-yellow',confirmed:'b-blue',active:'b-green',completed:'b-gray'}[o.status]||'b-gray';
+  const waMsg=encodeURIComponent(`*Order Confirmed — Cemerlang Endas*
+Ref: ${o.ref}
+Service: ${o.bin}
+Delivery: ${o.delDate} · ${o.delTime}
+Address: ${o.addr}
+Total: ${o.price}
+
+Driver will call 30 min before arrival. Thank you.`);
+  return`<div class="aRow">
+    <div class="arTop"><div><div class="arBin">${o.ico||'🏗'} ${o.bin}</div><div class="arRef">${o.ref} · ${o.plan} · ${o.custName||'—'}</div></div><span class="badge ${bc}">${o.status}</span></div>
+    <div class="arMeta">
+      <div class="arMI">👤 ${o.contact||'—'}</div>
+      <div class="arMI">📍 ${o.addr||'—'}</div>
+      <div class="arMI">🚚 ${o.delDate} · ${o.delTime}</div>
+      <div class="arMI">💰 ${o.price}</div>
+      <div class="arMI">📦 On-demand collection</div>
+      ${o.emergContact?`<div class="arMI">🆘 ${o.emergContact}</div>`:''}
+      ${o.driverName?`<div class="arMI">🚛 ${o.driverName}</div>`:''}
+    </div>
+    <div class="arActs">
+      ${o.status==='pending'?`<button class="abtn abtn-g" onclick="adminAccept('${o.id}')">✓ Accept</button><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button>`:`<button class="abtn abtn-b" onclick="openAssign('${o.id}')">Change Driver</button>`}
+      <a href="https://wa.me/?text=${waMsg}" target="_blank"><button class="abtn abtn-wa">📱 WhatsApp</button></a>
+      <button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','inv')">🧾 Invoice</button>
+      <button class="abtn abtn-ghost" onclick="adminShowDoc('${o.id}','do')">📄 D/O</button>
+    </div>
+  </div>`;
+}
+
+function adminODash(o){
+  const cur=o.stage||1;
   const stages=STAGES.map(st=>{
     const done=st.n<cur,active=st.n===cur,dc=done?'done':active?'active':'pending',dt=done?'✓':active?'●':st.n;
     let acts='';
-    if(active&&st.n===2)acts=`<div class="asActs"><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button>${nm==='B'?`<button class="abtn abtn-ghost" onclick="toast('📱 Auto-notifying both parties…')">Auto-Notify Both</button>`:`<button class="abtn abtn-g" onclick="adminSendConf('${o.id}')">Send Confirmation to Client</button>`}</div>`;
-    if(active&&st.n===4)acts=`<div class="asActs"><span style="color:#5a7a5a;font-size:.72rem;font-weight:700">Awaiting driver to mark delivered</span></div>`;
-    if(active&&st.n===5)acts=`<div class="asActs"><span style="color:#5a7a5a;font-size:.72rem;font-weight:700">Awaiting customer acceptance</span></div>`;
-    return `<div class="aStRow"><div class="asDot ${dc}">${dt}</div><div style="flex:1"><div class="asTitle">${st.title}</div><div class="asSub2">${st.sub}</div>${done?'<div style="color:#4a7a4a;font-size:.68rem;font-weight:700;margin-top:3px">✓ Done</div>':''}${active?'<div style="color:var(--y1);font-size:.68rem;font-weight:700;margin-top:3px">● Active now</div>':''}${acts}</div></div>`;
+    if(active&&st.n===2)acts=`<div class="asActs"><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Driver</button><button class="abtn abtn-g" onclick="adminSendConf('${o.id}')">Send Confirmation</button></div>`;
+    if(active&&st.n===6)acts=`<div class="asActs"><button class="abtn abtn-b" onclick="openAssign('${o.id}')">Assign Collection Driver</button></div>`;
+    return`<div class="aStRow"><div class="asDot ${dc}">${dt}</div><div style="flex:1"><div class="asTitle">${st.title}</div><div class="asSub2">${st.sub}</div>${done?'<div style="color:#4a9a5a;font-size:.68rem;font-weight:700;margin-top:3px">✓ Done</div>':''}${active?'<div style="color:var(--y1);font-size:.68rem;font-weight:700;margin-top:3px">● Active</div>':''}${acts}</div></div>`;
   }).join('');
-  const c=s.customers.find(x=>x.id===o.custId)||{name:'—'};
-  return `<div class="aODash"><div class="aODashHdr"><div><div style="color:#5a7a5a;font-size:.68rem;font-weight:700;margin-bottom:2px">${o.ref} · ${o.plan} · ${c.name}</div><h4>${o.ico} ${o.bin}</h4><div style="color:#6a9a6a;font-size:.73rem;font-weight:700;margin-top:3px">${o.delDate} → ${o.colDate} · ${o.price}</div></div><span class="badge ${o.status==='pending'?'b-yellow':o.status==='confirmed'?'b-blue':'b-green'}">${o.status}</span></div>${stages}<div class="aChatBar"><div class="aChatHdr"><span>💬 Order Chat</span><button style="background:none;border:none;color:var(--y1);font-size:.73rem;font-weight:800;cursor:pointer" onclick="adminToggleChat('${uid}',this)">Join Chat</button></div><div class="aChatMsgs" id="acm_${uid}"><div class="acMsg cust"><div class="acSender">Customer</div>Order placed. Awaiting confirmation.</div>${o.driver?`<div class="acMsg drv"><div class="acSender">Driver</div>Job accepted. On my way on delivery day.</div>`:''}</div><div id="acb_${uid}" style="display:none"><div class="aChatInputRow"><input placeholder="Admin message to all parties…" id="aci_${uid}" onkeypress="if(event.key==='Enter')adminChatSend('${uid}')"><button onclick="adminChatSend('${uid}')">Send</button></div></div></div></div>`;
+  const uid=o.id;
+  return`<div class="aODash">
+    <div class="aODashHdr">
+      <div><div style="color:#4a9a5a;font-size:.68rem;font-weight:700;margin-bottom:2px">${o.ref} · ${o.plan} · ${o.custName||'—'}</div>
+      <h4>${o.ico||'🏗'} ${o.bin}</h4>
+      <div style="color:#6aaa7a;font-size:.73rem;font-weight:700;margin-top:3px">Deliver ${o.delDate} · ${o.price} · ${o.driverName||'No driver yet'}</div></div>
+      <span class="badge ${o.status==='pending'?'b-yellow':o.status==='confirmed'?'b-blue':'b-green'}">${o.status}</span>
+    </div>
+    ${stages}
+    <div class="aChatBar"><div class="aChatHdr"><span>💬 Order Chat</span>
+    <button style="background:none;border:none;color:var(--y1);font-size:.73rem;font-weight:800;cursor:pointer" onclick="adminToggleChat('${uid}',this)">Join Chat</button></div>
+    <div class="aChatMsgs" id="acm_${uid}"><div class="acMsg cust"><div class="acSender">Customer</div>Order placed — ${o.ref}</div></div>
+    <div id="acb_${uid}" style="display:none"><div class="aChatInputRow"><input placeholder="Admin message…" id="aci_${uid}" onkeypress="if(event.key==='Enter')adminChatSend('${uid}')"><button onclick="adminChatSend('${uid}')">Send</button></div></div>
+    </div>
+  </div>`;
 }
-function custRegCard(c,s){
-  const orders=s.orders.filter(o=>o.custId===c.id);
-  const ini=c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  return `<div class="cRegCard"><div class="cRegTop"><div class="cAva">${ini}</div><div style="flex:1"><div class="cRegName">${c.name}</div><div class="cRegComp">${c.company||'Individual'}</div></div><span class="badge ${c.active?'b-green':'b-gray'}">${c.active?'Active':'Inactive'}</span></div><div class="cRegMeta"><div class="cRegMI">📧 ${c.email}</div><div class="cRegMI">📱 ${c.phone||'—'}</div><div class="cRegMI">📍 ${c.addr||'—'}</div><div class="cRegMI">📦 ${orders.length} orders</div><div class="cRegMI">🔧 ${c.createdBy==='admin'?'Admin registered':'Self registered'}</div></div><div class="cRegActs"><button class="abtn abtn-g" onclick="showCreds('${c.id}')">🔑 View Login Details</button><button class="abtn abtn-ghost" onclick="resetPass('${c.id}')">Reset Password</button><button class="abtn abtn-ghost" onclick="toggleActive('${c.id}')">${c.active?'Deactivate':'Activate'}</button></div></div>`;
-}
-function toggleNotif(on){const s=getStore();s.notifMode=on?'B':'A';saveStore(s);document.getElementById('notifLbl').textContent=on?'Mode B':'Mode A';toast(on?'Mode B: Auto simultaneous notify ON':'Mode A: Manual confirmation ON');}
-function adminAccept(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].status='confirmed';s.orders[i].stage=2;saveStore(s);toast('✅ Order accepted! Customer notified — arranging driver.');renderAdmin('aOrders');}
-function adminSendConf(id){const s=getStore(),i=s.orders.findIndex(o=>o.id===id);if(i<0)return;s.orders[i].stage=3;saveStore(s);toast('📱 Confirmation sent to customer! They will be notified in the app.');renderAdmin('aODash');}
-function adminShowDoc(id,type){const s=getStore();curODash=s.orders.find(o=>o.id===id);if(!curODash)return;document.getElementById('docContent').innerHTML=type==='do'?buildDO(curODash):buildInv(curODash);document.getElementById('docModal').classList.add('show');}
-function adminToggleChat(uid,btn){const bar=document.getElementById('acb_'+uid),show=bar.style.display==='none';bar.style.display=show?'block':'none';btn.textContent=show?'Leave Chat':'Join Chat';if(show)toast('💬 Joined chat as Admin');}
-function adminChatSend(uid){const inp=document.getElementById('aci_'+uid),msg=inp.value.trim();if(!msg)return;const w=document.getElementById('acm_'+uid);const el=document.createElement('div');el.className='acMsg adm';el.textContent='Admin: '+msg;w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;}
-// ═ Admin Assign ═
-function openAssign(id){
-  assignId=id;const s=getStore(),o=s.orders.find(x=>x.id===id);
-  document.getElementById('assignRef').textContent=(o?o.ref:'')+'  ·  Select driver to assign';
-  selDrv=null;
-  document.getElementById('drvListModal').innerHTML=s.drivers.filter(d=>d.active!==false).map(d=>`<div style="background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s" onclick="pickDrv('${d.id}',this)" id="dr_${d.id}"><div style="width:44px;height:44px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;color:#fff;flex-shrink:0">${d.ava||d.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div style="flex:1"><div style="font-size:.88rem;font-weight:800">${d.name}</div><div style="font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px">${d.vtype||'Vehicle'} · ${d.plate||'—'}</div><div style="font-size:.72rem;color:var(--tx3);font-weight:600">📱 ${d.phone||'—'} · ${d.jobs||0} jobs today</div></div><div style="font-size:1.1rem;color:var(--bdr2)" class="drvSel">○</div></div>`).join('');
-  document.getElementById('assignModal').classList.add('show');
-}
-function pickDrv(id,row){document.querySelectorAll('#drvListModal [id^=dr_]').forEach(r=>{r.style.borderColor='var(--bdr)';r.querySelector('.drvSel').textContent='○';});row.style.borderColor='var(--y1)';row.querySelector('.drvSel').textContent='●';const s=getStore();selDrv=s.drivers.find(d=>d.id===id);}
-function confirmAssign(){
-  if(!selDrv){toast('⚠️ Select a driver first');return;}
-  const s=getStore(),i=s.orders.findIndex(o=>o.id===assignId);if(i<0){closeModal('assignModal');return;}
-  s.orders[i].driver=selDrv.name;if(s.orders[i].status==='pending')s.orders[i].status='confirmed';if(s.orders[i].stage<3)s.orders[i].stage=3;saveStore(s);
-  closeModal('assignModal');toast('🚛 '+selDrv.name+' assigned — driver notified!');document.getElementById('aBadge').textContent=s.orders.filter(o=>o.status==='pending').length;renderAdmin('aOrders');
-}
-// ═ Admin Customer Reg ═
-function genPass(){const ch='abcdefghijkmnpqrstuvwxyz23456789';let p='';for(let i=0;i<10;i++)p+=ch[Math.floor(Math.random()*ch.length)];document.getElementById('ncPass').value=p;}
-function adminRegCust(){
-  const name=document.getElementById('ncName').value.trim(),em=document.getElementById('ncEmail').value.trim().toLowerCase(),pw=document.getElementById('ncPass').value.trim();
-  if(!name){toast('⚠️ Customer name is required');return;}
-  if(!em||!em.includes('@')){toast('⚠️ Valid email address required');return;}
-  if(!pw||pw.length<8){toast('⚠️ Password must be at least 8 characters');return;}
-  const s=getStore();
-  if(s.customers.find(c=>c.email.toLowerCase()===em)){toast('❌ This email is already registered');return;}
-  const nc={id:'c'+Date.now(),name,company:document.getElementById('ncComp').value.trim(),email:em,phone:document.getElementById('ncPhone').value.trim(),addr:document.getElementById('ncAddr').value.trim(),password:pw,createdBy:'admin',orders:[],active:true};
-  s.customers.push(nc);saveStore(s);
-  showCreds(nc.id);toast('✅ Customer registered!');renderAdmin('aCustomers');
-}
-function showCreds(custId){
-  const s=getStore(),c=s.customers.find(x=>x.id===custId);if(!c)return;
-  document.getElementById('credSub').textContent='Login details for '+c.name;
-  document.getElementById('credEmail').textContent=c.email;
-  document.getElementById('credPass').textContent=c.password;
-  const msg=`Hi ${c.name},\n\nYour Cemerlang Endas Bin Rental account is ready.\n\nLogin: (open app / link provided)\nEmail: ${c.email}\nPassword: ${c.password}\n\nPlease change your password after first login.\n\nFor enquiries:\n📞 03-6251 3977 (Ms. Wong / Ms. Then)\n\nThank you 🗑`;
-  document.getElementById('waPrev').textContent=msg;
-  document.getElementById('waBtn').onclick=()=>{const num=c.phone?c.phone.replace(/[^0-9]/g,''):'';window.open('https://wa.me/'+(num?'60'+num.replace(/^0/,''): '')+'?text='+encodeURIComponent(msg),'_blank');};
-  document.getElementById('credModal').classList.add('show');
-}
-function copyTxt(elId,label){const txt=document.getElementById(elId).textContent;navigator.clipboard.writeText(txt).then(()=>toast('✅ '+label+' copied!')).catch(()=>{const el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('✅ '+label+' copied!');});}
-function resetPass(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);if(i<0)return;const ch='abcdefghijkmnpqrstuvwxyz23456789';let p='';for(let j=0;j<10;j++)p+=ch[Math.floor(Math.random()*ch.length)];s.customers[i].password=p;saveStore(s);showCreds(id);toast('🔑 Password reset! Share new details with customer.');}
-function toggleActive(id){const s=getStore(),i=s.customers.findIndex(c=>c.id===id);if(i<0)return;s.customers[i].active=!s.customers[i].active;saveStore(s);toast(s.customers[i].active?'✅ Customer activated':'⛔ Customer deactivated');renderAdmin('aCustomers');}
 
-// ═══ DRIVER ═══
+async function adminAccept(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{status:'confirmed',stage:2});
+  toast('✅ Order accepted! Customer notified — arranging driver.');
+}
+async function adminSendConf(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:3});
+  toast('📱 Confirmation sent to customer!');renderAdmin('aODash');
+}
+function adminShowDoc(id,type){
+  const o=(window._adminOrders||[]).find(x=>x.id===id);
+  if(!o)return;curODash=o;
+  document.getElementById('docContent').innerHTML=type==='do'?buildDO(o):buildInv(o);
+  document.getElementById('docModal')?.classList.add('show');
+}
+function adminToggleChat(uid,btn){
+  const bar=document.getElementById('acb_'+uid),show=bar?.style.display==='none';
+  if(bar)bar.style.display=show?'block':'none';
+  btn.textContent=show?'Leave Chat':'Join Chat';
+  if(show)toast('💬 Joined chat as Admin');
+}
+function adminChatSend(uid){
+  const inp=document.getElementById('aci_'+uid),msg=inp?.value.trim();if(!msg)return;
+  const w=document.getElementById('acm_'+uid);
+  const el=document.createElement('div');el.className='acMsg adm';el.textContent='Admin: '+msg;
+  w?.appendChild(el);if(inp)inp.value='';if(w)w.scrollTop=w.scrollHeight;
+}
+function toggleNotif(on){toast(on?'Mode B: Auto simultaneous ON':'Mode A: Manual confirmation ON');}
+
+// ══ CUSTOMER REGISTRATION (Admin) ══
+function genPass(){
+  const ch='abcdefghijkmnpqrstuvwxyz23456789';let p='';
+  for(let i=0;i<10;i++)p+=ch[Math.floor(Math.random()*ch.length)];
+  document.getElementById('ncPass').value=p;
+}
+
+async function adminRegCust(){
+  const name=document.getElementById('ncName')?.value.trim();
+  const em=document.getElementById('ncEmail')?.value.trim().toLowerCase();
+  const pw=document.getElementById('ncPass')?.value.trim();
+  const phone=document.getElementById('ncPhone')?.value.trim();
+  const comp=document.getElementById('ncComp')?.value.trim();
+  const addr=document.getElementById('ncAddr')?.value.trim();
+  if(!name){toast('⚠️ Name required');return;}
+  if(!em||!em.includes('@')){toast('⚠️ Valid email required');return;}
+  if(!pw||pw.length<8){toast('⚠️ Password min 8 chars');return;}
+  try{
+    // Create Firebase Auth account
+    const {createUserWithEmailAndPassword:createUser}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+    const secondAuth=fb().auth;
+    const cred=await createUser(secondAuth,em,pw);
+    const uid=cred.user.uid;
+    // Save to Firestore
+    await fb().setDoc(fb().doc(fb().db,'users',uid),{
+      id:uid,role:'customer',name,company:comp||'',email:em,
+      phone:phone||'',addr:addr||'',password:pw,
+      orders:[],active:true,createdBy:'admin',
+      createdAt:fb().serverTimestamp()
+    });
+    showCreds(uid,em,name,phone||'',pw);
+    toast('✅ Customer registered! Share login details below.');
+    renderAdmin('aCustomers');
+  }catch(e){
+    if(e.code==='auth/email-already-in-use')toast('⚠️ Email already registered');
+    else toast('❌ Error: '+e.message);
+  }
+}
+
+function showCreds(uid,email,name,phone,pw){
+  document.getElementById('credSub').textContent='Login details for '+name;
+  document.getElementById('credEmail').textContent=email;
+  document.getElementById('credPass').textContent=pw||'(set during registration)';
+  const msg=`Hi ${name},
+
+Your Cemerlang Endas Bin Rental account is ready.
+
+Email: ${email}
+Password: ${pw||'(contact us)'}
+
+Login at: https://web3studiotech.github.io/CemerlangEndas
+
+Please change your password after first login.
+
+📞 03-6251 3977 (Ms. Wong / Ms. Then)
+
+Thank you 🗑`;
+  document.getElementById('waPrev').textContent=msg;
+  const num=phone?'60'+phone.replace(/[^0-9]/g,'').replace(/^0/,''):'';
+  document.getElementById('waBtn').onclick=()=>window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');
+  document.getElementById('credModal')?.classList.add('show');
+}
+
+function copyTxt(elId,label){
+  const txt=document.getElementById(elId)?.textContent;if(!txt)return;
+  navigator.clipboard.writeText(txt).then(()=>toast('✅ '+label+' copied!')).catch(()=>{
+    const el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('✅ '+label+' copied!');
+  });
+}
+
+async function toggleCustActive(uid,newState){
+  await fb().updateDoc(fb().doc(fb().db,'users',uid),{active:newState});
+  toast(newState?'✅ Customer activated':'⛔ Customer deactivated');
+  loadCustomersList();
+}
+
+// ══ DRIVER MANAGEMENT (Admin) ══
+async function renderDriversAdmin(){
+  const el=document.getElementById('aMain');if(!el)return;
+  const vTypes=['🚛 Lorry (RoRo)','🚜 Crane (20T)','🏗 Sky-Lift','🚐 Van','🚚 Tipper Truck','🛻 Pick-Up'];
+  // Load drivers from Firestore
+  let drivers=[];
+  try{
+    const snap=await fb().getDocs(fb().collection(fb().db,'drivers'));
+    snap.forEach(d=>drivers.push({id:d.id,...d.data()}));
+  }catch(e){console.error(e);}
+
+  el.innerHTML=`<h2>🚛 Driver & Vehicle Management</h2>
+  <div class="aStats">
+    <div class="aStat"><div class="asNum">${drivers.length}</div><div class="asLbl">Registered</div></div>
+    <div class="aStat"><div class="asNum">${drivers.filter(d=>d.active!==false).length}</div><div class="asLbl">Active</div></div>
+    <div class="aStat"><div class="asNum">—</div><div class="asLbl">Online Now</div></div>
+    <div class="aStat"><div class="asNum">—</div><div class="asLbl">Jobs Today</div></div>
+  </div>
+  <div style="background:#0f2a15;border:1px solid #1a4020;border-radius:var(--rad);padding:16px;margin-bottom:16px">
+    <div style="color:#fff;font-size:.92rem;font-weight:900;margin-bottom:14px">➕ Register New Driver / Vehicle</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div><div class="aLab">Full Name *</div><input class="aInp" type="text" id="ndName" placeholder="Driver full name"></div>
+      <div><div class="aLab">IC / Staff ID</div><input class="aInp" type="text" id="ndIC" placeholder="XXXXXX-XX-XXXX"></div>
+      <div><div class="aLab">Contact Number *</div><input class="aInp" type="tel" id="ndPhone" placeholder="01x-xxxx xxxx"></div>
+      <div><div class="aLab">Emergency Contact</div><input class="aInp" type="tel" id="ndEmerg" placeholder="01x-xxxx xxxx"></div>
+      <div><div class="aLab">Vehicle Type *</div><select class="aInp" id="ndVType"><option value="">Select…</option>${vTypes.map(v=>`<option value="${v}">${v}</option>`).join('')}</select></div>
+      <div><div class="aLab">Plate Number *</div><input class="aInp" type="text" id="ndPlate" placeholder="e.g. VDD 3312" style="text-transform:uppercase"></div>
+      <div><div class="aLab">Vehicle Model</div><input class="aInp" type="text" id="ndModel" placeholder="e.g. Hino, KATO"></div>
+      <div><div class="aLab">Licence Class</div><select class="aInp" id="ndLic"><option value="">Select…</option><option>GDL (Goods Driving Licence)</option><option>CDL (Crane/Heavy)</option><option>Class D</option><option>Class E</option></select></div>
+    </div>
+    <div><div class="aLab">Login Email (for Driver App)</div><input class="aInp" type="email" id="ndEmail" placeholder="driver@email.com"></div>
+    <div><div class="aLab">Login Password *</div><input class="aInp" type="text" id="ndPass" placeholder="Min 8 characters"></div>
+    <div><div class="aLab">Notes</div><textarea class="aInp" id="ndNotes" rows="2" placeholder="Skills, area coverage, shift preference…" style="resize:none"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="abtn abtn-g" style="flex:1;padding:11px;font-size:.84rem;border-radius:var(--rads)" onclick="adminAddDriver()">✓ Register Driver</button>
+      <button class="abtn abtn-ghost" style="padding:11px 16px;border-radius:var(--rads)" onclick="clearDrvForm()">Clear</button>
+    </div>
+  </div>
+  <div style="color:#4a9a5a;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">Registered Drivers (${drivers.length})</div>
+  ${drivers.length?drivers.map(d=>`<div class="aRow">
+    <div class="arTop">
+      <div style="display:flex;gap:11px;align-items:center;flex:1;min-width:0">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;color:#fff;flex-shrink:0">${(d.name||'').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+        <div style="flex:1;min-width:0"><div class="arBin">${d.name}</div><div class="arRef">${d.vtype||'—'} · ${d.plate||'—'}</div></div>
+      </div>
+      <span class="badge ${d.active===false?'b-gray':'b-green'}">${d.active===false?'Inactive':'Active'}</span>
+    </div>
+    <div class="arMeta">
+      <div class="arMI">📱 ${d.phone||'—'}</div>
+      <div class="arMI">🚗 ${d.model||'—'}</div>
+      <div class="arMI">📋 ${d.licence||'—'}</div>
+      <div class="arMI">📧 ${d.email||'—'}</div>
+    </div>
+    <div class="arActs">
+      <button class="abtn abtn-ghost" onclick="toggleDrvActive('${d.id}',${d.active===false})">${d.active===false?'Activate':'Deactivate'}</button>
+      <button class="abtn abtn-r" onclick="deleteDriver('${d.id}','${d.name}')">Delete</button>
+    </div>
+  </div>`).join(''):'<div style="text-align:center;padding:32px;color:#4a9a5a;font-size:.85rem;font-weight:700">No drivers registered yet.</div>'}`;
+}
+
+async function adminAddDriver(){
+  const name=document.getElementById('ndName')?.value.trim();
+  const phone=document.getElementById('ndPhone')?.value.trim();
+  const vtype=document.getElementById('ndVType')?.value;
+  const plate=document.getElementById('ndPlate')?.value.trim().toUpperCase();
+  const em=document.getElementById('ndEmail')?.value.trim().toLowerCase();
+  const pw=document.getElementById('ndPass')?.value.trim();
+  if(!name){toast('⚠️ Driver name required');return;}
+  if(!phone){toast('⚠️ Contact number required');return;}
+  if(!vtype){toast('⚠️ Select vehicle type');return;}
+  if(!plate){toast('⚠️ Plate number required');return;}
+  if(!em||!em.includes('@')){toast('⚠️ Driver login email required');return;}
+  if(!pw||pw.length<8){toast('⚠️ Password min 8 characters');return;}
+  try{
+    // Create Firebase Auth for driver
+    const {createUserWithEmailAndPassword:createUser}=await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+    const cred=await createUser(fb().auth,em,pw);
+    const uid=cred.user.uid;
+    const driverData={
+      id:uid,name,email:em,phone,
+      ic:document.getElementById('ndIC')?.value.trim()||'',
+      emerg:document.getElementById('ndEmerg')?.value.trim()||'',
+      vtype,plate,
+      model:document.getElementById('ndModel')?.value.trim()||'',
+      licence:document.getElementById('ndLic')?.value||'',
+      notes:document.getElementById('ndNotes')?.value.trim()||'',
+      active:true,jobs:0,status:'Offline',
+      createdAt:fb().serverTimestamp()
+    };
+    // Save to drivers collection
+    await fb().setDoc(fb().doc(fb().db,'drivers',uid),driverData);
+    // Save to users collection for login
+    await fb().setDoc(fb().doc(fb().db,'users',uid),{
+      id:uid,role:'driver',name,email:em,phone,company:'',addr:'',
+      password:pw,orders:[],active:true,createdBy:'admin',
+      vtype,plate,createdAt:fb().serverTimestamp()
+    });
+    toast('✅ '+name+' registered! They can now login with '+em);
+    clearDrvForm();
+    renderDriversAdmin();
+  }catch(e){
+    if(e.code==='auth/email-already-in-use')toast('⚠️ Email already in use');
+    else toast('❌ Error: '+e.message);
+  }
+}
+function clearDrvForm(){
+  ['ndName','ndIC','ndPhone','ndEmerg','ndPlate','ndModel','ndNotes','ndEmail','ndPass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ndVType','ndLic'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+}
+async function toggleDrvActive(id,newState){
+  await fb().updateDoc(fb().doc(fb().db,'drivers',id),{active:newState});
+  await fb().updateDoc(fb().doc(fb().db,'users',id),{active:newState});
+  toast(newState?'✅ Driver activated':'⛔ Driver deactivated');
+  renderDriversAdmin();
+}
+async function deleteDriver(id,name){
+  if(!confirm('Delete driver '+name+'? This cannot be undone.'))return;
+  await fb().updateDoc(fb().doc(fb().db,'drivers',id),{active:false});
+  toast('🗑 Driver deactivated');renderDriversAdmin();
+}
+
+// ══ ASSIGN DRIVER ══
+async function openAssign(id){
+  assignId=id;
+  const o=(window._adminOrders||[]).find(x=>x.id===id);
+  document.getElementById('assignRef').textContent=(o?o.ref:'')+'  ·  Select driver';
+  selDrv=null;
+  // Load drivers from Firestore
+  let drivers=[];
+  try{
+    const snap=await fb().getDocs(fb().query(fb().collection(fb().db,'drivers'),fb().where('active','==',true)));
+    snap.forEach(d=>drivers.push({id:d.id,...d.data()}));
+  }catch(e){console.error(e);}
+  document.getElementById('drvListModal').innerHTML=drivers.map(d=>`
+    <div style="background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer" onclick="pickDrv('${d.id}','${d.name}',this)">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:900;color:#fff;flex-shrink:0">${(d.name||'').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div style="flex:1">
+        <div style="font-size:.88rem;font-weight:800;color:var(--tx)">${d.name}</div>
+        <div style="font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px">${d.vtype||'—'} · ${d.plate||'—'}</div>
+        <div style="font-size:.72rem;color:var(--tx3);font-weight:600">📱 ${d.phone||'—'}</div>
+      </div>
+      <div style="font-size:1.1rem;color:var(--bdr2)" class="dSel">○</div>
+    </div>`).join('');
+  document.getElementById('assignModal')?.classList.add('show');
+}
+function pickDrv(id,name,row){
+  document.querySelectorAll('#drvListModal [onclick]').forEach(r=>{r.style.borderColor='var(--bdr)';const ds=r.querySelector('.dSel');if(ds)ds.textContent='○';});
+  row.style.borderColor='var(--y1)';const ds=row.querySelector('.dSel');if(ds)ds.textContent='●';
+  selDrv={id,name};
+}
+async function confirmAssign(){
+  if(!selDrv){toast('⚠️ Select a driver');return;}
+  try{
+    await fb().updateDoc(fb().doc(fb().db,'orders',assignId),{
+      driverId:selDrv.id,driverName:selDrv.name,
+      status:'confirmed',stage:3
+    });
+    closeModal('assignModal');
+    toast('🚛 '+selDrv.name+' assigned — driver notified in Driver portal!');
+  }catch(e){toast('❌ Error: '+e.message);}
+}
+
+// ══ DRIVER PORTAL ══
+function renderDriverJobs(jobs,u){
+  const active=jobs.filter(o=>o.status!=='completed');
+  const done=jobs.filter(o=>o.status==='completed');
+  const banner=document.getElementById('drvNewJobBanner');
+  const newJobs=active.filter(o=>o.stage<=3);
+  if(banner)banner.style.display=newJobs.length>0?'flex':'none';
+  const jobList=document.getElementById('drvJobList');
+  if(jobList)jobList.innerHTML=active.length?active.map(o=>drvJobCard(o)).join(''):'<div style="text-align:center;padding:32px;color:#4a9a5a;font-size:.85rem;font-weight:700">No active jobs</div>';
+  const histList=document.getElementById('drvHistoryList');
+  if(histList)histList.innerHTML=done.length?done.map(o=>`<div class="dJob done"><div class="djTop"><div><div class="djBin">${o.ico||'🏗'} ${o.bin}</div><div class="djRef">${o.ref}</div></div><span class="badge b-green">Done</span></div><div class="djMeta"><div class="djMR"><span class="ic">📅</span><span>${o.delDate}</span></div><div class="djMR"><span class="ic">📍</span><span class="val">${o.addr||'—'}</span></div></div></div>`).join(''):'<div style="text-align:center;padding:32px;color:#4a9a5a;font-size:.85rem;font-weight:700">No completed jobs yet</div>';
+}
+
+function drvJobCard(o){
+  return`<div class="dJob ${o.stage<=3?'urgent':''}">
+    <div class="djTop"><div><div class="djBin">${o.ico||'🏗'} ${o.bin}</div><div class="djRef">${o.ref} · ${o.plan}</div></div>
+    <span class="badge ${o.stage<=3?'b-yellow':'b-green'}">${o.stage<=3?'New Job':'Active'}</span></div>
+    <div class="djMeta">
+      <div class="djMR"><span class="ic">📅</span><span>Deliver: <span class="val">${o.delDate}</span></span></div>
+      <div class="djMR"><span class="ic">🕙</span><span>Window: <span class="val">${o.delTime}</span></span></div>
+      <div class="djMR"><span class="ic">📍</span><span>Address: <span class="val">${o.addr||'—'}</span></span></div>
+      <div class="djMR"><span class="ic">👤</span><span>Contact: <span class="val">${o.contact||'—'}</span></span></div>
+      ${o.emergContact?`<div class="djMR"><span class="ic">🆘</span><span>Emergency: <span class="val">${o.emergContact}</span></span></div>`:''}
+      <div class="djMR"><span class="ic">📝</span><span>Notes: <span class="val">${o.notes||'None'}</span></span></div>
+      <div class="djMR"><span class="ic">💰</span><span>Value: <span class="val">${o.price}</span></span></div>
+    </div>
+    <div class="dStageLine">
+      ${STAGES.map(st=>{
+        const done=st.n<(o.stage||1),active=st.n===(o.stage||1);
+        return`<div class="dStRow"><div class="dStDot ${done?'done':active?'active':'pending'}">${done?'✓':active?'●':st.n}</div>
+        <div style="flex:1"><div class="dsTitle">${st.title}</div><div class="dsSub">${st.sub}</div>
+        ${active&&st.n===3?`<div class="dsActs"><button class="djBtn djAccept" style="flex:none;padding:9px 16px;font-size:.82rem" onclick="drvAccept('${o.id}')">✓ Accept Job</button><button class="djDecline" style="padding:9px 14px;font-size:.82rem" onclick="drvDecline('${o.id}')">Decline</button></div>`:''}
+        ${active&&st.n===4?`<div class="dsActs"><button class="djBtn djDone" style="flex:none;padding:9px 16px;font-size:.82rem" onclick="openPhotoModal('delivery','${o.id}')">📸 Mark Delivered</button></div>`:''}
+        ${active&&st.n===6?`<div class="dsActs"><button class="djBtn djDone" style="flex:none;padding:9px 16px;font-size:.82rem" onclick="openPhotoModal('collection','${o.id}')">📸 Collect & Submit Photos</button></div>`:''}
+        ${active&&st.n===7?`<div class="dsActs"><button class="djBtn djDone" style="flex:none;padding:9px 16px;font-size:.82rem" onclick="drvCloseCase('${o.id}')">🔒 Close Case</button></div>`:''}
+        ${done?'<div style="color:#4a9a5a;font-size:.68rem;font-weight:700;margin-top:2px">✓ Done</div>':''}
+        </div></div>`;
+      }).join('')}
+    </div>
+    <div class="drvChat"><div class="drvChatHdr"><span>💬 Chat — ${o.custName||'Customer'}</span></div>
+    <div class="drvChatMsgs" id="drvChat_${o.id}"><div class="dCMsg sys">${o.ref} assigned to you</div></div>
+    <div class="drvChatInp"><input type="text" id="dci_${o.id}" placeholder="Message customer…" onkeypress="if(event.key==='Enter')drvChat('drvChat_${o.id}','dci_${o.id}')">
+    <button onclick="drvChat('drvChat_${o.id}','dci_${o.id}')">➤</button></div></div>
+  </div>`;
+}
+
+let curPhotoOrderId='';
+async function drvAccept(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:4});
+  toast('✅ Job accepted! Admin & customer have been notified.');
+}
+async function drvDecline(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{driverId:null,driverName:null,stage:2,status:'pending'});
+  toast('Job declined. Admin notified.');
+}
+async function drvCloseCase(id){
+  await fb().updateDoc(fb().doc(fb().db,'orders',id),{stage:7,status:'completed'});
+  toast('🔒 Case closed! Company notified.');
+}
+
+function openPhotoModal(ctx,id){
+  photoCtx=ctx;curPhotoOrderId=id;photoCnt=0;
+  ['ps1','ps2'].forEach(pid=>{
+    const el=document.getElementById(pid);
+    if(el){el.className='photoSlot';el.innerHTML='<span style="font-size:1.4rem">📷</span>'+(pid==='ps1'?'Photo 1':'Photo 2')+'<br><span style="font-size:.68rem">Tap to upload</span>';}
+  });
+  document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';
+  document.getElementById('photoModal')?.classList.add('show');
+}
+function fakePhoto(id){
+  const el=document.getElementById(id);
+  if(el){el.className='photoSlot filled';el.innerHTML='<span style="font-size:1.4rem">✅</span>Photo uploaded<br><span style="font-size:.68rem">Tap to replace</span>';}
+  photoCnt=document.querySelectorAll('.photoSlot.filled').length;
+}
+async function submitPhotos(){
+  if(photoCnt<2){toast('⚠️ Upload both photos first');return;}
+  closeModal('photoModal');
+  try{
+    const newStage=photoCtx==='delivery'?5:7;
+    const updates={stage:newStage};
+    if(photoCtx==='collection'){updates.status='completed';}
+    await fb().updateDoc(fb().doc(fb().db,'orders',curPhotoOrderId),updates);
+    toast(photoCtx==='delivery'?'📸 Delivery confirmed! Customer & company notified.':'📸 Collection done! Case closed.');
+  }catch(e){toast('❌ Error: '+e.message);}
+}
+
+function drvChat(chatId,inputId){
+  const inp=document.getElementById(inputId),msg=inp?.value.trim();if(!msg)return;
+  const w=document.getElementById(chatId);
+  const el=document.createElement('div');el.className='dCMsg me';el.innerHTML='<div class="cS">You</div>'+msg;
+  w?.appendChild(el);if(inp)inp.value='';if(w)w.scrollTop=w.scrollHeight;
+  setTimeout(()=>{const r=document.createElement('div');r.className='dCMsg sys';r.textContent='Sent';w?.appendChild(r);if(w)w.scrollTop=w.scrollHeight;},600);
+}
 function drvNavFn(id,tab){
   document.querySelectorAll('.drvScr').forEach(s=>{s.classList.remove('on');s.style.display='none';});
-  const target=document.getElementById(id);
-  if(target){target.classList.add('on');target.style.display='block';}
+  const target=document.getElementById(id);if(target){target.classList.add('on');target.style.display='block';}
   document.querySelectorAll('.dNavItem').forEach(t=>t.classList.remove('on'));
   if(tab)tab.classList.add('on');
 }
-function drvAccept(btn){const card=btn.closest('.dJob');card.querySelector('.djActs').innerHTML=`<button class="djBtn djDone" onclick="openPhotoModal('delivery')">📸 Mark as Delivered</button>`;card.style.borderColor='#4caf50';card.querySelector('.badge').textContent='Accepted';card.querySelector('.badge').className='badge b-green';toast('✅ Job accepted! Admin & customer have been notified.');}
-function drvDecline(btn){btn.closest('.dJob').remove();toast('Job declined. Admin notified.');}
-function openPhotoModal(ctx){photoCtx=ctx;photoCnt=0;['ps1','ps2'].forEach(id=>{const el=document.getElementById(id);el.className='photoSlot';el.innerHTML='<span style="font-size:1.4rem">📷</span>'+(id==='ps1'?'Photo 1':'Photo 2')+'<br><span style="font-size:.68rem">Tap to upload</span>';});document.getElementById('photoTitle').textContent=ctx==='delivery'?'Delivery Proof Photos':'Collection Proof Photos';document.getElementById('photoModal').classList.add('show');}
-function fakePhoto(id){const el=document.getElementById(id);el.className='photoSlot filled';el.innerHTML='<span style="font-size:1.4rem">✅</span>Photo uploaded<br><span style="font-size:.68rem">Tap to replace</span>';photoCnt=document.querySelectorAll('.photoSlot.filled').length;}
-function submitPhotos(){if(photoCnt<2){toast('⚠️ Upload both photos first');return;}closeModal('photoModal');toast(photoCtx==='delivery'?'📸 Delivery confirmed! Customer & company notified.':'📸 Collection confirmed! Closure sent.');}
-function drvChat(chatId,inputId){const inp=document.getElementById(inputId),msg=inp.value.trim();if(!msg)return;const w=document.getElementById(chatId);const el=document.createElement('div');el.className='dCMsg me';el.innerHTML='<div class="cS">You</div>'+msg;w.appendChild(el);inp.value='';w.scrollTop=w.scrollHeight;setTimeout(()=>{const r=document.createElement('div');r.className='dCMsg sys';r.textContent='Sent to customer';w.appendChild(r);w.scrollTop=w.scrollHeight;},600);}
 
-// ═══ DRIVER MANAGEMENT ═══
-function adminAddDriver(){
-  const name=document.getElementById('ndName').value.trim();
-  const phone=document.getElementById('ndPhone').value.trim();
-  const vtype=document.getElementById('ndVType').value;
-  const plate=document.getElementById('ndPlate').value.trim().toUpperCase();
-  if(!name){toast('⚠️ Driver name is required');return;}
-  if(!phone){toast('⚠️ Contact number is required');return;}
-  if(!vtype){toast('⚠️ Select a vehicle type');return;}
-  if(!plate){toast('⚠️ Vehicle plate number is required');return;}
-  const s=getStore();
-  // check duplicate plate
-  if(s.drivers.find(d=>d.plate&&d.plate.toUpperCase()===plate)){toast('⚠️ This plate number is already registered');return;}
-  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  const nd={
-    id:'d'+Date.now(),
-    name,
-    ava:initials,
-    phone,
-    emerg:document.getElementById('ndEmerg').value.trim(),
-    vtype,
-    plate,
-    model:document.getElementById('ndModel').value.trim(),
-    licence:document.getElementById('ndLic').value,
-    ic:document.getElementById('ndIC').value.trim(),
-    notes:document.getElementById('ndNotes').value.trim(),
-    status:'Offline',
-    jobs:0,
-    active:true,
-  };
-  s.drivers.push(nd);
-  saveStore(s);
-  toast('✅ '+name+' registered successfully!');
-  clearDriverForm();
-  renderAdmin('aDrivers');
-}
-function clearDriverForm(){
-  ['ndName','ndIC','ndPhone','ndEmerg','ndPlate','ndModel','ndNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['ndVType','ndLic'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
-}
-function editDriver(id){
-  const s=getStore(),d=s.drivers.find(x=>x.id===id);if(!d)return;
-  // populate form with driver data
-  document.getElementById('ndName').value=d.name||'';
-  document.getElementById('ndIC').value=d.ic||'';
-  document.getElementById('ndPhone').value=d.phone||'';
-  document.getElementById('ndEmerg').value=d.emerg||'';
-  document.getElementById('ndPlate').value=d.plate||'';
-  document.getElementById('ndModel').value=d.model||'';
-  document.getElementById('ndNotes').value=d.notes||'';
-  // set selects
-  const vtEl=document.getElementById('ndVType');
-  if(vtEl){for(let i=0;i<vtEl.options.length;i++){if(vtEl.options[i].value===d.vtype){vtEl.selectedIndex=i;break;}}}
-  const licEl=document.getElementById('ndLic');
-  if(licEl){for(let i=0;i<licEl.options.length;i++){if(licEl.options[i].value===d.licence){licEl.selectedIndex=i;break;}}}
-  // remove old driver, save button will re-add
-  s.drivers=s.drivers.filter(x=>x.id!==id);
-  saveStore(s);
-  toast('📝 Editing '+d.name+' — update details and click Register Driver');
-  window.scrollTo(0,0);
-  document.getElementById('aMain').scrollTo(0,0);
-}
-function toggleDriverActive(id){
-  const s=getStore(),i=s.drivers.findIndex(d=>d.id===id);if(i<0)return;
-  s.drivers[i].active=s.drivers[i].active===false?true:false;
-  saveStore(s);
-  toast(s.drivers[i].active?'✅ Driver activated':'⛔ Driver deactivated');
-  renderAdmin('aDrivers');
-}
-function deleteDriver(id){
-  const s=getStore(),d=s.drivers.find(x=>x.id===id);if(!d)return;
-  if(!confirm('Delete driver '+d.name+'? This cannot be undone.'))return;
-  s.drivers=s.drivers.filter(x=>x.id!==id);
-  saveStore(s);
-  toast('🗑 Driver removed');
-  renderAdmin('aDrivers');
-}
-
-// ═══ INIT ═══
+// ══ INIT ══
 document.addEventListener('DOMContentLoaded',()=>{
-  getStore();renderAdmin('aOrders');
   const d=new Date();d.setDate(d.getDate()+2);
-  const mn=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
-  const sd=document.getElementById('oDate');if(sd)sd.min=`${d.getFullYear()}-${mn}-${dd}`;
-  const s=getStore();
-  if(s.currentUser){const c=s.customers.find(x=>x.id===s.currentUser&&x.active);if(c){curUser=c;launchApp(c);}}
+  const mn=String(d.getMonth()+1).padStart(2,'0'),dd2=String(d.getDate()).padStart(2,'0');
+  const sd=document.getElementById('oDate');if(sd)sd.min=`${d.getFullYear()}-${mn}-${dd2}`;
 });
 </script>
 </body>
