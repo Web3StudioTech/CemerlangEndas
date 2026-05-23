@@ -754,30 +754,76 @@ function hideLoading(){
   }
 }
 
-// Auth state listener - runs when Firebase auth is ready
+// Auth state listener
 _auth.onAuthStateChanged(function(user){
   if(user){
+    // Try to get Firestore profile
     _db.collection('users').doc(user.uid).get().then(function(doc){
       if(doc.exists){
         const userData = {id: user.uid, ...doc.data()};
         window.curUser = userData;
         hideLoading();
+        // Reset login button
+        const btn=document.querySelector('#authLogin button');
+        if(btn){btn.textContent='Sign In';btn.disabled=false;}
         if(typeof launchApp === 'function') launchApp(userData);
       } else {
-        // Auth user exists but no Firestore profile - show login
-        hideLoading();
-        const lp = document.getElementById('loginPanel');
-        if(lp) lp.style.display='flex';
+        // No Firestore profile found - create a basic customer profile
+        console.log('No profile found, creating basic customer profile');
+        const basicProfile = {
+          id: user.uid,
+          role: 'customer',
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          phone: '',
+          addr: '',
+          company: '',
+          orders: [],
+          active: true,
+          createdBy: 'self'
+        };
+        _db.collection('users').doc(user.uid).set(basicProfile).then(function(){
+          window.curUser = basicProfile;
+          hideLoading();
+          const btn=document.querySelector('#authLogin button');
+          if(btn){btn.textContent='Sign In';btn.disabled=false;}
+          if(typeof launchApp === 'function') launchApp(basicProfile);
+        }).catch(function(e){
+          console.error('Error creating profile:',e);
+          hideLoading();
+          const btn=document.querySelector('#authLogin button');
+          if(btn){btn.textContent='Sign In';btn.disabled=false;}
+          // Still launch with basic profile even if save fails
+          window.curUser = basicProfile;
+          if(typeof launchApp === 'function') launchApp(basicProfile);
+        });
       }
     }).catch(function(e){
-      console.error('Firestore error:',e);
+      console.error('Firestore read error:',e);
+      // Firestore failed but auth succeeded - create minimal profile and continue
+      const basicProfile = {
+        id: user.uid,
+        role: 'customer',
+        name: user.email.split('@')[0],
+        email: user.email,
+        phone: '',
+        addr: '',
+        company: '',
+        orders: [],
+        active: true
+      };
+      window.curUser = basicProfile;
       hideLoading();
-      const lp = document.getElementById('loginPanel');
-      if(lp) lp.style.display='flex';
+      const btn=document.querySelector('#authLogin button');
+      if(btn){btn.textContent='Sign In';btn.disabled=false;}
+      if(typeof launchApp === 'function') launchApp(basicProfile);
     });
   } else {
-    // Not logged in
+    // Not logged in - show login panel
     hideLoading();
+    const btn=document.querySelector('#authLogin button');
+    if(btn){btn.textContent='Sign In';btn.disabled=false;}
+    window.curUser = null;
     const lp = document.getElementById('loginPanel');
     if(lp) lp.style.display='flex';
     ['custPanel','adminPanel','drvPanel'].forEach(function(id){
@@ -952,14 +998,19 @@ async function doLogin(){
   if(!em||!pw){toast('⚠️ Enter email and password');return;}
   const btn=document.querySelector('#authLogin button')||document.querySelector('#authLogin .btnLogin');
   if(btn){btn.textContent='Signing in…';btn.disabled=true;}
-  _auth.signInWithEmailAndPassword(em,pw).then(function(){
-    // onAuthStateChanged handles the rest
+  _auth.signInWithEmailAndPassword(em,pw).then(function(cred){
+    // onAuthStateChanged handles routing
+    // Button will be reset in auth handler
+    console.log('Auth successful for:', cred.user.email);
   }).catch(function(e){
     if(btn){btn.textContent='Sign In';btn.disabled=false;}
+    console.error('Login error:',e.code,e.message);
     if(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
       toast('❌ Email or password incorrect');
     } else if(e.code==='auth/too-many-requests'){
       toast('⚠️ Too many attempts. Try again later.');
+    } else if(e.code==='auth/invalid-email'){
+      toast('❌ Invalid email address');
     } else {
       toast('❌ Login failed: '+e.message);
     }
