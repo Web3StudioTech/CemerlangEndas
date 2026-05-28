@@ -75,7 +75,7 @@ select.fInp{cursor:pointer}
 .cNavItem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);transition:color .15s}
 .cNavItem.on{color:var(--g1)}
 .cNavItem .nIco{font-size:1.3rem}
-.cScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px 14px 20px;display:none}
+.cScr{position:absolute;top:0;left:0;right:0;bottom:62px;overflow-y:auto;padding:14px 14px 20px;display:none;-webkit-overflow-scrolling:touch}
 .cScr.on{display:block}
 .cHdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-top:2px}
 .cHdr h2{font-size:1.25rem;font-weight:900}
@@ -87,7 +87,7 @@ select.fInp{cursor:pointer}
 .oCardRef{font-size:.74rem;color:var(--tx2);font-weight:600;margin-top:2px}
 .oCardMeta{display:flex;flex-wrap:wrap;gap:6px;padding-top:9px;border-top:1px solid var(--bdr)}
 .mChip{font-size:.75rem;font-weight:700;color:var(--tx2)}
-.stepBar{display:flex;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;background:var(--sur);border-radius:var(--rads);border:1.5px solid var(--bdr);padding:4px}
+.stepBar{display:flex;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;background:var(--sur);border-radius:var(--rads);border:1.5px solid var(--bdr);padding:4px;margin-top:4px}
 .stepBar::-webkit-scrollbar{display:none}
 .sStep{flex-shrink:0;padding:7px 10px;border-radius:7px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);white-space:nowrap;transition:all .15s}
 .sStep.on{background:var(--g1);color:#fff}.sStep.done{color:var(--g2)}
@@ -371,35 +371,31 @@ select.fInp{cursor:pointer}
       <div id="oS1">
         <div class="sLbl">Select Service Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-          <div class="binCard" id="svc-roro" onclick="pickSvc('roro')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
-            <div style="font-size:2rem;margin-bottom:6px">🏗</div>
-            <div class="bName">RoRo Bin</div>
-            <div class="bSub">Solid waste · Weekly/14-Day/Monthly</div>
-            <div class="bChk">✓</div>
+          <div class="binCard" id="svc-roro" onclick="pickSvc('roro')" style="flex-direction:column;align-items:center;text-align:center;padding:18px 10px;position:relative">
+            <img src="https://i.imgur.com/placeholder.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" style="width:64px;height:64px;object-fit:contain;margin-bottom:8px">
+            <div style="font-size:2.2rem;margin-bottom:8px;display:none">🏗</div>
+            <div class="bName" style="font-size:.95rem">RoRo Bin</div>
+            <div class="bChk" style="position:absolute;top:8px;right:8px">✓</div>
           </div>
-          <div class="binCard" id="svc-leach" onclick="pickSvc('leach')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
-            <div style="font-size:2rem;margin-bottom:6px">🗂</div>
-            <div class="bName">Leach Bin</div>
-            <div class="bSub">Wet & organic waste</div>
-            <div class="bChk">✓</div>
+          <div class="binCard" id="svc-leach" onclick="pickSvc('leach')" style="flex-direction:column;align-items:center;text-align:center;padding:18px 10px;position:relative">
+            <div style="font-size:2.2rem;margin-bottom:8px">🗂</div>
+            <div class="bName" style="font-size:.95rem">Leach Bin</div>
+            <div class="bChk" style="position:absolute;top:8px;right:8px">✓</div>
           </div>
-          <div class="binCard" id="svc-garbage" onclick="pickSvc('garbage')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
-            <div style="font-size:2rem;margin-bottom:6px">🗑</div>
-            <div class="bName">Garbage Bin</div>
-            <div class="bSub">Residential & commercial</div>
-            <div class="bChk">✓</div>
+          <div class="binCard" id="svc-garbage" onclick="pickSvc('garbage')" style="flex-direction:column;align-items:center;text-align:center;padding:18px 10px;position:relative">
+            <div style="font-size:2.2rem;margin-bottom:8px">🗑</div>
+            <div class="bName" style="font-size:.95rem">Garbage Bin</div>
+            <div class="bChk" style="position:absolute;top:8px;right:8px">✓</div>
           </div>
-          <div class="binCard" id="svc-skylift" onclick="pickSvc('skylift')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px">
-            <div style="font-size:2rem;margin-bottom:6px">🏗</div>
-            <div class="bName">Sky-Lift</div>
-            <div class="bSub">Full Day RM430–450 · Half Day RM380</div>
-            <div class="bChk">✓</div>
+          <div class="binCard" id="svc-skylift" onclick="pickSvc('skylift')" style="flex-direction:column;align-items:center;text-align:center;padding:18px 10px;position:relative">
+            <div style="font-size:2.2rem;margin-bottom:8px">🏗</div>
+            <div class="bName" style="font-size:.95rem">Sky-Lift</div>
+            <div class="bChk" style="position:absolute;top:8px;right:8px">✓</div>
           </div>
-          <div class="binCard" id="svc-crane" onclick="pickSvc('crane')" style="flex-direction:column;align-items:center;text-align:center;padding:16px 10px;grid-column:1/-1">
-            <div style="font-size:2rem;margin-bottom:6px">🚜</div>
-            <div class="bName">Mobile Crane (20T)</div>
-            <div class="bSub">Full Day RM800 · Half Day RM480 · Operator included</div>
-            <div class="bChk">✓</div>
+          <div class="binCard" id="svc-crane" onclick="pickSvc('crane')" style="flex-direction:column;align-items:center;text-align:center;padding:18px 10px;grid-column:1/-1;position:relative">
+            <div style="font-size:2.2rem;margin-bottom:8px">🚜</div>
+            <div class="bName" style="font-size:.95rem">Mobile Crane (20T)</div>
+            <div class="bChk" style="position:absolute;top:8px;right:8px">✓</div>
           </div>
         </div>
       </div>
@@ -809,22 +805,22 @@ const RATE_COLS = ['8½" (No Cover)','8½" Cover','10" Batu','12" Kayu','16" Bat
 const RATE_DATA = {
   "Kepong": [
     {name:"Sri Sinar / Sri Damansara", p:[270,200,280,330,380,400]},
-    {name:"Bkt Maluri / Megalara",     p:[270,200,280,320,380,400]},
-    {name:"Tmn Ehsan / Desa Jaya / Tmn Diva", p:[270,200,280,320,380,400]},
+    {name:"Bkt Maluri / Menjalara",    p:[270,200,280,320,380,400]},
+    {name:"Tmn Ehsan / Desa Jaya / Tmn Daya", p:[270,200,280,320,380,400]},
   ],
   "Selayang": [
-    {name:"Batu / Selayang Baru / Jaya", p:[270,200,280,290,380,400]},
-    {name:"Utara / Selatan",             p:[270,200,280,320,380,400]},
+    {name:"Selayang Baru / Jaya", p:[270,200,280,290,380,400]},
+    {name:"Utara / Selatan",      p:[270,200,280,320,380,400]},
   ],
-  "Injong": [
+  "Jinjang": [
     {name:"Utara / Selatan", p:[270,200,280,330,380,400]},
   ],
   "Segambut": [
     {name:"Jln Ipoh", p:[280,300,290,410,380,550]},
   ],
   "Sungai Buloh": [
-    {name:"Banramas / Valencia / Kg Baru", p:[280,300,290,440,380,null]},
-    {name:"Bdr Rahman Putra",              p:[280,300,290,null,380,null]},
+    {name:"Sierramas / Valencia / Kg Baru", p:[280,300,290,440,380,null]},
+    {name:"Bdr Rahman Putra",               p:[280,300,290,null,380,null]},
   ],
   "Batu Caves": [
     {name:"Batu Caves", p:[280,300,290,null,null,null]},
@@ -836,29 +832,39 @@ const RATE_DATA = {
     {name:"Kota Damansara", p:[290,300,300,370,400,420]},
   ],
   "Wangsa Maju": [
-    {name:"Setawangsa / Melawati", p:[290,300,300,370,450,420]},
+    {name:"Setiawangsa / Melawati", p:[290,300,300,370,450,420]},
   ],
   "Setiapak": [
-    {name:"Jln Kerang / Sri Ukay",     p:[290,300,300,370,400,420]},
-    {name:"Sri Gombak / Desa Keramat", p:[290,300,300,370,450,420]},
+    {name:"Ulu Kelang / Sri Ukay",  p:[290,300,300,370,400,420]},
+    {name:"Sri Gombak / Dato Keramat", p:[290,300,300,370,450,420]},
   ],
   "Petaling Jaya / Damansara": [
     {name:"Bdr Utama / Tmn Tun",            p:[290,300,300,370,450,420]},
     {name:"Kelana Jaya / Seapark",          p:[290,300,300,370,450,420]},
-    {name:"Tropicana / Lembah Klara",       p:[290,300,300,370,450,420]},
+    {name:"Tropicana / Lembah Kiara",       p:[290,300,300,370,450,420]},
     {name:"Damansara Perdana",              p:[290,300,300,370,450,420]},
     {name:"Bkt Kiara / Mutiara Damansara",  p:[290,300,300,370,400,420]},
     {name:"Bkt Tunku / Bangsar / Jln Duta", p:[290,300,300,370,400,420]},
     {name:"Sri Hartamas / Mont Kiara / D'sara Heights", p:[290,300,300,370,400,420]},
   ],
   "Kuala Lumpur (City)": [
-    {name:"Lake Yew / Semarak / Chow Kit / PUDU", p:[300,320,310,380,420,440]},
-    {name:"Tmn Desa / Desa Makmur / USJ",         p:[300,320,310,380,420,440]},
-    {name:"Klang Lama / OUG / Desa Petaling",     p:[300,320,310,380,420,440]},
-    {name:"Pandah Indah / Perdana (Cheras)",       p:[300,320,310,380,380,440]},
-    {name:"Taman Midah / Sg Long / Bdr Mahkota",   p:[300,320,310,380,380,440]},
-    {name:"Rawang — Buaya / Country Home",         p:[300,320,310,400,430,450]},
-    {name:"Desa Tun Razak",                        p:[300,320,320,400,430,450]},
+    {name:"Loke Yew / Semarak / Chow Kit / PUDU", p:[300,320,310,380,420,440]},
+  ],
+  "Subang Jaya": [
+    {name:"Subang Jaya", p:[300,320,310,380,420,440]},
+  ],
+  "Salak South": [
+    {name:"Salak South", p:[300,320,310,380,420,440]},
+  ],
+  "Cheras": [
+    {name:"Pandan Indah / Perdana", p:[300,320,310,380,380,440]},
+    {name:"Taman Midah / Sg Long / Bdr Mahkota", p:[300,320,310,380,380,440]},
+  ],
+  "Rawang": [
+    {name:"Buaya / Country Home", p:[300,320,310,400,430,450]},
+  ],
+  "Desa Tun Razak": [
+    {name:"Sg Besi", p:[300,320,320,400,430,450]},
   ],
   "Ampang": [
     {name:"Kg Pandan / Tasik Permei / Ampang Jaya", p:[320,330,330,380,430,450]},
@@ -866,12 +872,14 @@ const RATE_DATA = {
   "Puchong": [
     {name:"Puchong", p:[320,330,330,400,430,450]},
   ],
-  "Serdang / Bdr Jati": [
-    {name:"Bdr Jati", p:[330,340,340,400,430,450]},
-    {name:"Serdang",  p:[330,340,340,400,430,450]},
+  "Bukit Jalil": [
+    {name:"Bukit Jalil", p:[320,330,330,400,430,450]},
+  ],
+  "Serdang": [
+    {name:"Serdang", p:[330,340,340,400,430,450]},
   ],
   "Sri Kembangan": [
-    {name:"Balakong / Taming Jaya", p:[330,340,340,400,430,450]},
+    {name:"Balakong / Tanming Jaya", p:[330,340,340,400,430,450]},
   ],
   "Shah Alam": [
     {name:"Kampung Jawa / Bt Tiga", p:[340,350,350,400,450,470]},
@@ -1257,7 +1265,12 @@ function buildStep2(){
 }
 
 function onTownChange(town){
-  oSt.selectedTown=town;oSt.selectedSub=null;oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
+  oSt.selectedTown=town;
+  oSt.selectedSub=null;
+  oSt.selectedSize=null;
+  oSt.price=0;
+  oSt.bin=null;
+  oSt.dur=null;
   const sw=document.getElementById('subAreaWrap');
   const rt=document.getElementById('rateTable');
   const re=document.getElementById('s2RoroEmpty');
@@ -1276,36 +1289,59 @@ function onTownChange(town){
 }
 
 function onSubChange(idx){
-  if(idx==='')return;
-  oSt.selectedSub=parseInt(idx);oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
-  const subs=RATE_DATA[oSt.selectedTown];if(!subs)return;
-  const sub=subs[parseInt(idx)];if(!sub)return;
-  document.getElementById('rateTable')?.style.setProperty('display','block');
-  document.getElementById('s2RoroEmpty')?.style.setProperty('display','none');
-  document.getElementById('selectedBinDisplay')?.style.setProperty('display','none');
+  if(idx===''||idx===null||idx===undefined)return;
+  const subIdx=parseInt(idx);
+  oSt.selectedSub=subIdx;oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
+  const subs=RATE_DATA[oSt.selectedTown];
+  if(!subs||!subs[subIdx])return;
+  const sub=subs[subIdx];
+  const rt=document.getElementById('rateTable');
+  const re=document.getElementById('s2RoroEmpty');
+  const bd=document.getElementById('selectedBinDisplay');
+  if(rt)rt.style.display='block';
+  if(re)re.style.display='none';
+  if(bd)bd.style.display='none';
   const pr=document.getElementById('ratePriceRow');
   if(pr){
     const sizes=['8½" No Cover','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
-    pr.innerHTML=`<div style="padding:10px;display:flex;align-items:center"><span style="font-size:.78rem;font-weight:700;color:var(--tx2)">${sub.name}</span></div>`+
-    sub.p.map((price,i)=>{
-      if(price===null)return`<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3)">—</div>`;
-      const isSel=oSt.selectedSize===i;
-      return`<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSel?'var(--g1)':'transparent'};color:${isSel?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s">RM ${price}</div>`;
-    }).join('');
+    let rowHtml=`<div style="padding:10px 8px;display:flex;align-items:center;font-size:.78rem;font-weight:700;color:var(--tx2)">${sub.name}</div>`;
+    sub.p.forEach(function(price,i){
+      if(price===null){
+        rowHtml+=`<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3);border-left:1px solid var(--bdr)">—</div>`;
+      } else {
+        const isSel=oSt.selectedSize===i;
+        rowHtml+=`<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSel?'var(--g1)':'transparent'};color:${isSel?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s;user-select:none">RM ${price}</div>`;
+      }
+    });
+    pr.innerHTML=rowHtml;
   }
 }
 
 function pickRoroSize(sizeIdx,price,sizeName){
-  oSt.selectedSize=sizeIdx;oSt.price=price;
+  oSt.selectedSize=sizeIdx;
+  oSt.price=price;
+  oSt.dur='unit';
   const subs=RATE_DATA[oSt.selectedTown];
   const sub=subs?subs[oSt.selectedSub]:null;
-  oSt.bin={name:'RoRo Bin — '+sizeName,ico:'🏗',location:(oSt.selectedTown||'')+(sub?' › '+sub.name:''),sizeName,price,w:price,f:price,m:price};
-  oSt.dur='unit';
+  const subName=sub?sub.name:'';
+  oSt.bin={
+    name:'RoRo Bin — '+sizeName,
+    ico:'🏗',
+    location:(oSt.selectedTown||'')+(subName?' › '+subName:''),
+    sizeName:sizeName,
+    price:price,
+    w:price,f:price,m:price
+  };
+  // Re-render price row to show selection highlight
   onSubChange(String(oSt.selectedSub));
+  // Show selected bin confirmation
   const bd=document.getElementById('selectedBinDisplay');
   if(bd)bd.style.display='block';
-  document.getElementById('selectedBinName').textContent='🏗 RoRo Bin — '+sizeName+' ('+oSt.selectedTown+(sub?' › '+sub.name:'')+')';
-  document.getElementById('selectedBinPrice').textContent='RM '+price+' per delivery';
+  const bn=document.getElementById('selectedBinName');
+  if(bn)bn.textContent='🏗 RoRo Bin — '+sizeName+' ('+oSt.selectedTown+(subName?' › '+subName:'')+')';
+  const bp=document.getElementById('selectedBinPrice');
+  if(bp)bp.textContent='RM '+price+' per delivery · tap Next to continue';
+  toast('✅ '+sizeName+' selected — RM '+price);
 }
 
 function pickEquipDur(dur,price,name,ico){
@@ -1381,8 +1417,16 @@ function orderNext(){
   if(s===2){
     const isSvc=oSt.svc==='skylift'||oSt.svc==='crane';
     const isPlaceholder=oSt.svc==='leach'||oSt.svc==='garbage';
-    if(!isPlaceholder&&!isSvc&&!oSt.bin){toast('⚠️ Select your area and bin size');return;}
-    if(isSvc&&!oSt.bin){toast('⚠️ Choose Full Day or Half Day');return;}
+    if(isPlaceholder){
+      // Allow through for placeholder services
+    } else if(isSvc){
+      if(!oSt.bin){toast('⚠️ Choose Full Day or Half Day');return;}
+    } else {
+      // RoRo
+      if(!oSt.selectedTown){toast('⚠️ Please select your town / area');return;}
+      if(oSt.selectedSub===null||oSt.selectedSub===undefined){toast('⚠️ Please select your sub-area');return;}
+      if(oSt.selectedSize===null||oSt.selectedSize===undefined){toast('⚠️ Please select a bin size from the price table');return;}
+    }
   }
   if(s===3){
     if(!oSt.startDate){toast('⚠️ Pick a delivery date');return;}
