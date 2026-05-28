@@ -418,9 +418,9 @@ select.fInp{cursor:pointer}
             <div style="background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--rads);overflow:hidden;margin-bottom:12px">
               <div style="display:grid;grid-template-columns:1.5fr repeat(6,1fr);background:var(--g1);padding:8px 10px;gap:4px">
                 <div style="font-size:.65rem;font-weight:800;color:rgba(255,255,255,.7)">SIZE</div>
-                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">8½"<br>No Cover</div>
-                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">8½"<br>Cover</div>
-                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">10"<br>Batu</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">9½"<br>No Cover</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">9½"<br>Cover</div>
+                <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">12"<br>Batu</div>
                 <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">12"<br>Kayu</div>
                 <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">16"<br>Batu</div>
                 <div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.7);text-align:center">16"<br>Kayu</div>
@@ -801,7 +801,7 @@ console.log('Firebase compat initialized');
 
 <script>
 // ══ RATE CARD DATA ══
-const RATE_COLS = ['8½" (No Cover)','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
+const RATE_COLS = ['8½" (No Cover)','9½" Cover','12" Batu','12" Kayu','16" Batu','16" Kayu'];
 const RATE_DATA = {
   "Kepong": [
     {name:"Sri Sinar / Sri Damansara", p:[270,200,280,330,380,400]},
@@ -1291,7 +1291,7 @@ function onTownChange(town){
 function onSubChange(idx){
   if(idx===''||idx===null||idx===undefined)return;
   const subIdx=parseInt(idx);
-  oSt.selectedSub=subIdx;oSt.selectedSize=null;oSt.price=0;oSt.bin=null;
+  oSt.selectedSub=subIdx;oSt.selectedSize=null;oSt.price=0;oSt.bin=null;oSt.dur=null;
   const subs=RATE_DATA[oSt.selectedTown];
   if(!subs||!subs[subIdx])return;
   const sub=subs[subIdx];
@@ -1301,21 +1301,48 @@ function onSubChange(idx){
   if(rt)rt.style.display='block';
   if(re)re.style.display='none';
   if(bd)bd.style.display='none';
-  const pr=document.getElementById('ratePriceRow');
-  if(pr){
-    const sizes=['8½" No Cover','8½" Cover','10" Batu','12" Kayu','16" Batu','16" Kayu'];
-    let rowHtml=`<div style="padding:10px 8px;display:flex;align-items:center;font-size:.78rem;font-weight:700;color:var(--tx2)">${sub.name}</div>`;
-    sub.p.forEach(function(price,i){
-      if(price===null){
-        rowHtml+=`<div style="padding:10px 6px;text-align:center;font-size:.78rem;color:var(--tx3);border-left:1px solid var(--bdr)">—</div>`;
-      } else {
-        const isSel=oSt.selectedSize===i;
-        rowHtml+=`<div onclick="pickRoroSize(${i},${price},'${sizes[i]}')" style="padding:10px 6px;text-align:center;cursor:pointer;background:${isSel?'var(--g1)':'transparent'};color:${isSel?'#fff':'var(--g1)'};font-size:.85rem;font-weight:900;border-left:1px solid var(--bdr);transition:all .15s;user-select:none">RM ${price}</div>`;
-      }
-    });
-    pr.innerHTML=rowHtml;
-  }
+  renderPriceRow(sub);
 }
+
+function renderPriceRow(sub){
+  const pr=document.getElementById('ratePriceRow');
+  if(!pr||!sub)return;
+  const sizes=['9½" No Cover','9½" Cover','12" Batu','12" Kayu','16" Batu','16" Kayu'];
+  pr.innerHTML='';
+  const nameDiv=document.createElement('div');
+  nameDiv.style.cssText='padding:10px 8px;display:flex;align-items:center;font-size:.78rem;font-weight:700;color:var(--tx2)';
+  nameDiv.textContent=sub.name;
+  pr.appendChild(nameDiv);
+  sub.p.forEach(function(price,i){
+    const cell=document.createElement('div');
+    cell.style.cssText='padding:12px 6px;text-align:center;border-left:1px solid var(--bdr);transition:all .15s;';
+    if(price===null){
+      cell.style.color='var(--tx3)';
+      cell.style.fontSize='.78rem';
+      cell.textContent='—';
+    } else {
+      const isSel=oSt.selectedSize===i;
+      cell.style.cursor='pointer';
+      cell.style.fontWeight='900';
+      cell.style.fontSize='.88rem';
+      cell.style.background=isSel?'var(--g1)':'transparent';
+      cell.style.color=isSel?'#fff':'var(--g1)';
+      cell.textContent='RM '+price;
+      cell.dataset.idx=i;
+      cell.dataset.price=price;
+      cell.dataset.size=sizes[i];
+      cell.addEventListener('click',function(){
+        pickRoroSize(
+          parseInt(this.dataset.idx),
+          parseInt(this.dataset.price),
+          this.dataset.size
+        );
+      });
+    }
+    pr.appendChild(cell);
+  });
+}
+
 
 function pickRoroSize(sizeIdx,price,sizeName){
   oSt.selectedSize=sizeIdx;
@@ -1333,7 +1360,8 @@ function pickRoroSize(sizeIdx,price,sizeName){
     w:price,f:price,m:price
   };
   // Re-render price row to show selection highlight
-  onSubChange(String(oSt.selectedSub));
+  const subs2=RATE_DATA[oSt.selectedTown];
+  if(subs2&&subs2[oSt.selectedSub])renderPriceRow(subs2[oSt.selectedSub]);
   // Show selected bin confirmation
   const bd=document.getElementById('selectedBinDisplay');
   if(bd)bd.style.display='block';
