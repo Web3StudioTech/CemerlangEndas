@@ -934,6 +934,9 @@ const ADMIN_WA='60362513977';
 
 // ══ STATE ══
 let oSt={step:1,svc:null,bin:null,dur:null,startDate:null,delTime:null,selectedTown:null,selectedSub:null,selectedSize:null,price:0};
+
+// curUser helper - always check window.curUser as fallback
+function getCurUser(){return curUser||window._savedUser||null;}
 let selDrv=null,photoCnt=0,photoCtx='',assignId='',curUser=null,curODash=null;
 let unsubOrders=null, unsubDrivers=null;
 
@@ -1039,6 +1042,9 @@ function launchApp(u){
     if(el){el.classList.remove('on');el.style.display='none';}
   });
   if(u.role==='customer'){
+    // Persist user to window and sessionStorage
+    window.curUser=u;
+    try{window._savedUser={id:u.id,role:u.role,name:u.name,email:u.email};}catch(e){}
     showPanel('custPanel');
     const ca=document.getElementById('custApp');
     if(ca){ca.style.display='flex';ca.style.flexDirection='column';}
@@ -1486,7 +1492,20 @@ function updateStep(){
 }
 
 async function submitOrder(){
-  if(!curUser){toast('⚠️ Please log in first');return;}
+  // Recover curUser from Firebase auth if lost
+  if(!curUser){
+    if(window._savedUser){
+      curUser=window._savedUser;
+    } else if(_auth.currentUser){
+      try{
+        const udoc=await _db.collection('users').doc(_auth.currentUser.uid).get();
+        curUser=udoc.exists?{id:_auth.currentUser.uid,...udoc.data()}:{id:_auth.currentUser.uid,role:'customer',name:_auth.currentUser.email.split('@')[0],email:_auth.currentUser.email};
+      }catch(e){
+        curUser={id:_auth.currentUser.uid,role:'customer',name:_auth.currentUser.email.split('@')[0],email:_auth.currentUser.email};
+      }
+    }
+  }
+  if(!curUser){toast('⚠️ Session expired. Please log in again.');return;}
   const btn=document.getElementById('submitBtn');
   btn.textContent='Placing order…';btn.disabled=true;
   try{
@@ -1503,7 +1522,7 @@ async function submitOrder(){
     ].filter(Boolean).join(', ');
     const ref='CE-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000);
     const orderData={
-      ref,custId:curUser.id,custName:curUser.name,
+      ref,custId:curUser.id,custName:curUser.name||curUser.email||'Customer',
       ico,svc:oSt.svc,bin:binName,
       plan:getDurLabel(),
       delDate:document.getElementById('oDD')?.textContent||'—',
