@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B6B3A">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Cemerlang Endas — Bin Rental</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -21,8 +23,9 @@
   --sh:0 2px 12px rgba(0,0,0,.08);--shl:0 6px 28px rgba(0,0,0,.14);
   --fn:'Nunito',sans-serif;
 }
-html,body{height:100%;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden}
-#pBar{position:fixed;top:0;left:0;right:0;z-index:200;background:#0f4526;display:none;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.3);width:100%}
+html{height:100%;height:-webkit-fill-available;}
+body{min-height:100%;min-height:-webkit-fill-available;font-family:var(--fn);color:var(--tx);font-size:15px;background:var(--bg);overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+#pBar{position:fixed;top:0;top:env(safe-area-inset-top);left:0;right:0;z-index:200;background:#0f4526;display:none;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.3);width:100%}
 #pBar.show{display:flex}
 .pTab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
 .pTab.on{color:#fff;border-bottom-color:var(--y1)}
@@ -282,7 +285,7 @@ select.fInp{cursor:pointer}
 </head>
 <body>
 <!-- Loading screen while Firebase initializes -->
-<div id="loadingScreen" style="position:fixed;inset:0;background:var(--g1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999">
+<div id="loadingScreen" style="position:fixed;inset:0;top:env(safe-area-inset-top);background:var(--g1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999">
   <div style="font-size:3rem;margin-bottom:16px">🗑</div>
   <div style="color:#fff;font-size:1.2rem;font-weight:900;margin-bottom:8px">Cemerlang Endas</div>
   <div style="color:rgba(255,255,255,.7);font-size:.85rem;font-weight:600;margin-bottom:24px">Bin Rental & Equipment</div>
@@ -292,7 +295,7 @@ select.fInp{cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <!-- LOGIN PANEL -->
-<div id="loginPanel" style="position:fixed;inset:0;background:var(--g1);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto">
+<div id="loginPanel" style="position:fixed;inset:0;top:env(safe-area-inset-top);background:var(--g1);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto">
   <div style="background:#fff;border-radius:var(--rad);padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shl)">
     <div style="text-align:center;margin-bottom:22px">
       <div style="width:64px;height:64px;border-radius:18px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px">🗑</div>
@@ -456,9 +459,8 @@ select.fInp{cursor:pointer}
         <div class="sLbl">Delivery Start Date</div>
         <input type="date" class="fInp" id="oDate" onchange="updateDate()">
         <div id="oDR" style="display:none">
-          <div style="display:flex;gap:9px;margin-bottom:13px">
-            <div class="card" style="flex:1;padding:12px"><div class="sLbl">📦 Delivery</div><div style="font-size:.9rem;font-weight:800" id="oDD">—</div></div>
-            <div class="card" style="flex:1;padding:12px"><div class="sLbl">🔄 Collection</div><div style="font-size:.9rem;font-weight:800" id="oCD">—</div></div>
+          <div style="margin-bottom:13px">
+            <div class="card" style="padding:12px;background:var(--g3);border-color:var(--g4)"><div class="sLbl">📦 Delivery Date</div><div style="font-size:.95rem;font-weight:800;color:var(--g5)" id="oDD">—</div></div>
           </div>
           <div class="sLbl">🚚 Preferred Delivery Time</div><div class="tGrid" id="dtGrid"></div>
           <div class="sLbl">📦 Preferred Collection Time</div><div class="tGrid" id="ctGrid"></div>
@@ -509,9 +511,34 @@ select.fInp{cursor:pointer}
     </div>
     <!-- Orders List -->
     <div id="cOrders" class="cScr">
-      <div class="cHdr"><h2>My Orders</h2></div>
+      <div class="cHdr">
+        <h2>My Orders</h2>
+        <button onclick="goHome()" style="background:var(--g3);border:1.5px solid var(--bdr);border-radius:var(--rads);padding:7px 13px;font-family:var(--fn);font-size:.82rem;font-weight:800;cursor:pointer;color:var(--g5)">🏠 Home</button>
+      </div>
       <div id="ordersList"><div style="text-align:center;padding:32px;color:var(--tx3);font-size:.88rem;font-weight:700">No orders placed yet</div></div>
     </div>
+    <!-- Order Success Screen -->
+    <div id="cSuccess" class="cScr">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px">
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:20px">✅</div>
+        <h2 style="font-size:1.4rem;font-weight:900;color:var(--tx);margin-bottom:8px">Order Placed!</h2>
+        <p style="font-size:.88rem;color:var(--tx2);font-weight:600;margin-bottom:6px" id="successRef">—</p>
+        <p style="font-size:.84rem;color:var(--tx2);font-weight:600;margin-bottom:24px;line-height:1.6">Our team will review and confirm your order shortly. We will WhatsApp you with payment details and delivery confirmation.</p>
+        <div style="background:var(--g3);border:1.5px solid var(--g4);border-radius:var(--rad);padding:16px;width:100%;margin-bottom:20px;text-align:left">
+          <div class="sLbl" style="margin-bottom:8px">What happens next?</div>
+          <div style="font-size:.82rem;color:var(--tx2);font-weight:600;line-height:1.9">
+            1️⃣ Admin reviews your order<br>
+            2️⃣ Driver is assigned<br>
+            3️⃣ You receive WhatsApp confirmation<br>
+            4️⃣ Bin delivered on your chosen date<br>
+            5️⃣ Request collection when bin is full
+          </div>
+        </div>
+        <button class="btn btn-g btn-full" onclick="goHome()" style="margin-bottom:10px">🏠 Back to Home</button>
+        <button class="btn btn-ghost btn-full" onclick="cNav('cOrders',document.querySelectorAll('.cNavItem')[2])">📋 View My Orders</button>
+      </div>
+    </div>
+
     <!-- Order Dashboard -->
     <div id="cODash" class="cScr">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -1539,10 +1566,10 @@ async function submitOrder(){
       createdAt:firebase.firestore.FieldValue.serverTimestamp(),
     };
     await _db.collection('orders').add(orderData);
-    toast('🎉 Order placed! Admin has been notified. We will WhatsApp you shortly.');
     btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
     document.getElementById('oActBar')?.classList.remove('show');
-    cNav('cOrders',document.querySelectorAll('.cNavItem')[2]);
+    // Show success screen
+    showOrderSuccess(ref);
   } catch(e){
     toast('❌ Error placing order: '+e.message);
     btn.textContent='✓ Confirm & Place Order';btn.disabled=false;
@@ -1609,6 +1636,22 @@ async function custRequestCollection(id){
 async function custClose(id){
   await _db.collection('orders').doc(id).update({stage:7,status:'completed'});
   toast('🔒 Case closed. Thank you for using Cemerlang Endas!');showODash(id);
+}
+
+function showOrderSuccess(ref){
+  document.querySelectorAll('.cScr').forEach(s=>s.classList.remove('on'));
+  const sc=document.getElementById('cSuccess');
+  if(sc){sc.classList.add('on');}
+  const refEl=document.getElementById('successRef');
+  if(refEl)refEl.textContent='Order Reference: '+ref;
+  document.querySelectorAll('.cNavItem').forEach(t=>t.classList.remove('on'));
+  document.getElementById('oActBar')?.classList.remove('show');
+  toast('🎉 Order placed! Admin has been notified.');
+}
+
+function goHome(){
+  cNav('cHome',document.querySelector('.cNavItem'));
+  if(curUser)loadOrdersRealtime(curUser);
 }
 
 function sendChat(){
